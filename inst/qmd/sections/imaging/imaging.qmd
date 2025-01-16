@@ -1,0 +1,33 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r imaging}
+#| echo: false
+#| results: asis
+
+imageFiles <- list.files(params$imagedir, pattern = ".png$", recursive = TRUE, full.names = TRUE)
+axialImage <- paste0("{", imageFiles[grep("AX_T2_FLAIR", imageFiles)], "}")
+sagittalImage <- paste0("{", imageFiles[grep("Sagittal_3D_Accelerated_MPRAGE", imageFiles)], "}")
+
+scanDate <- format(subjinfo[subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+                              !is.na(subjinfo$scan_date), "scan_date", drop = TRUE], "%B %d, %Y")
+
+radiologyRead <- 
+  paste0("{", subjinfo[subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+                         !is.na(subjinfo$radiology_read), "radiology_read", drop = TRUE], "}")
+
+if(length(imageFiles) >= 1){
+  ltex <- paste(readLines("sections/imaging/latex/imaging.tex"), collapse = "\n")
+  ltex <- glue::glue(
+    ltex, scanDate = scanDate, axialImage = axialImage, sagittalImage = sagittalImage, 
+    radiologyRead = radiologyRead, .open = "{{", .close = "}}"
+    )
+  cat(paste0("", ltex, ""), sep = "\n")
+}
+
+```
+
+
+

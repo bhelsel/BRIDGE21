@@ -1,0 +1,263 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r blood pressure, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+bpsys <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$bpsys), 
+    grepl("bpsys", colnames(subjinfo)), drop = TRUE]
+
+bpdias <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$bpdias), 
+    grepl("bpdias", colnames(subjinfo)), drop = TRUE]
+
+bpsys_cat <- 
+  cut(bpsys, breaks = c(-Inf, 120, 130, Inf),
+      labels = c("Normal", "Elevated", "High"), right = FALSE)
+
+bp_cat <- 
+  ifelse(bpsys_cat == "Normal" & bpdias < 80, "Normal", ifelse(
+    bpsys_cat == "Elevated" & bpdias < 80, "Elevated", ifelse(
+      bpsys_cat == "High" | bpdias >= 80, "High", "Unknown")))
+
+bpdias_cat <- 
+  cut(bpsys, breaks = c(-Inf, 120, 130, Inf),
+      labels = c("Normal", "Elevated", "High"), right = FALSE)
+
+if(length(bpsys) >= 1){
+  cat("\\subsection{Blood Pressure}")
+  bpdata <- data.frame(
+    dates = format(dates$date_of_visit, "%m/%d/%Y"), 
+    bpsys, bpdias, bpdias_cat)
+  flextable::flextable(bpdata) |>
+    flextable::set_header_labels(values = c("Date", "Systolic", "Diastolic", "Risk Cateogry")) |>
+    flextable::width(j = 4, width = 1.25) |>
+    flextable::align(j = 1:4, part = "all", align = "center") |>
+    flextable::bold(i = 1, part = "header")
+}
+
+
+```
+
+```{r accelerometer text}
+#| echo: false
+#| results: asis
+
+accelMetaDir <- file.path(params$accelres, "output_data", "meta")
+accelResDir <- file.path(params$accelres, "output_data", "results")
+
+
+dayMMFile <- list.files(accelResDir, "day.*MM", full.names = TRUE)
+accel_df <- readr::read_csv(dayMMFile, show_col_types = FALSE)
+
+accel_df_subset <- cbind(
+  date = accel_df$calendar_date, 
+  dur_spt_min = accel_df$dur_spt_min, 
+  accel_df[, grep("total.*min", colnames(accel_df))])
+
+accel_df_subset$dur_day_total_MVPA_min <- accel_df_subset$dur_day_total_MOD_min + accel_df_subset$dur_day_total_VIG_min
+accel_df_subset$dur_day_total_MOD_min <- accel_df_subset$dur_day_total_VIG_min <- NULL
+
+accel_df_subset_per <- 
+  data.frame(
+    date = accel_df_subset$date, 
+    apply(
+      accel_df_subset[, 2:5], 2, 
+      FUN = function(x) x / rowSums(accel_df_subset[, 2:5])) * 100
+    )
+
+accel_df_subset[, 2:5] <- round(accel_df_subset[, 2:5])
+accel_df_subset$date <- format(accel_df_subset$date, "%m/%d/%Y")
+
+paSleepSuccess <- sum(accel_df_subset$dur_spt_min >= 480 & accel_df_subset$dur_day_total_MVPA_min >= 30)
+
+if(length(accel_df) >= 1){
+  ltexPA <- paste(readLines("sections/lifestyle/latex/activity.tex"), collapse = "\n")
+  ltexPA <- glue::glue(
+    ltexPA, paSleepSuccess = paste0("{", paSleepSuccess, "}"),
+    accelDaysMonitored = paste0("{", nrow(accel_df), "}"), .open = "{{", .close = "}}"
+    )
+  cat(paste0("", ltexPA, ""), sep = "\n")
+}
+
+```
+
+```{r accelerometer table, ft.align="left"}
+#| echo: false
+
+flextable::flextable(accel_df_subset) |>
+  flextable::set_header_labels(
+    values = c("Date", "Sleep", "Inactivity", "Light", "MVPA")
+  ) |>
+  flextable::width(j = 1, width = 1) |>
+  flextable::align(j = 1:5, part = "all", align = "center") |>
+  flextable::bold(i = 1, part = "header", bold = TRUE) |>
+  flextable::add_footer_row(
+    values = "MVPA: Moderate-to-Vigorous Physical Activity", 
+    colwidths = 5) |>
+  flextable::add_footer_row(
+    values = "Sleep and Activity are Measured in Minutes per Day",
+    colwidths = 5) |>
+  flextable::bg(i = ~ dur_spt_min > 480 & dur_day_total_MVPA_min > 30, bg = "#87CEEB")
+
+```
+
+```{r accelerometer plot}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 6
+#| fig-dpi: 300
+
+load(list.files(file.path(accelMetaDir, "ms2.out"), recursive = TRUE, full.names = TRUE))
+IMPdates <- unique(as.Date(IMP$metashort$timestamp))
+IMPremove <- IMPdates[!IMPdates %in% as.Date(accel_df_subset$date, "%m/%d/%Y")]
+IMP$metashort <- IMP$metashort[!as.Date(IMP$metashort$timestamp) %in% IMPremove, ]
+BRIDGE21::plot_time_series_by_date(IMP)
+
+```
+
+<!--- Body Mass Index --->
+
+```{r body mass index, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+weight_lbs <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$weight), 
+    grepl("weight", colnames(subjinfo)), drop = TRUE]
+
+height_in <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$height), 
+    grepl("height", colnames(subjinfo)), drop = TRUE]
+
+if(length(weight_lbs) >= 1 & length(weight_lbs) == length(height_in)) {
+  weight_kg <- round(weight_lbs / 2.205, 2)
+  height_cm <- round(height_in * 2.54, 2)
+  height_m <- round(height_cm / 100, 2)
+  bmi <- round(weight_kg / height_m^2, 2)
+  
+  paste("", "\\input{sections/lifestyle/latex/bmi.tex}", "") |> 
+    cat(sep = "\n")
+  
+  bmi_df <- data.frame(
+    date = format(dates$date_of_visit, "%m/%d/%Y"), 
+    weight_kg, height_cm, bmi
+    )
+  
+  flextable::flextable(bmi_df) |>
+    flextable::set_header_labels(
+      values = c("Date", "Weight (kg)", "Height (cm)", "BMI")
+    ) |>
+    flextable::width(j = 1:4, width = 1) |>
+    flextable::align(part = "all", align = "center")
+  
+}
+
+```
+
+<!--- Body Composition --->
+
+```{r body composition, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+fitness_date <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$fittest_date), 
+    grepl("fittest_date", colnames(subjinfo)), drop = TRUE]
+
+lean_tissue <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$lean), 
+    grepl("lean", colnames(subjinfo)), drop = TRUE]
+
+fat_tissue <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$fat), 
+    which(colnames(subjinfo) == "fat"), drop = TRUE]
+
+fat_tissue_percent <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$total_fat), 
+    grepl("total_fat", colnames(subjinfo)), drop = TRUE]
+
+bone_mineral_density <- 
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) & 
+      is.na(subjinfo$redcap_repeat_instrument) & 
+      !is.na(subjinfo$bmc), 
+    grepl("bmc", colnames(subjinfo)), drop = TRUE]
+
+if(length(fitness_date) >= 1){
+  
+  bodycomp <- data.frame(
+    date = format(as.Date(fitness_date), "%m/%d/%Y"),
+    lean_tissue, fat_tissue, fat_tissue_percent, bone_mineral_density
+  )
+  
+  paste("", "\\input{sections/lifestyle/latex/dxa.tex}", "") |> 
+    cat(sep = "\n")
+  
+  flextable::flextable(bodycomp) |>
+    flextable::set_header_labels(
+      values = c("Date", "Lean Tissue (g)", "Fat Tissue (g)",
+                 "Fat Tissue (%)", "Bone Mineral Density (g)")) |>
+    flextable::width(j = 1:5, width = 1.25) |>
+    flextable::align(part = "all", align = "center")
+  
+ 
+}
+
+
+
+```
+
+<!--- Diet Questionnaire --->
+
+```{r diet questionnaire, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+
+paste("", "\\input{sections/lifestyle/latex/diet.tex}", "") |> 
+    cat(sep = "\n")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

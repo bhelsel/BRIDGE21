@@ -1,0 +1,173 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r calculate dsmse scores, ft.align = "left"}
+#| echo: false
+
+# Insert DSMSE Percentile Rankings Here
+
+# subjinfo$dsortot2 # Orientation
+# subjinfo$dsknwtt2 # Knowledge of Examiner
+# subjinfo$dssmtot2 # Shoebox Memory
+# subjinfo$dsmmtot2 # Place Memory
+# subjinfo$dsaptot2 # Apraxia
+# subjinfo$dslgtot2	# Language
+# subjinfo$dsvistt2 # Visuospatial
+showdsmse <- showkbit2 <- showntg <- FALSE
+
+dsmse <- subjinfo[
+  grepl("visit", subjinfo$redcap_event_name) & is.na(subjinfo$redcap_repeat_instrument), 
+  c("dslgtot2", "dssmtot2", "dsmmtot2", "dsvistt2")
+  ]
+
+language_index <- round(pnorm(((dsmse$dslgtot2 - 37.1) / 9.07), mean = 0, sd = 1) * 100, 2)
+memory_index <- round(pnorm((((dsmse$dssmtot2 + dsmse$dsmmtot2) - 14.08) / 4.68), mean = 0, sd = 1) * 100, 2)
+visual_spatial_index <- round(pnorm(((dsmse$dsvistt2 - 6.18) / 1.09), mean = 0, sd = 1) * 100, 2)
+
+dsmse_df <- 
+  data.frame(
+    date = format(dates$date_of_visit, "%m/%d/%Y"),
+    visual_spatial_index,
+    memory_index,
+    language_index
+    ) 
+
+```
+
+```{r add dsmse results, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+if(nrow(dsmse_df) >= 1 & 
+   !all(is.na(dsmse_df[, -which(names(dsmse_df) == "date")]))){
+  showdsmse <- TRUE
+  paste("", "\\input{sections/cognition/latex/dsmse.tex}", "") |> 
+    cat(sep = "\n")
+  
+  flextable::flextable(dsmse_df) |>
+    flextable::set_header_labels(values = c(
+      "Date", "Visual Spatial", 
+      "Memory", "Language")
+      ) |>
+    flextable::width(j = 1:4, width = 1.15) |>
+    flextable::align(j = 1:4, align = "center", part = "all") |>
+    flextable::bold(j = 1:4, part = "header")
+  }
+
+```
+
+<!--- Kauffman Brief Intelligence Test (KBIT-2) --->
+
+```{r kbit results}
+#| echo: false
+#| results: asis
+
+
+kbit_date <- dates[dates$redcap_event_name == "visit1_arm_1", "date_of_visit", drop = TRUE]
+kbit_formatted_date = format(kbit_date, "%B %d, %Y")
+age_at_visit <- dates[dates$redcap_event_name == "visit1_arm_1", "age_at_visit", drop = TRUE] 
+kbit2verbkraw <- subjinfo[subjinfo$redcap_event_name == "visit1_arm_1", "kbit2_vk", drop = TRUE]
+kbit2ridraw <- subjinfo[subjinfo$redcap_event_name == "visit1_arm_1", "kbit2_ridl", drop = TRUE]
+kbit2vnonvraw <- subjinfo[subjinfo$redcap_event_name == "visit1_arm_1", "kbit2_totnonv", drop = TRUE]
+
+if(!is.na(age_at_visit) & !is.na(kbit2verbkraw) & 
+   !is.na(kbit2ridraw) & !is.na(kbit2vnonvraw)){
+  
+  showkbit2 <- TRUE
+  
+  kbit2 <- 
+    abcds::calculate_kbit2_score(
+      age_at_visit = age_at_visit, 
+      kbit2verbkraw = kbit2verbkraw, 
+      kbit2ridraw = kbit2ridraw, 
+      kbit2vnonvraw = kbit2vnonvraw, 
+      print_kbit = FALSE
+    )
+
+  verbal_ae <- paste0(kbit2$kbit2verbaey, ":", kbit2$kbit2verbae)
+  
+  nonverbal_ae <- paste0(kbit2$kbit2nonvbaey, ":", kbit2$kbit2nonvbaey)
+  
+  cat(
+    "**Kauffman Brief Intelligence Test Results**\n",
+    strwrap(
+      paste0(
+      "You completed the Kauffman Brief Intelligence Test on **",
+      kbit_formatted_date, "**. Your intelligent quotient was **", kbit2$kbit2iqcompstd,
+      "** which was a verbal age-equivalent of **", verbal_ae, 
+      "** and a non-verbal age-equivalent of **", nonverbal_ae, "**" 
+      ), width = 100
+    ), fill = TRUE
+  )
+}
+
+
+
+```
+
+<!--- NTG - Early Detection and Screen for Dementia (NTG-EDSD) --->
+
+```{r ntgedsd calculate scores}
+#| echo: false
+
+ntgedsd <- data.frame(
+  date = format(dates$date_of_visit, "%m/%d/%Y"),
+  subjinfo[grepl("visit", subjinfo$redcap_event_name) & is.na(subjinfo$redcap_repeat_instrument), 
+           which(colnames(subjinfo) == "dsadl1"):which(colnames(subjinfo) == "dsother6")]
+  )
+
+if(!all(is.na(ntgedsd[, -which(names(ntgedsd) == "date")]))){
+  showntg <- TRUE
+  ntgedsd <- ntgedsd[
+  apply(ntgedsd[, 2:ncol(ntgedsd)], 1, function(row) !all(is.na(row))), 
+  apply(ntgedsd[, 2:ncol(ntgedsd)], 2, function(col) !all(is.na(col)))
+  ]
+
+  ntgedsd <- ntgedsd[apply(ntgedsd, 1, FUN = function(x) sum(is.na(x))) == 0, ] # Filter out NA values
+
+  ntgedsd$score <- rowSums(
+    as.data.frame(
+      apply(
+        ntgedsd[, 2:ncol(ntgedsd)], 
+        MARGIN = 2, 
+        FUN = function(x) ifelse(x == 1 | x == 2, 1, 0)
+        )
+      ), na.rm = TRUE)
+}
+
+
+
+```
+
+```{r add ntgedsd results, ft.align = "left"}
+#| echo: false
+#| results: asis
+
+if(length(ntgedsd$score) >= 1 & 
+   all(!is.na(ntgedsd$score))){
+  paste("", "\\input{sections/cognition/latex/ntgedsd.tex}", "") |> 
+    cat(sep = "\n")
+  
+  flextable::flextable(ntgedsd[, c("date", "score")]) |>
+    flextable::set_header_labels(values = c("Date of Questionnaire", "Score")) |>
+    flextable::width(j = 1:2, width = 1.75) |>
+    flextable::bold(j = 1:2, part = "header") |>
+    flextable::align(j = 1:2, part = "all", align = "center")
+
+}
+
+```
+
+```{r summary}
+#| echo: false
+#| results: asis
+
+if(showdsmse | showkbit2 | showntg){
+  paste0("", "\\input{sections/cognition/latex/after-cognition.tex}", "") |>
+    cat(sep = "\n")
+}
+
+```
+

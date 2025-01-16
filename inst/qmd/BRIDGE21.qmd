@@ -1,0 +1,140 @@
+---
+title: YOUR BRAIN HEALTH REPORT
+format:
+  BRIDGE21-pdf: default
+editor_options: 
+  chunk_output_type: console
+---
+
+Thank you for participating in the KU ADRC Brain Health and Down Syndrome Program. You are helping to advance our understanding and treatment of Alzheimer's disease and related dementias in people with Down syndrome, offering hope to so many.
+
+As part of our study, you get feedback from experts on the research tests and measures we perform. This brain health report, created for you, puts this information back in your hands.
+
+
+## UNDERSTANDING YOUR REPORT
+
+The results in this report were obtained for research purposes for the Clinical Cohort study. Although these research tests alone don't give a full view of your brain health, they are crucial in our quest for knowledge. Remember, we're still piecing together the puzzle of brain science, and your role is essential in this. Some research findings may indicate a higher dementia risk. If you have cognitive symptoms, this information may be helpful in understanding and managing them.
+
+## SHARING YOUR RESULTS
+
+Discussing these research results with your doctor may be beneficial, especially for initiating discussions on memory changes. However, you may want to be cautious about having your research results sent directly to your physicians, as this typically results in them becoming a part of your medical record. Including these types of results in your medical record could have future implications for insurance or medical care.
+
+Consider your family's feelings before revealing any risk information, as it might directly affect them. We're here to address any concerns about sharing your report.
+
+## UNDERSTANDING THE LIMITATIONS OF THESE RESULTS
+
+These results come from tests that may still be in the research stage and may not yet be approved for general medical use. This means that sometimes the results might show higher or lower levels of the markers than a true result. It’s important to remember that these tests cannot, on their own, diagnose any condition. They should always be discussed with your research team, who can help interpret what they may mean in the context of your overall health.
+
+# Summary of your Evaluation, Memory, and Thinking Tests
+
+## PHYSICIAN ASSESSMENT AND NOTE
+
+```{r read data, ft.align="left"}
+#| echo: false
+#| message: false
+
+extract_params <- function(yaml_file){
+  yaml <- readLines(yaml_file, warn = FALSE)
+   setNames(
+     lapply(yaml, function(x) sub("^.*: ", "", x)),
+     sub(":.*$", "", yaml)
+     )
+}
+
+params <- extract_params("_variables.yaml")
+
+data <- readr::read_csv(list.files(params$datadir, "All_Data", full.names = TRUE), show_col_types = FALSE)
+
+subjinfo <- data[data$ptid == params$id, ]
+
+subject_fname <-
+  subjinfo[
+    subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+      is.na(subjinfo$redcap_repeat_instrument),
+    "subject_fname", drop = TRUE
+    ]
+
+subject_lname <-
+  subjinfo[
+    subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+      is.na(subjinfo$redcap_repeat_instrument), 
+    "subject_lname", drop = TRUE
+    ]
+
+subject_age <- subjinfo[
+  subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+    is.na(subjinfo$redcap_repeat_instrument), 
+  "subject_age", drop = TRUE
+  ]
+
+dates <- subjinfo[
+  grepl("visit", subjinfo$redcap_event_name) & 
+    is.na(subjinfo$redcap_repeat_instrument),
+  c("redcap_event_name", "visitmo", "visitday", "visityr")
+  ]
+
+dates$date_of_visit <- as.Date(
+  paste0(
+    dates[, "visityr", drop = TRUE], "-",
+    dates[, "visitmo", drop = TRUE], "-",
+    dates[, "visitday", drop = TRUE]
+    )
+  )
+
+dob <- subjinfo[subjinfo$redcap_event_name == "annual_forms_arm_1", "subject_birthdate", drop = TRUE]
+
+dates$age_at_visit <- floor(as.numeric(dates$date_of_visit - dob) / 365.25)
+
+subjinfo_df <- data.frame(
+  col1 = c(
+    paste("Name:", subject_fname, subject_lname),
+    paste("Date of Last Assessment:",
+          format(max(dates[, "date_of_visit", drop = TRUE], na.rm = TRUE), "%B %d, %Y"))
+  ),
+  col2 = c(
+     paste("Age:", max(dates$age_at_visit, na.rm = TRUE)),
+     ""
+  )
+)
+
+flextable::flextable(subjinfo_df) |>
+  flextable::width(j = 1, width = 4) |>
+  flextable::width(j = 2, width = 3) |>
+  flextable::delete_part(part = "header") |>
+  flextable::border_remove() |>
+  flextable::fontsize(j = 1:2, size = 11)
+
+
+cat(
+  strwrap(
+    subjinfo[!is.na(subjinfo$final_impression), "final_impression", drop = TRUE],
+    width = 100),
+  fill = TRUE
+  )
+
+```
+
+## MEMORY AND THINKING TEST SCORES
+
+{{< include sections/cognition/cognition.qmd >}}
+
+\newpage
+
+# MRI Structural Findings
+
+{{< include sections/imaging/imaging.qmd >}}
+
+\newpage
+
+# UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK
+
+{{< include sections/blood/blood.qmd >}}
+
+\newpage
+
+# Lifestyle and Disease Risk
+
+We assessed various measures that can affect your overall brain health. Recent research suggests that a healthy lifestyle is a key components of brain health.
+
+{{< include sections/lifestyle/lifestyle.qmd >}}
+
