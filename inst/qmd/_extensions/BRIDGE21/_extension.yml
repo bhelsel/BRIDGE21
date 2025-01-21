@@ -10,6 +10,6 @@ contributes:
         - "mytemplate.tex"
       date: last-modified
       date-format: long
-      mainfont: Times
-      monofont: Times
+      mainfont: Times New Roman
+      monofont: Times New Roman
       embed-resources: true
