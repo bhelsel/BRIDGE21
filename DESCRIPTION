@@ -13,6 +13,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
   dplyr,
+  flextable,
   GGIR, 
   ggplot2,
   kuadrc.xnat,
@@ -21,4 +22,5 @@ Imports:
   scales,
   yaml
 Remotes:
+  bhelsel/abcds
   bhelsel/kuadrc.xnat
