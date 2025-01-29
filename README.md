@@ -6,3 +6,4 @@ Down syndrome cohort studies. It generates participant feedback reports and
 insights for research participants to help get the data back into the hands of
 the participants and their families.
 
+<img src = "man/figures/overview.png" width="75%" height="75%"/> 
