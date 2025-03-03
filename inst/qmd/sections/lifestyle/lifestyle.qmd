@@ -2,7 +2,6 @@
 editor_options: 
   chunk_output_type: console
 ---
-
 ```{r blood pressure, ft.align = "left"}
 #| echo: false
 #| results: asis
@@ -22,17 +21,20 @@ bpdias <-
     grepl("bpdias", colnames(subjinfo)), drop = TRUE]
 
 bpsys_cat <- 
-  cut(bpsys, breaks = c(-Inf, 120, 130, Inf),
-      labels = c("Normal", "Elevated", "High"), right = FALSE)
+  cut(bpsys, breaks = c(-Inf, 90, 120, 130, Inf),
+      labels = c("Low", "Normal", "Elevated Risk", "High Risk"), right = FALSE)
 
-bp_cat <- 
-  ifelse(bpsys_cat == "Normal" & bpdias < 80, "Normal", ifelse(
-    bpsys_cat == "Elevated" & bpdias < 80, "Elevated", ifelse(
-      bpsys_cat == "High" | bpdias >= 80, "High", "Unknown")))
 
 bpdias_cat <- 
-  cut(bpsys, breaks = c(-Inf, 120, 130, Inf),
-      labels = c("Normal", "Elevated", "High"), right = FALSE)
+  cut(bpdias, breaks = c(-Inf, 60, 80, 90, Inf),
+      labels = c("Low", "Normal", "Elevated Risk", "High Risk"), right= FALSE)
+
+bp_cat <- 
+  ifelse(bpsys_cat == "Low" | bpdias_cat == "Low", "Low BP",
+           ifelse(bpsys_cat == "Normal" & bpdias < 80, "Normal",
+           ifelse(bpsys_cat == "Elevated Risk" & bpdias < 80, "Elevated Risk",
+           ifelse(bpsys_cat == "High Risk" | bpdias >= 80, "High Risk", "Normal"))))
+
 
 if(length(bpsys) >= 1){
   cat("\\subsection{Blood Pressure}")
@@ -46,6 +48,108 @@ if(length(bpsys) >= 1){
     flextable::bold(i = 1, part = "header")
 }
 
+
+```
+
+```{r bp plot}
+#| echo: false
+#| results: asis
+colors <- c("#ADD8E6", "#90EE90", "#FDEE8C", "#FF7F7F")
+
+generate_base_bp_plot <- function(values, categories, colors) {
+  midpoints <- sapply(1:(length(values)-1), FUN = function(x){
+    (values[x] + values[x + 1]) / 2
+  })
+
+  ggplot2::ggplot() +
+    ggplot2::geom_rect(ggplot2::aes(xmin = 0, xmax = max(values), ymin = -2, ymax = 3), fill = "#FFFFFF") +
+    ggplot2::geom_rect(ggplot2::aes(
+      xmin = values[1:length(values)-1],
+      xmax = values[2:length(values)],
+      ymin = 0, ymax = 1),
+      fill = colors, color = "black") +
+    ggplot2::annotate("text", y = -0.7, x = midpoints, label = categories) 
+}
+
+bp_visual <- function(bpsys, bpdias, bp_cat, values = c(0, 15, 35, 60, 85), categories = c("Low BP", "Normal", "Elevated Risk", "High Risk"), colors = colors) {
+  base <- generate_base_bp_plot(values, categories, colors)
+
+  highlight_value <- ifelse(bp_cat == "High Risk", 72.5, 
+                            ifelse(bp_cat == "Elevated Risk", 47.5, 
+                                   ifelse(bp_cat == "Low BP", 7.5, 25)))
+
+  overallplot <- base +
+    ggplot2::annotate("text", x = 0, y = 2.2, fontface = "bold", size = 5,
+                     label = paste("Overall Blood Pressure Category:", bp_cat), hjust = 0) +
+    ggplot2::annotate("segment", y = 0, yend = 1, x = highlight_value, linetype = "dashed") +
+    ggplot2::annotate("segment", y = 1.5, yend = 1.1, x = highlight_value,
+                      arrow = ggplot2::arrow(length = grid::unit(0.02, "npc"))) +
+    ggplot2::annotate("text", x = highlight_value, y = 1.65, label = "Your Blood Pressure", fontface = "bold") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = 0.4, size = 12),
+      plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank())
+}
+
+sys_bp_visual <- function(bpsys, values = c(0, 90, 120, 130, 200), categories = c("Low BP", "Normal", "Elevated Risk", "High Risk"), colors = colors) {
+  bpsys_cat <- cut(bpsys, breaks = c(-Inf, 90, 120, 130, Inf),
+                   labels = c("Low BP", "Normal", "Elevated Risk", "High Risk"), right = FALSE)
+  base <- generate_base_bp_plot(values, categories, colors)
+
+  plot <- base +
+    ggplot2::annotate("text", x = 0, y = 3.0, fontface = "bold", size = 4,
+                     label = paste("Systolic Blood Pressure Category:", bpsys_cat), hjust = 0) +
+    ggplot2::annotate("segment", y = 0, yend = 1, x = bpsys, linetype = "dashed", color = "black") +
+    ggplot2::annotate("segment", y = 1.5, yend = 1.1, x = bpsys,
+                      arrow = ggplot2::arrow(length = grid::unit(0.02, "npc")), color = "black") +
+    ggplot2::annotate("text", x = bpsys, y = 1.9, label = paste("Your Systolic BP:", bpsys), fontface = "bold", color = "black") +
+   ggplot2::theme_minimal() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = 0.4, size = 12),
+      plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank())
+  return(plot)
+}
+
+dias_bp_visual <- function(bpdias, values = c(0, 60, 80, 90, 120), categories = c("Low BP", "Normal", "Elevated Risk", "High Risk"), colors = colors) {
+  bpdias_cat <- cut(bpdias, breaks = c(-Inf, 60, 80, 90, Inf),
+                    labels = c("Low BP", "Normal", "Elevated Risk", "High Risk"), right = FALSE)
+  base <- generate_base_bp_plot(values, categories, colors)
+
+  plot <- base +
+    ggplot2::annotate("text", x = 0, y = 3.0, fontface = "bold", size = 4,
+                     label = paste("Diastolic Blood Pressure Category:", bpdias_cat), hjust = 0) +
+    ggplot2::annotate("segment", y = 0, yend = 1, x = bpdias, linetype = "dashed", color = "black") +
+    ggplot2::annotate("segment", y = 1.5, yend = 1.1, x = bpdias,
+                      arrow = ggplot2::arrow(length = grid::unit(0.02, "npc")), color = "black") +
+    ggplot2::annotate("text", x = bpdias, y = 1.8, label = paste("Your Diastolic BP:", bpdias), fontface = "bold", color = "black") +
+   ggplot2::theme_minimal() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = 0.4, size = 12),
+      plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank())
+  return(plot)
+}
+bp_category_plot <- bp_visual(bpsys = bpsys, bpdias = bpdias, bp_cat = bp_cat, colors = colors)
+sys_plot <- sys_bp_visual(bpsys = bpsys, colors = colors)
+dias_plot <- dias_bp_visual(bpdias = bpdias, colors = colors)
+gridExtra::grid.arrange(bp_category_plot, sys_plot, dias_plot, ncol = 1, heights = c(3, 2, 2)) 
 
 ```
 
@@ -248,16 +352,3 @@ paste("", "\\input{sections/lifestyle/latex/diet.tex}", "") |>
 
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-

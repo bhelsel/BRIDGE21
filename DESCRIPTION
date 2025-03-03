@@ -16,6 +16,8 @@ Imports:
   flextable,
   GGIR, 
   ggplot2,
+  grid,
+  gridExtra,
   kuadrc.xnat,
   quarto, 
   readr,
