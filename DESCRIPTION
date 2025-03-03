@@ -22,5 +22,5 @@ Imports:
   scales,
   yaml
 Remotes:
-  bhelsel/abcds
+  bhelsel/abcds,
   bhelsel/kuadrc.xnat
