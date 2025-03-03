@@ -16,11 +16,13 @@ Imports:
   flextable,
   GGIR, 
   ggplot2,
+  grid,
+  gridExtra,
   kuadrc.xnat,
   quarto, 
   readr,
   scales,
   yaml
 Remotes:
-  bhelsel/abcds
+  bhelsel/abcds,
   bhelsel/kuadrc.xnat

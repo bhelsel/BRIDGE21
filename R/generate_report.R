@@ -36,7 +36,7 @@ generate_report <- function(id, datadir, acceldir, outputdir){
   if(!any(grepl("AX_T2_FLAIR", checkdicm)) | !any(grepl("Sagittal_3D_Accelerated_MPRAGE", checkdicm))){
     project_no <- kuadrc.xnat::get_projects(name = "DS-Cohort")
     experiments <- kuadrc.xnat::get_experiments(project = project_no, subject = gsub("RED_", "", id))
-    scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)  
+    scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)
   }
   if(!any(grepl("AX_T2_FLAIR", checkdicm))){
     todownload = c(todownload, which(scans$type == "AX_T2_FLAIR"))
