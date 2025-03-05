@@ -20,6 +20,10 @@
 
 
 generate_report <- function(id, datadir, acceldir, outputdir){
+  if(outputdir == getwd()) {
+    stop("\nCurrent working directory is: ", getwd(), 
+        "\noutputdir needs to be different than your current working directory")
+  }
   # Locate data file and verify that id is in the ptid variable
   datafile <- list.files(datadir, "All_Data", full.names = TRUE)
   if(length(datafile) == 0) stop(sprintf("Could not locate the REDCap Data in '%s'", datadir))
