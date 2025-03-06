@@ -15,6 +15,7 @@
 #' @import grid
 #' @import gridExtra
 #' @import abcds
+#' @importFrom patchwork inset_element
 #'
 #'
 #' @name BRIDGE21
