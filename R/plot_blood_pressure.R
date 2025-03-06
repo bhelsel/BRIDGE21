@@ -45,14 +45,14 @@ classify_blood_pressure <- function(value, type = c("systolic", "diastolic")){
 #' @rdname round_rectangle
 #' @keywords internal 
 #' @importFrom ggplot2 annotation_custom
-#' @importFrom grid roundrectGrob gpar
+#' @importFrom grid roundrectGrob gpar unit
 
 round_rectangle <- function(x, y, width, height, radius, fill){
   ggplot2::annotation_custom(
     grid::roundrectGrob(
       x = x, y = y,  
       width = width, height = height,  
-      r = unit(radius, "npc"),  # Corner rounding
+      r = grid::unit(radius, "npc"),  # Corner rounding
       gp = grid::gpar(fill = fill, col = NA)  # Fill color with no border
     )
   )
@@ -117,7 +117,7 @@ generate_bp_plot <- function(bpsys, bpdia){
         xmin = rep(3, 4), xmax = rep(5, 4), 
         ymin = seq(90, 120, 10), ymax = seq(94, 129, 10)), 
       fill = bptab$colors) +
-    ggplot2::geom_text(aes(x = rep(7, 4), y = seq(90, 120, 10)), 
+    ggplot2::geom_text(ggplot2::aes(x = rep(7, 4), y = seq(90, 120, 10)), 
                        label = bptab$categories, hjust = 0, vjust = 0, size = 4) +
     ggplot2::theme_void()
 }
