@@ -2,7 +2,7 @@
 editor_options: 
   chunk_output_type: console
 ---
-```{r blood pressure, fig.align='center', fig.height=6, fig.width=8, dpi=300}
+```{r blood pressure}
 #| echo: false
 #| results: asis
 
@@ -50,9 +50,10 @@ if(length(bpsys) >= 1){
     flextable::height(height = 0.25) |>
     flextable::hrule(rule = "exact")
 
-  BRIDGE21::generate_bp_plot(
-    bpsys = bpdata$bpsys[length(bpdata$bpsys)], 
-    bpdia = bpdata$bpdias[length(bpdata$bpdias)]) +
+  bp_plot <- 
+    BRIDGE21::generate_bp_plot(
+      bpsys = bpdata$bpsys[length(bpdata$bpsys)], 
+      bpdia = bpdata$bpdias[length(bpdata$bpdias)]) +
     patchwork::inset_element(
       flextable::gen_grob(bpft, fit = "width"),
       left = 0.05, bottom = 0.6,
@@ -62,10 +63,14 @@ if(length(bpsys) >= 1){
       left = 0.05, bottom = 0.87,
       right = 0.5, top = 0.87
     )
+  
+  ggplot2::ggsave(filename = "bp_plot.png", plot = bp_plot, width = 8, height = 6, dpi = 300)
 }
 
 
 ```
+
+![](bp_plot.png)
 
 ```{r accelerometer text}
 #| echo: false
