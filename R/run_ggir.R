@@ -28,11 +28,15 @@ run_ggir <- function(id, acceldir, outputdir){
     invisible(file.copy(from = accelfile, to = file.path(acceldata, basename(accelfile))))
   }
   
-  GGIR::GGIR(
-    datadir = acceldata, outputdir = accelres,
-    windowsizes = c(1, 900, 3600), mvpathreshold = 100.6,
-    threshold.lig =	44.8, threshold.mod	= 100.6,
-    threshold.vig	= 428.8, desiredtz = "UTC", overwrite = FALSE)
+  suppressWarnings(
+    GGIR::GGIR(
+      datadir = acceldata, outputdir = accelres, mode = 1:5, visualreport = FALSE,
+      windowsizes = c(1, 900, 3600), mvpathreshold = 100.6,
+      threshold.lig =	44.8, threshold.mod	= 100.6,
+      threshold.vig	= 428.8, desiredtz = "UTC", overwrite = FALSE
+      )
+  )
+  
   
   return(accelres)
 }

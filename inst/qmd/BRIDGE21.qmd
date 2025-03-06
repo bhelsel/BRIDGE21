@@ -41,7 +41,7 @@ extract_params <- function(yaml_file){
      )
 }
 
-params <- extract_params("_variables.yaml")
+if(!exists("params")) params <- extract_params("_variables.yaml")
 
 data <- readr::read_csv(list.files(params$datadir, "All_Data", full.names = TRUE), show_col_types = FALSE)
 
