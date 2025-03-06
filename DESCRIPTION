@@ -23,6 +23,7 @@ Imports:
   gridExtra,
   kuadrc.xnat,
   magick,
+  patchwork,
   quarto, 
   readr,
   scales,
