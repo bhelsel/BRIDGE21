@@ -170,10 +170,13 @@ height_in <-
     grepl("height", colnames(subjinfo)), drop = TRUE]
 
 if(length(weight_lbs) >= 1 & length(weight_lbs) == length(height_in)) {
+  weight_lbs_last = weight_lbs[length(weight_lbs)]
+  height_in_last = height_in[length(height_in)]
   weight_kg <- round(weight_lbs / 2.205, 2)
   height_cm <- round(height_in * 2.54, 2)
   height_m <- round(height_cm / 100, 2)
   bmi <- round(weight_kg / height_m^2, 2)
+  bmi_last <- bmi[length(bmi)]
   
   paste("", "\\input{sections/lifestyle/latex/bmi.tex}", "") |> 
     cat(sep = "\n")
@@ -183,16 +186,48 @@ if(length(weight_lbs) >= 1 & length(weight_lbs) == length(height_in)) {
     weight_kg, height_cm, bmi
     )
   
-  flextable::flextable(bmi_df) |>
+  bmift <- 
+    flextable::flextable(bmi_df) |>
     flextable::set_header_labels(
       values = c("Date", "Weight (kg)", "Height (cm)", "BMI")
     ) |>
     flextable::width(j = 1:4, width = 1) |>
-    flextable::align(part = "all", align = "center")
+    flextable::hrule(rule = "exact") |>
+    flextable::height_all(height = 0.25) |>
+    flextable::bold(i = 1, part = "header") |>
+    flextable::align(part = "all", align = "center") |>
+    flextable::fontsize(j = 1:4, part = "all", size = 14) |>
+    flextable::gen_grob(fit = "width")
+  
+  bmift_pw <- patchwork::wrap_elements(full = bmift)
+  
+  bmi_plot <- BRIDGE21::generate_bmi_arch_plot(weight_lbs_last, height_in_last)
+  
+  weight_plot <- BRIDGE21::generate_weight_bar_plot(weight_lbs_last, height_in_last)
+  
+  bmi_weight_plot <- 
+    (patchwork::plot_spacer() / bmift_pw + patchwork::plot_layout(heights = c(1, 3)) |
+    patchwork:::`/.ggplot`(bmi_plot, weight_plot) + patchwork::plot_layout(heights = c(3, 1))) + 
+    patchwork::plot_layout(widths = c(1.5, 3)) +
+    patchwork::plot_annotation(
+      title = "Weight and Body Mass Index Visit History",
+      subtitle = paste("Your Body Mass Index:", round(bmi_last, 1), "kg/m\u00B2"),
+      theme = ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 24, hjust = 0.5, face = "bold"),
+        plot.subtitle = ggplot2::element_text(size = 18, hjust = 0.5))
+      )
+
+  ggplot2::ggsave(filename = "bmi_weight_plot.png", bmi_weight_plot, width = 11, height = 6, dpi = 300)
+  
   
 }
 
+
+  
+
 ```
+
+![](bmi_weight_plot.png)
 
 <!--- Body Composition --->
 
