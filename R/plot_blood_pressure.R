@@ -1,17 +1,17 @@
 #' @title create_blood_pressure_table
-#' @description Creates a table containing systolic and diastolic blood pressure 
+#' @description Creates a table containing systolic and diastolic blood pressure
 #'     values and their respective risk categories.
 #' @return A table containing blood pressure and risk categories
-#' @details Creates a table containing systolic and diastolic blood pressure 
+#' @details Creates a table containing systolic and diastolic blood pressure
 #'     values and their respective risk categories.
 #' @rdname create_blood_pressure_table
-#' @keywords internal 
+#' @keywords internal
 
 create_blood_pressure_table <- function(){
   data.frame(
-    systolic = c(90, 120, 130, 180), 
-    diastolic = c(60, 80, 90, 180), 
-    categories = c("Low BP", "Normal", "Elevated Risk", "High Risk"),
+    systolic = c(90, 120, 130, 180),
+    diastolic = c(60, 80, 90, 180),
+    categories = c("Low BP", "Normal", "Elevated", "High"),
     colors = c("#ADD8E6", "#90EE90", "#FDEE8C", "#FF7F7F")
   )
 }
@@ -23,7 +23,7 @@ create_blood_pressure_table <- function(){
 #' @details Classifies systolic or diastolic blood pressure and returns the
 #'     level of associated risk.
 #' @rdname classify_blood_pressure
-#' @keywords internal 
+#' @keywords internal
 
 classify_blood_pressure <- function(value, type = c("systolic", "diastolic")){
   type = match.arg(type)
@@ -39,19 +39,19 @@ classify_blood_pressure <- function(value, type = c("systolic", "diastolic")){
 #' @param fill Fill color of the rectangle
 #' @return An annotation_custom ggplot2 layer
 #' @details A convenience function to plot the rounded rectangles in generate_bp_plot
-#' @seealso 
+#' @seealso
 #'  \code{\link[ggplot2]{annotation_custom}}
 #'  \code{\link[grid]{roundrect}}, \code{\link[grid]{gpar}}
 #' @rdname round_rectangle
-#' @keywords internal 
+#' @keywords internal
 #' @importFrom ggplot2 annotation_custom
 #' @importFrom grid roundrectGrob gpar unit
 
 round_rectangle <- function(x, y, width, height, radius, fill){
   ggplot2::annotation_custom(
     grid::roundrectGrob(
-      x = x, y = y,  
-      width = width, height = height,  
+      x = x, y = y,
+      width = width, height = height,
       r = grid::unit(radius, "npc"),  # Corner rounding
       gp = grid::gpar(fill = fill, col = NA)  # Fill color with no border
     )
@@ -65,22 +65,22 @@ round_rectangle <- function(x, y, width, height, radius, fill){
 #' @param bpdia Diastolic Blood Pressure
 #' @return A ggplot2 object containing the plotted blood pressure values
 #' @details Generate a plot containing the systolic and diastolic blood pressure values
-#' @seealso 
+#' @seealso
 #'  \code{\link[magick]{editing}}
 #'  \code{\link[ggplot2]{ggplot}}, \code{\link[ggplot2]{geom_raster}}, \code{\link[ggplot2]{aes}}, \code{\link[ggplot2]{annotation_custom}}, \code{\link[ggplot2]{annotate}}, \code{\link[ggplot2]{geom_label}}, \code{\link[ggplot2]{ggtheme}}
 #'  \code{\link[grid]{grid.raster}}, \code{\link[grid]{patterns}}
 #' @rdname generate_bp_plot
-#' @export 
+#' @export
 #' @importFrom magick image_read
 #' @importFrom ggplot2 ggplot geom_rect aes annotation_custom annotate geom_label geom_text theme_void
 #' @importFrom grid rasterGrob linearGradient
 
 generate_bp_plot <- function(bpsys, bpdia){
-  
+
   bptab <- create_blood_pressure_table()
-  
+
   img <- magick::image_read(system.file("images/blood_pressure.png", package = "BRIDGE21"))
-  
+
   ggplot2::ggplot() +
     # Base Plot
     ggplot2::geom_rect(ggplot2::aes(xmin = 0, xmax = 100, ymin = 30, ymax = 220), fill = "white") +
@@ -111,13 +111,13 @@ generate_bp_plot <- function(bpsys, bpdia){
     ggplot2::annotate("segment", x = 74, xend = 76, y = seq(50, 190, 5), yend = seq(50, 190, 5)) +
     ggplot2::annotate("segment", x = 80, xend = 82, y = seq(50, 190, 5), yend = seq(50, 190, 5)) +
     ggplot2::annotate("text", x = 78, y = seq(50, 190, 10), label = seq(50, 190, 10)) +
-    # Add legend 
+    # Add legend
     ggplot2::geom_rect(
       ggplot2::aes(
-        xmin = rep(3, 4), xmax = rep(5, 4), 
-        ymin = seq(90, 120, 10), ymax = seq(94, 129, 10)), 
+        xmin = rep(3, 4), xmax = rep(5, 4),
+        ymin = seq(90, 120, 10), ymax = seq(94, 129, 10)),
       fill = bptab$colors) +
-    ggplot2::geom_text(ggplot2::aes(x = rep(7, 4), y = seq(90, 120, 10)), 
+    ggplot2::geom_text(ggplot2::aes(x = rep(7, 4), y = seq(90, 120, 10)),
                        label = bptab$categories, hjust = 0, vjust = 0, size = 4) +
     ggplot2::theme_void()
 }
