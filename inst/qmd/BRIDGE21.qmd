@@ -13,7 +13,7 @@ As part of our study, you get feedback from experts on the research tests and me
 
 ## UNDERSTANDING YOUR REPORT
 
-The results in this report were obtained for research purposes for the Clinical Cohort study. Although these research tests alone don't give a full view of your brain health, they are crucial in our quest for knowledge. Remember, we're still piecing together the puzzle of brain science, and your role is essential in this. Some research findings may indicate a higher dementia risk. If you have cognitive symptoms, this information may be helpful in understanding and managing them.
+The results in this report were obtained for research purposes for the Brain Health and Down Syndrome Cohort study. Although these research tests alone don't give a full view of your brain health, they are crucial in our quest for knowledge. Remember, we're still piecing together the puzzle of brain science, and your role is essential in this. Some research findings may indicate a higher dementia risk. If you have cognitive symptoms, this information may be helpful in understanding and managing them.
 
 ## SHARING YOUR RESULTS
 
@@ -28,6 +28,8 @@ These results come from tests that may still be in the research stage and may no
 # Summary of your Evaluation, Memory, and Thinking Tests
 
 ## PHYSICIAN ASSESSMENT AND NOTE
+
+Each time you are seen, we have a team of clinicians review your cognitive assessments, questionnaires your study partner answered, and clinical information. Below is the clinician’s feedback from your last visit. 
 
 ```{r read data, ft.align="left"}
 #| echo: false
