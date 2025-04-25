@@ -73,6 +73,8 @@ if(length(bpsys) >= 1){
 
 ![](bp_plot.png)
 
+\newpage
+
 ```{r accelerometer text}
 #| echo: false
 #| results: asis
@@ -149,6 +151,8 @@ IMP$metashort <- IMP$metashort[!as.Date(IMP$metashort$timestamp) %in% IMPremove,
 BRIDGE21::plot_time_series_by_date(IMP)
 
 ```
+
+\newpage
 
 <!--- Body Mass Index --->
 

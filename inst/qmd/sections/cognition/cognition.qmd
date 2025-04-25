@@ -15,7 +15,7 @@ editor_options:
 # subjinfo$dsaptot2 # Apraxia
 # subjinfo$dslgtot2	# Language
 # subjinfo$dsvistt2 # Visuospatial
-showdsmse <- showkbit2 <- showntg <- FALSE
+showdsmse <- showntg <- FALSE
 
 dsmse <- subjinfo[
   grepl("visit", subjinfo$redcap_event_name) & is.na(subjinfo$redcap_repeat_instrument), 
@@ -58,6 +58,18 @@ if(nrow(dsmse_df) >= 1 &
 
 ```
 
+```{r summary}
+#| echo: false
+#| results: asis
+
+if(showdsmse){
+  paste0("", "\\input{sections/cognition/latex/after-dsmse.tex}", "") |>
+    cat(sep = "\n")
+}
+
+```
+
+\newpage
 
 <!--- NTG - Early Detection and Screen for Dementia (NTG-EDSD) --->
 
@@ -111,15 +123,3 @@ if(length(ntgedsd$score) >= 1 &
 }
 
 ```
-
-```{r summary}
-#| echo: false
-#| results: asis
-
-if(showdsmse | showkbit2 | showntg){
-  paste0("", "\\input{sections/cognition/latex/after-cognition.tex}", "") |>
-    cat(sep = "\n")
-}
-
-```
-
