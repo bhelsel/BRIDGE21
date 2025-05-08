@@ -33,7 +33,8 @@ bp_cat <-
 
 
 if(length(bpsys) >= 1){
-  cat("\\subsection{Blood Pressure}")
+  paste("", "\\input{sections/lifestyle/latex/bp.tex}", "") |> 
+    cat(sep = "\n")
   bpdata <- 
     data.frame(
       dates = format(dates$date_of_visit, "%m/%d/%Y"), 
