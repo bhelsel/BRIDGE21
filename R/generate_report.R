@@ -21,7 +21,7 @@
 
 generate_report <- function(id, datadir, acceldir, outputdir){
   if(outputdir == getwd()) {
-    stop("\nCurrent working directory is: ", getwd(), 
+    stop("\nCurrent working directory is: ", getwd(),
         "\noutputdir needs to be different than your current working directory")
   }
   # Locate data file and verify that id is in the ptid variable
