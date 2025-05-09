@@ -272,8 +272,8 @@ bone_mineral_density <-
   subjinfo[
     grepl("visit", subjinfo$redcap_event_name) & 
       is.na(subjinfo$redcap_repeat_instrument) & 
-      !is.na(subjinfo$bmc), 
-    grepl("bmc", colnames(subjinfo)), drop = TRUE]
+      !is.na(subjinfo$dxa_bmd_z), 
+    grepl("dxa_bmd_z", colnames(subjinfo)), drop = TRUE]
 
 if(length(fitness_date) >= 1){
   
