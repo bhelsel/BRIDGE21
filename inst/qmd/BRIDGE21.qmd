@@ -125,8 +125,6 @@ cat(
 
 \newpage
 
-# MRI Structural Findings
-
 {{< include sections/imaging/imaging.qmd >}}
 
 \newpage
