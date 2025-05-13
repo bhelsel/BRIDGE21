@@ -39,14 +39,20 @@ generate_report <- function(id, datadir, acceldir, outputdir){
   todownload = c()
   if(!any(grepl("AX_T2_FLAIR", checkdicm)) | !any(grepl("Sagittal_3D_Accelerated_MPRAGE", checkdicm))){
     project_no <- kuadrc.xnat::get_projects(name = "DS-Cohort")
-    experiments <- kuadrc.xnat::get_experiments(project = project_no, subject = gsub("RED_", "", id))
-    scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)
-  }
-  if(!any(grepl("AX_T2_FLAIR", checkdicm))){
-    todownload = c(todownload, which(scans$type == "AX_T2_FLAIR"))
-  }
-  if(!any(grepl("Sagittal_3D_Accelerated_MPRAGE", checkdicm))){
-    todownload = c(todownload, which(scans$type == "Sagittal 3D Accelerated MPRAGE"))
+    experiments <- tryCatch({
+      kuadrc.xnat::get_experiments(project = project_no, subject = gsub("RED_", "", id))
+    }, error = function(e){
+      return(NULL)
+    })
+    if(!is.null(experiments)){
+      scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)
+      if(!any(grepl("AX_T2_FLAIR", checkdicm))){
+        todownload = c(todownload, which(scans$type == "AX_T2_FLAIR"))
+      }
+      if(!any(grepl("Sagittal_3D_Accelerated_MPRAGE", checkdicm))){
+        todownload = c(todownload, which(scans$type == "Sagittal 3D Accelerated MPRAGE"))
+      }
+    }
   }
   if(length(todownload) >= 1){
     if(length(todownload) == 2) todownload <- paste0(todownload, collapse = ",")
@@ -56,8 +62,8 @@ generate_report <- function(id, datadir, acceldir, outputdir){
   }
   # Convert to nifti files and save the default image as a .png file
   checkpng <- list.files(imagedir, recursive = TRUE, pattern = ".png$")
-  if(length(checkpng) == 0){
-    scandir <- list.files(file.path(imagedir, "DS-Cohort"), full.names = TRUE)
+  scandir <- list.files(file.path(imagedir, "DS-Cohort"), full.names = TRUE)
+  if(length(checkpng) == 0 & length(scandir) != 0){
     kuadrc.xnat::convert_to_nifti(directory = scandir)
     kuadrc.xnat::save_nifti_image(path = file.path(scandir, "nifti"))
   }
