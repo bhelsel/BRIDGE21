@@ -91,8 +91,16 @@ if(!all(is.na(ntgedsd[, -which(names(ntgedsd) == "date")]))){
 
   ntgedsd <- ntgedsd[apply(ntgedsd, 1, FUN = function(x) sum(is.na(x))) == 0, ] # Filter out NA values
 
+  createNTGdf <- function(x){
+    if(is.vector(x)){
+      as.data.frame(t(x))
+    } else{
+      as.data.frame(x)
+    }
+  }
+  
   ntgedsd$score <- rowSums(
-    as.data.frame(
+    createNTGdf(
       apply(
         ntgedsd[, 2:ncol(ntgedsd)], 
         MARGIN = 2, 
