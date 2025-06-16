@@ -10,7 +10,7 @@
 #' @section BRIDGE21 functions:
 #'
 #' \code{\link{generate_report}}
-#' 
+#'
 #' @import flextable
 #' @import grid
 #' @import gridExtra

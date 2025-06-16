@@ -12,37 +12,40 @@ editor_options:
 
 showTau <- showApoe <- FALSE
 
-ptau <- 
+ptau <-
   subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) & 
-      is.na(subjinfo$redcap_repeat_instrument) & 
-      !is.na(subjinfo$ptau217_pgml), 
-    grep("ptau217", colnames(subjinfo))]
+    grepl("visit", subjinfo$redcap_event_name) &
+      is.na(subjinfo$redcap_repeat_instrument) &
+      !is.na(subjinfo$ptau217_pgml),
+    grep("ptau217", colnames(subjinfo))
+  ]
 
-if(nrow(ptau) >= 1){
-
+if (nrow(ptau) >= 1) {
   showTau <- TRUE
-  
+
   ptau <- ptau[, c("ptau217_date", "ptau217_pgml")]
-  
+
   ptau$ptau217_date <- format(ptau$ptau217_date, "%m/%d/%Y")
-  
+
   ptau$category <- cut(
     ptau$ptau217_pgml,
     breaks = c(-Inf, 0.4, 0.63, Inf),
     labels = c("Not Elevated", "Intermediate", "Elevated"),
     right = FALSE
   )
-  
+
   ptau$ptau217_pgml <- round(ptau$ptau217_pgml, 2)
 
   ptau$interpretation <-
-    factor(ptau$category, 
-           levels = c("Not Elevated", "Intermediate", "Elevated"),
-           labels = c(
-             "Negative: Alzheimer's disease pathology not indicated",
-             "Intermediate: Alzheimer's disease pathology possible",
-             "Positive: Alzheimer's disease pathology likely"))
+    factor(
+      ptau$category,
+      levels = c("Not Elevated", "Intermediate", "Elevated"),
+      labels = c(
+        "Negative: Alzheimer's disease pathology not indicated",
+        "Intermediate: Alzheimer's disease pathology possible",
+        "Positive: Alzheimer's disease pathology likely"
+      )
+    )
 }
 
 ```
@@ -51,8 +54,8 @@ if(nrow(ptau) >= 1){
 #| echo: false
 #| results: asis
 
-if(showTau){
-   paste("", "\\input{sections/blood/latex/proteins.tex}", "") |> 
+if (showTau) {
+  paste("", "\\input{sections/blood/latex/proteins.tex}", "") |>
     cat(sep = "\n")
 }
 
@@ -61,28 +64,33 @@ if(showTau){
 ```{r print flextable of ptau results, ft.align="left"}
 #| echo: false
 
-if(showTau){
+if (showTau) {
   flextable::flextable(ptau) |>
     flextable::set_header_labels(
       values = c(
-        "Date", "pTau 217", 
-        "Category", "Interpretation"
-        )) |>
+        "Date",
+        "pTau 217",
+        "Category",
+        "Interpretation"
+      )
+    ) |>
     flextable::width(j = 1:3, width = 0.75) |>
     flextable::width(j = 4, width = 4) |>
     flextable::align(j = 1:4, part = "all", align = "center") |>
     flextable::add_footer_row(
       values = "pTau 217 is measured in pg/ml",
-      colwidths = 4) |>
+      colwidths = 4
+    ) |>
     flextable::add_header_row(
       values = "Plasma 217 Results and Interpretation",
       colwidths = 4
     ) |>
     flextable::align(i = 1, part = "head", align = "left") |>
     flextable::border(
-      i = 1, part = "head", 
-      border = list("width" = 0, color = "black", style = "solid"))
-    
+      i = 1,
+      part = "head",
+      border = list("width" = 0, color = "black", style = "solid")
+    )
 }
 
 ```
@@ -91,8 +99,8 @@ if(showTau){
 #| echo: false
 #| results: asis
 
-if(showTau){
-   paste("", "\\input{sections/blood/latex/after-tau.tex}", "") |> 
+if (showTau) {
+  paste("", "\\input{sections/blood/latex/after-tau.tex}", "") |>
     cat(sep = "\n")
 }
 
@@ -101,35 +109,61 @@ if(showTau){
 
 <!--- insert apoe section here when available --->
 
+\newpage
+
 ```{r karyotype results}
 #| echo: false
 #| results: asis
 
-karyotype_no <- 
+karyotype_no <-
   subjinfo[
-    grepl("visit1_arm_1", subjinfo$redcap_event_name) & 
-      is.na(subjinfo$redcap_repeat_instrument) & 
-      !is.na(subjinfo$dschrom), 
-    grep("dschrom", colnames(subjinfo)), drop = TRUE]
+    grepl("visit1_arm_1", subjinfo$redcap_event_name) &
+      is.na(subjinfo$redcap_repeat_instrument) &
+      !is.na(subjinfo$dschrom),
+    grep("dschrom", colnames(subjinfo)),
+    drop = TRUE
+  ]
 
 karyotype_label <-
-  ifelse(karyotype_no == 1, "Trisomy 21", ifelse(
-    karyotype_no == 2, "Transolocation", ifelse(
-      karyotype_no == 3, "Mosaic", "Unknown")))
+  ifelse(
+    karyotype_no == 1,
+    "Trisomy 21",
+    ifelse(
+      karyotype_no == 2,
+      "Transolocation",
+      ifelse(
+        karyotype_no == 3,
+        "Mosaic",
+        "Unknown"
+      )
+    )
+  )
 
-karyotype_source <- 
+karyotype_source <-
   subjinfo[
-    grepl("visit1_arm_1", subjinfo$redcap_event_name) & 
-      is.na(subjinfo$redcap_repeat_instrument) & 
-      !is.na(subjinfo$chromsm_source), 
-    grep("chromsm_source", colnames(subjinfo)), drop = TRUE]
+    grepl("visit1_arm_1", subjinfo$redcap_event_name) &
+      is.na(subjinfo$redcap_repeat_instrument) &
+      !is.na(subjinfo$chromsm_source),
+    grep("chromsm_source", colnames(subjinfo)),
+    drop = TRUE
+  ]
 
-karyotype_source_label <- 
-  ifelse(karyotype_source == "IU", "Indiana University", ifelse(
-    karyotype_source == "medrec", "Medical Record", ifelse(
-      karyotype_source == "copartic", "Parent or Care Partner Reported", "Unknown")))
+karyotype_source_label <-
+  ifelse(
+    karyotype_source == "IU",
+    "Indiana University",
+    ifelse(
+      karyotype_source == "medrec",
+      "Medical Record",
+      ifelse(
+        karyotype_source == "copartic",
+        "Parent or Care Partner Reported",
+        "Unknown"
+      )
+    )
+  )
 
-if(karyotype_label != "Unknown"){
+if (karyotype_label != "Unknown") {
   cat(paste0("", "\\input{sections/blood/latex/karyotype.tex}"), sep = "\n")
 }
 

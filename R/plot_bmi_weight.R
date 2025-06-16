@@ -13,32 +13,46 @@
 #' @importFrom ggplot2 geom_polygon aes geom_text ggplot geom_rect annotate scale_x_continuous scale_y_continuous coord_radial theme_void
 
 generate_bmi_arch_plot <- function(wt, ht) {
-
   # Define internal BMI functions ----
 
-  add_bmi_arrow <- function(bmi, curve = 0.75){
+  add_bmi_arrow <- function(bmi, curve = 0.75) {
     yvals <- c(-200, -200, -75, -200)
     list(
       ggplot2::geom_polygon(
-        ggplot2::aes(x = c((bmi-curve), bmi, bmi, (bmi-curve)), y = yvals),
-        fill = "grey80",  alpha = 0.5, color = "black", linewidth = 0.75),
+        ggplot2::aes(x = c((bmi - curve), bmi, bmi, (bmi - curve)), y = yvals),
+        fill = "grey80",
+        alpha = 0.5,
+        color = "black",
+        linewidth = 0.75
+      ),
       ggplot2::geom_polygon(
-        ggplot2::aes(x = c(bmi, (bmi+curve), bmi, bmi), y = yvals),
-        fill = "grey80", alpha = 0.5, color = "black", linewidth = 0.75)
+        ggplot2::aes(x = c(bmi, (bmi + curve), bmi, bmi), y = yvals),
+        fill = "grey80",
+        alpha = 0.5,
+        color = "black",
+        linewidth = 0.75
+      )
     )
   }
 
-  add_bmi_text <- function(categories, units){
+  add_bmi_text <- function(categories, units) {
     list(
       ggplot2::geom_text(
         ggplot2::aes(
-          x = c(15, 21.7, 27.5, 33), y = c(100, 100, 100, 100),
-          label = categories), fontface = "bold", size = 4.5),
+          x = c(15, 21.7, 27.5, 33),
+          y = c(100, 100, 100, 100),
+          label = categories
+        ),
+        fontface = "bold",
+        size = 4.5
+      ),
       ggplot2::geom_text(
         ggplot2::aes(
           x = c(15, 21.7, 27.5, 33),
           y = c(-30, -35, -30, -30),
-          label = units))
+          label = units
+        )
+      )
     )
   }
 
@@ -48,31 +62,59 @@ generate_bmi_arch_plot <- function(wt, ht) {
   ht_m <- (ht * 2.54) / 100
   bmi <- wt_kg / ht_m^2
 
-  if(bmi > 34) bmi <- 34 # Set max bmi for radial plot
+  if (bmi > 34) {
+    bmi <- 34
+  } # Set max bmi for radial plot
 
   ggplot2::ggplot() +
     ggplot2::geom_rect(
       ggplot2::aes(
         xmin = c(12, 18.5, 25, 30),
         xmax = c(18.5, 25, 30, 35),
-        ymin = -200, ymax = 200),
+        ymin = -200,
+        ymax = 200
+      ),
       fill = c("#ADD8E6", "#90EE90", "#FDEE8C", "#FF7F7F"),
-      color = "black", linewidth = 1) +
+      color = "black",
+      linewidth = 1
+    ) +
     ggplot2::geom_rect(
       ggplot2::aes(xmin = 12, xmax = 35, ymin = -75, ymax = 25),
-      fill = "grey80", alpha = .5, color = "black", linewidth = 0.75) +
+      fill = "grey80",
+      alpha = .5,
+      color = "black",
+      linewidth = 0.75
+    ) +
     ggplot2::annotate(
-      "segment", x = c(12, 18.5, 25, 30), xend = c(12, 18.5, 25, 30),
-      y = -200, yend = 200, linewidth = 1) +
+      "segment",
+      x = c(12, 18.5, 25, 30),
+      xend = c(12, 18.5, 25, 30),
+      y = -200,
+      yend = 200,
+      linewidth = 1
+    ) +
     add_bmi_arrow(bmi, curve = 0.75) +
     ggplot2::scale_x_continuous(breaks = seq(13, 34, 1), expand = c(0, 0)) +
-    ggplot2::scale_y_continuous(breaks = seq(-200, 200, 100), expand = c(0, 0)) +
+    ggplot2::scale_y_continuous(
+      breaks = seq(-200, 200, 100),
+      expand = c(0, 0)
+    ) +
     add_bmi_text(
       categories = c("Underweight", "Normal", "Overweight", "Obesity"),
-      units = c("< 18.5 kg/m\u00B2", "18.5-24.9 kg/m\u00B2", "25-29.9 kg/m\u00B2", "\u2265 30 kg/m\u00B2")) +
+      units = c(
+        "< 18.5 kg/m\u00B2",
+        "18.5-24.9 kg/m\u00B2",
+        "25-29.9 kg/m\u00B2",
+        "\u2265 30 kg/m\u00B2"
+      )
+    ) +
     ggplot2::coord_radial(
-      start = -0.5 * pi, end = 0.5 * pi,
-      inner.radius = 0.4, r.axis.inside = TRUE, rotate.angle = TRUE) +
+      start = -0.5 * pi,
+      end = 0.5 * pi,
+      inner.radius = 0.4,
+      r.axis.inside = TRUE,
+      rotate.angle = TRUE
+    ) +
     ggplot2::theme_void()
 }
 
@@ -90,44 +132,74 @@ generate_bmi_arch_plot <- function(wt, ht) {
 #' @export
 #' @importFrom ggplot2 geom_segment aes geom_point annotate ggplot geom_rect geom_hline geom_vline scale_x_continuous scale_y_continuous labs coord_fixed theme element_text margin element_blank element_line unit element_rect
 
-
 generate_weight_bar_plot <- function(wt, ht) {
-
   # Define internal weight functions ----
 
-  calculate_normal_weight <- function(wt, ht){
+  calculate_normal_weight <- function(wt, ht) {
     ht_m <- (ht * 2.54) / 100
     minwt <- 18.5 * (ht_m^2) * 2.205
     maxwt <- 24.9 * (ht_m^2) * 2.205
     wtrange <- seq(
       (floor(minwt / 10) * 10) - 40,
       (ceiling(maxwt / 10) * 10) + 200,
-      by = 20)
-    return(list(wt = wt, ht_m = ht_m, minwt = minwt, maxwt = maxwt, wtrange = wtrange))
+      by = 20
+    )
+    return(list(
+      wt = wt,
+      ht_m = ht_m,
+      minwt = minwt,
+      maxwt = maxwt,
+      wtrange = wtrange
+    ))
   }
 
-
-  add_wt_line <- function(normwt, y.adjust.text = 0.4){
+  add_wt_line <- function(normwt, y.adjust.text = 0.4) {
     list(
       ggplot2::geom_segment(
-        ggplot2::aes(x = min(normwt$wtrange), xend = normwt$wt, y = y.adjust.text, yend = y.adjust.text),
-        color = "black", linewidth = 1.5),
+        ggplot2::aes(
+          x = min(normwt$wtrange),
+          xend = normwt$wt,
+          y = y.adjust.text,
+          yend = y.adjust.text
+        ),
+        color = "black",
+        linewidth = 1.5
+      ),
       ggplot2::geom_point(
-        ggplot2::aes(x = normwt$wt, y = y.adjust.text), fill = "black", size = 4
+        ggplot2::aes(x = normwt$wt, y = y.adjust.text),
+        fill = "black",
+        size = 4
       )
     )
   }
 
-  add_wt_text <- function(normwt, y.adjust.line = 0.4){
-    wtvals <- c(min(normwt$wtrange), normwt$minwt, normwt$maxwt, max(normwt$wtrange))
-    xvals <- sapply(1:(length(wtvals)-1), FUN = function(x) mean(c(wtvals[x], wtvals[x+1])))
+  add_wt_text <- function(normwt, y.adjust.line = 0.4) {
+    wtvals <- c(
+      min(normwt$wtrange),
+      normwt$minwt,
+      normwt$maxwt,
+      max(normwt$wtrange)
+    )
+    xvals <- sapply(1:(length(wtvals) - 1), FUN = function(x) {
+      mean(c(wtvals[x], wtvals[x + 1]))
+    })
     list(
       ggplot2::annotate(
-        "text", x = xvals, y = rep(0.95, 3),
-        label = c("Under", "Normal", "Over"), fontface = "bold", size = 4),
+        "text",
+        x = xvals,
+        y = rep(0.95, 3),
+        label = c("Under", "Normal", "Over"),
+        fontface = "bold",
+        size = 4
+      ),
       ggplot2::annotate(
-        "text", x = (normwt$wt+25), y = y.adjust.line,  size = 4,
-        label = paste(normwt$wt, "lbs"), fontface = "bold")
+        "text",
+        x = (normwt$wt + 25),
+        y = y.adjust.line,
+        size = 4,
+        label = paste(normwt$wt, "lbs"),
+        fontface = "bold"
+      )
     )
   }
 
@@ -138,26 +210,44 @@ generate_weight_bar_plot <- function(wt, ht) {
   ggplot2::ggplot() +
     ggplot2::geom_rect(
       ggplot2::aes(
-        xmin = min(normwt$wtrange), xmax = max(normwt$wtrange),
-        ymin = 0, ymax = 1.1), fill = "white") +
+        xmin = min(normwt$wtrange),
+        xmax = max(normwt$wtrange),
+        ymin = 0,
+        ymax = 1.1
+      ),
+      fill = "white"
+    ) +
     ggplot2::geom_rect(
       ggplot2::aes(
         xmin = c(min(normwt$wtrange), normwt$minwt, normwt$maxwt),
         xmax = c(normwt$minwt, normwt$maxwt, max(normwt$wtrange)),
-        ymin = c(0.75, 0, 0.75), ymax = rep(1.1, 3)),
-      fill = c("#44c1de", "#5cbba2", "#094c92"), alpha = 0.3) +
+        ymin = c(0.75, 0, 0.75),
+        ymax = rep(1.1, 3)
+      ),
+      fill = c("#44c1de", "#5cbba2", "#094c92"),
+      alpha = 0.3
+    ) +
     ggplot2::geom_hline(yintercept = 0.75, linewidth = 0.75) +
     ggplot2::geom_vline(
       xintercept = c(normwt$minwt, normwt$maxwt),
-      linewidth = 0.75, linetype = "dashed") +
+      linewidth = 0.75,
+      linetype = "dashed"
+    ) +
     add_wt_line(normwt) +
     add_wt_text(normwt) +
-    ggplot2::scale_x_continuous(breaks = normwt$wtrange, expand = c(0.005, 0.005)) +
+    ggplot2::scale_x_continuous(
+      breaks = normwt$wtrange,
+      expand = c(0.005, 0.005)
+    ) +
     ggplot2::scale_y_continuous(expand = c(0.0175, 0.0175)) +
     ggplot2::labs(x = "Weight (lbs)") +
     ggplot2::coord_fixed(ratio = 40) +
     ggplot2::theme(
-      axis.title.x = ggplot2::element_text(size = 12, color = "black", margin = ggplot2::margin(t = 15)),
+      axis.title.x = ggplot2::element_text(
+        size = 12,
+        color = "black",
+        margin = ggplot2::margin(t = 15)
+      ),
       axis.title.y = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(size = 10, color = "black"),
       axis.text.y = ggplot2::element_blank(),
@@ -165,6 +255,10 @@ generate_weight_bar_plot <- function(wt, ht) {
       axis.ticks.y = ggplot2::element_blank(),
       axis.ticks.length.x = ggplot2::unit(0.3, "cm"),
       panel.grid = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(fill = "white", color = "black", linewidth = 2)
+      panel.background = ggplot2::element_rect(
+        fill = "white",
+        color = "black",
+        linewidth = 2
       )
+    )
 }

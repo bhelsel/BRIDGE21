@@ -35,67 +35,87 @@ Each time you are seen, we have a team of clinicians review your cognitive asses
 #| echo: false
 #| message: false
 
-extract_params <- function(yaml_file){
+extract_params <- function(yaml_file) {
   yaml <- readLines(yaml_file, warn = FALSE)
-   setNames(
-     lapply(yaml, function(x) sub("^.*: ", "", x)),
-     sub(":.*$", "", yaml)
-     )
+  setNames(
+    lapply(yaml, function(x) sub("^.*: ", "", x)),
+    sub(":.*$", "", yaml)
+  )
 }
 
-if(!exists("params")) params <- extract_params("_variables.yaml")
+if (!exists("params")) {
+  params <- extract_params("_variables.yaml")
+}
 
-data <- readr::read_csv(list.files(params$datadir, "All_Data", full.names = TRUE), show_col_types = FALSE)
+data <- readr::read_csv(
+  list.files(params$datadir, "All_Data", full.names = TRUE),
+  show_col_types = FALSE
+)
 
 subjinfo <- data[data$ptid == params$id, ]
 
 subject_fname <-
   subjinfo[
-    subjinfo$redcap_event_name == "annual_forms_arm_1" & 
+    subjinfo$redcap_event_name == "annual_forms_arm_1" &
       is.na(subjinfo$redcap_repeat_instrument),
-    "subject_fname", drop = TRUE
-    ]
+    "subject_fname",
+    drop = TRUE
+  ]
 
 subject_lname <-
   subjinfo[
-    subjinfo$redcap_event_name == "annual_forms_arm_1" & 
-      is.na(subjinfo$redcap_repeat_instrument), 
-    "subject_lname", drop = TRUE
-    ]
+    subjinfo$redcap_event_name == "annual_forms_arm_1" &
+      is.na(subjinfo$redcap_repeat_instrument),
+    "subject_lname",
+    drop = TRUE
+  ]
 
 subject_age <- subjinfo[
-  subjinfo$redcap_event_name == "annual_forms_arm_1" & 
-    is.na(subjinfo$redcap_repeat_instrument), 
-  "subject_age", drop = TRUE
-  ]
+  subjinfo$redcap_event_name == "annual_forms_arm_1" &
+    is.na(subjinfo$redcap_repeat_instrument),
+  "subject_age",
+  drop = TRUE
+]
 
 dates <- subjinfo[
-  grepl("visit", subjinfo$redcap_event_name) & 
+  grepl("visit", subjinfo$redcap_event_name) &
     is.na(subjinfo$redcap_repeat_instrument),
   c("redcap_event_name", "visitmo", "visitday", "visityr")
-  ]
+]
 
 dates$date_of_visit <- as.Date(
   paste0(
-    dates[, "visityr", drop = TRUE], "-",
-    dates[, "visitmo", drop = TRUE], "-",
+    dates[, "visityr", drop = TRUE],
+    "-",
+    dates[, "visitmo", drop = TRUE],
+    "-",
     dates[, "visitday", drop = TRUE]
-    )
   )
+)
 
-dob <- subjinfo[subjinfo$redcap_event_name == "annual_forms_arm_1", "subject_birthdate", drop = TRUE]
+dob <- subjinfo[
+  subjinfo$redcap_event_name == "annual_forms_arm_1" &
+    !is.na(subjinfo$subject_birthdate),
+  "subject_birthdate",
+  drop = TRUE
+]
 
 dates$age_at_visit <- floor(as.numeric(dates$date_of_visit - dob) / 365.25)
 
 subjinfo_df <- data.frame(
   col1 = c(
     paste("Name:", subject_fname, subject_lname),
-    paste("Date of Last Assessment:",
-          format(max(dates[, "date_of_visit", drop = TRUE], na.rm = TRUE), "%B %d, %Y"))
+    paste(
+      "Date of Last Assessment:",
+      format(
+        max(dates[, "date_of_visit", drop = TRUE], na.rm = TRUE),
+        "%B %d, %Y"
+      )
+    )
   ),
   col2 = c(
-     paste("Age:", max(dates$age_at_visit, na.rm = TRUE)),
-     ""
+    paste("Age:", max(dates$age_at_visit, na.rm = TRUE)),
+    ""
   )
 )
 
@@ -106,14 +126,19 @@ flextable::flextable(subjinfo_df) |>
   flextable::border_remove() |>
   flextable::fontsize(j = 1:2, size = 11)
 
-finalImpression <- subjinfo[!is.na(subjinfo$final_impression), "final_impression", drop = TRUE]
+finalImpression <- subjinfo[
+  !is.na(subjinfo$final_impression),
+  "final_impression",
+  drop = TRUE
+]
 
 cat(
   strwrap(
     finalImpression[length(finalImpression)],
-    width = 100),
+    width = 100
+  ),
   fill = TRUE
-  )
+)
 
 ```
 
