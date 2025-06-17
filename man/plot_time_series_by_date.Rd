@@ -4,10 +4,12 @@
 \alias{plot_time_series_by_date}
 \title{plot_time_series_by_date}
 \usage{
-plot_time_series_by_date(IMP)
+plot_time_series_by_date(IMP, summary_data)
 }
 \arguments{
 \item{IMP}{The IMP object from GGIR Part 2}
+
+\item{summary_data}{A data frame with date and min/day of sleep, inactivity, light, and moderate-to-vigorous physical activity}
 }
 \value{
 A ggplot2 object
