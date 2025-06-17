@@ -3,131 +3,231 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r calculate dsmse scores, ft.align = "left"}
+```{r memory scores}
 #| echo: false
 
-# Insert DSMSE Percentile Rankings Here
+showdsmse <- showntg <- showmcrt <- FALSE
 
-# subjinfo$dsortot2 # Orientation
-# subjinfo$dsknwtt2 # Knowledge of Examiner
-# subjinfo$dssmtot2 # Shoebox Memory
-# subjinfo$dsmmtot2 # Place Memory
-# subjinfo$dsaptot2 # Apraxia
-# subjinfo$dslgtot2	# Language
-# subjinfo$dsvistt2 # Visuospatial
-showdsmse <- showntg <- FALSE
+# Down Syndrome Mental Status Exam
 
 dsmse <- subjinfo[
-  grepl("visit", subjinfo$redcap_event_name) & is.na(subjinfo$redcap_repeat_instrument), 
-  c("dslgtot2", "dssmtot2", "dsmmtot2", "dsvistt2")
-  ]
+  grepl("visit", subjinfo$redcap_event_name) &
+    is.na(subjinfo$redcap_repeat_instrument),
+  c("dsmsett2", "dslgtot2", "dssmtot2", "dsmmtot2", "dsvistt2")
+]
 
-language_index <- round(pnorm(((dsmse$dslgtot2 - 37.1) / 9.07), mean = 0, sd = 1) * 100, 2)
-memory_index <- round(pnorm((((dsmse$dssmtot2 + dsmse$dsmmtot2) - 14.08) / 4.68), mean = 0, sd = 1) * 100, 2)
-visual_spatial_index <- round(pnorm(((dsmse$dsvistt2 - 6.18) / 1.09), mean = 0, sd = 1) * 100, 2)
+overall_score <- dsmse$dsmsett2
+language_index <- dsmse$dslgtot2
+memory_index <- dsmse$dssmtot2 + dsmse$dsmmtot2
+visual_spatial_index <- dsmse$dsvistt2
 
-dsmse_df <- 
+dsmse_df <-
   data.frame(
     date = format(dates$date_of_visit, "%m/%d/%Y"),
+    overall_score,
     visual_spatial_index,
     memory_index,
     language_index
-    ) 
+  )
+
+showdsmse <- nrow(dsmse_df) >= 1 &
+  !all(is.na(dsmse_df[, -which(names(dsmse_df) == "date")]))
+
+# Modified Cued Recall Test
+
+mcrt <- subjinfo[
+  grepl("visit", subjinfo$redcap_event_name) &
+    is.na(subjinfo$redcap_repeat_instrument),
+  c("dscrttfr", "dsccttcr")
+]
+
+mcrt_df <-
+  data.frame(
+    date = format(dates$date_of_visit, "%m/%d/%Y"),
+    dscrttr = rowSums(mcrt),
+    mcrt
+  )
+
+mcrtlabels <- c("Total Recall", "Free Recall", "Cued Recall")
+
+showmcrt <- nrow(mcrt_df) >= 1 &
+  !all(is.na(mcrt_df[, -which(names(mcrt_df) == "date")]))
+
 
 ```
 
-```{r add dsmse results, ft.align = "left"}
+```{r down syndrome mental state exam, ft.align="left"}
 #| echo: false
 #| results: asis
 
-if(nrow(dsmse_df) >= 1 & 
-   !all(is.na(dsmse_df[, -which(names(dsmse_df) == "date")]))){
-  showdsmse <- TRUE
-  paste("", "\\input{sections/cognition/latex/dsmse.tex}", "") |> 
+if (showdsmse) {
+  paste("", "\\input{sections/cognition/latex/dsmse.tex}", "") |>
     cat(sep = "\n")
-  
+
   flextable::flextable(dsmse_df) |>
-    flextable::set_header_labels(values = c(
-      "Date", "Visual Spatial", 
-      "Memory", "Language")
-      ) |>
-    flextable::width(j = 1:4, width = 1.15) |>
-    flextable::align(j = 1:4, align = "center", part = "all") |>
-    flextable::bold(j = 1:4, part = "header")
-  }
+    flextable::set_header_labels(
+      values = c(
+        "Date",
+        "Total Score",
+        "Visual Spatial",
+        "Memory",
+        "Language"
+      )
+    ) |>
+    flextable::width(j = 1:5, width = 1.15) |>
+    flextable::align(j = 1:5, align = "center", part = "all") |>
+    flextable::bold(j = 1:5, part = "header") |>
+    flextable::add_footer_row(values = "Max Score: 103", colwidths = 5)
+}
 
-```
+if (showdsmse & showmcrt) {
+  paste0("", "\\newpage", "") |>
+    cat(sep = "\n")
+}
 
-```{r summary}
-#| echo: false
-#| results: asis
-
-if(showdsmse){
-  paste0("", "\\input{sections/cognition/latex/after-dsmse.tex}", "") |>
+if (showdsmse & !showmcrt) {
+  paste0("", "\\input{sections/cognition/latex/after-memory.tex}", "") |>
     cat(sep = "\n")
 }
 
 ```
 
-\newpage
+<!--- Modified Cued Recall Test --->
+
+```{r modified cued recall test, ft.align="left"}
+#| echo: false
+#| results: asis
+
+if (showmcrt) {
+  paste("", "\\input{sections/cognition/latex/cued-recall.tex}", "") |>
+    cat(sep = "\n")
+
+  flextable::flextable(mcrt_df) |>
+    flextable::set_header_labels(
+      values = c("Date", mcrtlabels)
+    ) |>
+    flextable::width(j = 1:4, width = 1.15) |>
+    flextable::align(j = 1:4, align = "center", part = "all") |>
+    flextable::bold(j = 1:4, part = "header") |>
+    flextable::add_footer_row(values = "Max Score: 36", colwidths = 4)
+}
+
+if (!showdsmse & showmcrt | showdsmse & showmcrt) {
+  paste0("", "\\input{sections/cognition/latex/after-memory.tex}", "") |>
+    cat(sep = "\n")
+}
+
+
+```
 
 <!--- NTG - Early Detection and Screen for Dementia (NTG-EDSD) --->
 
-```{r ntgedsd calculate scores}
-#| echo: false
-
-ntgedsd <- data.frame(
-  date = format(dates$date_of_visit, "%m/%d/%Y"),
-  subjinfo[grepl("visit", subjinfo$redcap_event_name) & is.na(subjinfo$redcap_repeat_instrument), 
-           which(colnames(subjinfo) == "dsadl1"):which(colnames(subjinfo) == "dsother6")]
-  )
-
-if(!all(is.na(ntgedsd[, -which(names(ntgedsd) == "date")]))){
-  showntg <- TRUE
-  ntgedsd <- ntgedsd[
-  apply(ntgedsd[, 2:ncol(ntgedsd)], 1, function(row) !all(is.na(row))), 
-  apply(ntgedsd[, 2:ncol(ntgedsd)], 2, function(col) !all(is.na(col)))
-  ]
-
-  ntgedsd <- ntgedsd[apply(ntgedsd, 1, FUN = function(x) sum(is.na(x))) == 0, ] # Filter out NA values
-
-  createNTGdf <- function(x){
-    if(is.vector(x)){
-      as.data.frame(t(x))
-    } else{
-      as.data.frame(x)
-    }
-  }
-  
-  ntgedsd$score <- rowSums(
-    createNTGdf(
-      apply(
-        ntgedsd[, 2:ncol(ntgedsd)], 
-        MARGIN = 2, 
-        FUN = function(x) ifelse(x == 1 | x == 2, 1, 0)
-        )
-      ), na.rm = TRUE)
-}
-
-
-
-```
-
-```{r add ntgedsd results, ft.align = "left"}
+```{r ntgedsd calculate scores, ft.align="left"}
 #| echo: false
 #| results: asis
 
-if(length(ntgedsd$score) >= 1 & 
-   all(!is.na(ntgedsd$score))){
-  paste("", "\\input{sections/cognition/latex/ntgedsd.tex}", "") |> 
-    cat(sep = "\n")
-  
-  flextable::flextable(ntgedsd[, c("date", "score")]) |>
-    flextable::set_header_labels(values = c("Date of Questionnaire", "Score")) |>
-    flextable::width(j = 1:2, width = 1.75) |>
-    flextable::bold(j = 1:2, part = "header") |>
-    flextable::align(j = 1:2, part = "all", align = "center")
+ntgedsd <- data.frame(
+  date = format(dates$date_of_visit, "%m/%d/%Y"),
+  subjinfo[
+    grepl("visit", subjinfo$redcap_event_name) &
+      is.na(subjinfo$redcap_repeat_instrument),
+    which(colnames(subjinfo) == "dsadl1"):which(
+      colnames(subjinfo) == "dsother6"
+    )
+  ]
+)
 
+ntgedsd_labels <- c(
+  "Total Score",
+  "Activities of Daily Living",
+  "Language & Communication",
+  "Sleep-Wake Change Patterns",
+  "Ambulation",
+  "Memory",
+  "Behavior & Affect",
+  "Adult's Self-Report Problems",
+  "Significant Changes Observed by Others"
+)
+
+# ntgedsd$dsother1 <- NA
+# ntgedsd <- rbind(ntgedsd, ntgedsd)
+
+# check_missing <- function(ntgedsd) {
+#   missing <- rowSums(is.na(ntgedsd))
+#   ncols <- ncol(ntgedsd[, -which(colnames(ntgedsd) == "date")])
+#   dates <- ntgedsd$date
+#   missing_label <- paste0(
+#     round(missing / ncols, 2),
+#     "% (n = ",
+#     missing,
+#     ") missing on ",
+#     dates,
+#     collapse = "\n\n"
+#   )
+#   return(missing_label)
+# }
+
+# check_missing(ntgedsd)
+
+showntg <- all(dim(ntgedsd) >= 1) & all(!is.na(ntgedsd[1, ]))
+
+if (showntg) {
+  createNTGdf <- function(x) {
+    if (is.vector(x)) {
+      as.data.frame(t(x))
+    } else {
+      as.data.frame(x)
+    }
+  }
+
+  names = c("all", "adl", "lang", "sleep", "amb", "mem", "beh", "self", "other")
+
+  calcNTGscore <- function(name) {
+    if (name == "all") {
+      indx <- 2:length(ntgedsd)
+    } else {
+      indx <- grep(pattern = name, colnames(ntgedsd))
+    }
+
+    rowSums(
+      createNTGdf(
+        apply(
+          ntgedsd[, indx],
+          MARGIN = 2,
+          FUN = function(x) ifelse(x == 1 | x == 2, 1, 0)
+        )
+      ),
+      na.rm = TRUE
+    )
+  }
+
+  ntgedsd_df <- sapply(names, calcNTGscore)
+
+  if (is.vector(ntgedsd_df)) {
+    ntgedsd_df <- data.frame(
+      X1 = matrix(ntgedsd_df, ncol = 1)
+    )
+  } else {
+    ntgedsd_df <- data.frame(t(ntgedsd_df), row.names = 1:ncol(ntgedsd_df))
+  }
+
+  paste("", "\\input{sections/cognition/latex/ntgedsd.tex}", "") |>
+    cat(sep = "\n")
+
+  ntgedsd_df |>
+    dplyr::mutate(Variable = ntgedsd_labels, .before = 1) |>
+    flextable::flextable() |>
+    flextable::set_header_labels(
+      values = c("", ntgedsd$date)
+    ) |>
+    flextable::width(j = 1, width = 3) |>
+    flextable::width(j = 2:(ncol(ntgedsd_df) + 1), width = 1.15) |>
+    flextable::bold(j = 2:(ncol(ntgedsd_df) + 1), part = "header") |>
+    flextable::align(
+      j = 2:(ncol(ntgedsd_df) + 1),
+      part = "all",
+      align = "center"
+    )
 }
 
 ```
