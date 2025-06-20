@@ -4,12 +4,12 @@
 \alias{generate_body_fat_plot}
 \title{generate_body_fat_plot}
 \usage{
-generate_body_fat_plot(total_fat, sex, subject_birthdate, fittest_date)
+generate_body_fat_plot(total_fat, subject_sex, subject_birthdate, fittest_date)
 }
 \arguments{
 \item{total_fat}{Participant's body fat percent}
 
-\item{sex}{Participant's sex (1 = male, 0 = female)}
+\item{subject_sex}{Participant's sex (1 = male, 0 = female)}
 
 \item{subject_birthdate}{Date of birth (YYYY-MM-DD)}
 
