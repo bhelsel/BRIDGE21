@@ -143,40 +143,61 @@ generate_weight_bar_plot <- function(wt, ht) {
 
     wtrange <- seq(
       floor(weight_cutoffs[2] - 30),
-      ceiling(plot_max_weight))
-    return(list( wt = wt,
-                 ht_m = ht_m,
-                 bmi_cutoffs = bmi_cutoffs,
-                 weight_cutoffs = weight_cutoffs,
-                 wtrange = wtrange,
-                 plot_max_weight = plot_max_weight))
+      ceiling(plot_max_weight)
+    )
+    return(list(
+      wt = wt,
+      ht_m = ht_m,
+      bmi_cutoffs = bmi_cutoffs,
+      weight_cutoffs = weight_cutoffs,
+      wtrange = wtrange,
+      plot_max_weight = plot_max_weight
+    ))
   }
 
   add_wt_line <- function(info, y.adjust.text = 0.4) {
     list(
       ggplot2::geom_segment(
-        ggplot2::aes(x = min(info$wtrange), xend = info$wt, y = y.adjust.text, yend = y.adjust.text),
-        color = "black", linewidth = 1.5),
+        ggplot2::aes(
+          x = min(info$wtrange),
+          xend = info$wt,
+          y = y.adjust.text,
+          yend = y.adjust.text
+        ),
+        color = "black",
+        linewidth = 1.5
+      ),
       ggplot2::geom_point(
-        ggplot2::aes(x = info$wt, y = y.adjust.text), fill = "black", size = 4
+        ggplot2::aes(x = info$wt, y = y.adjust.text),
+        fill = "black",
+        size = 4
       )
     )
   }
 
   add_wt_text <- function(info, y.adjust.line = 0.4) {
-    xvals <- sapply(1:4, function(i) mean(c(
-      c(min(info$wtrange), info$weight_cutoffs[2:4])[i],
-      info$weight_cutoffs[2:5][i]
-    )))
+    xvals <- sapply(1:4, function(i) {
+      mean(c(
+        c(min(info$wtrange), info$weight_cutoffs[2:4])[i],
+        info$weight_cutoffs[2:5][i]
+      ))
+    })
     list(
       ggplot2::annotate(
-        "text", x = xvals, y = rep(0.95, 4),
+        "text",
+        x = xvals,
+        y = rep(0.95, 4),
         label = c("Under", "Normal", "Over", "Obesity"),
-        fontface = "bold", size = 4),
+        fontface = "bold",
+        size = 4
+      ),
       ggplot2::geom_label(
-        ggplot2::aes(x = info$wt+5, y = y.adjust.line),
+        ggplot2::aes(x = info$wt + 5, y = y.adjust.line),
         label = paste(info$wt, "lbs"),
-        fill = "white", fontface = "bold", size = 4, hjust = 0
+        fill = "white",
+        fontface = "bold",
+        size = 4,
+        hjust = 0
       )
     )
   }
@@ -186,17 +207,22 @@ generate_weight_bar_plot <- function(wt, ht) {
   category_fills <- c("#ADD8E6", "#90EE90", "#FDEE8C", "#F08080")
   ggplot2::ggplot() +
     ggplot2::geom_rect(
-      ggplot2::aes(xmin = min(info$wtrange), xmax = max(info$wtrange), ymin = 0, ymax = 1.1),
-      fill = "white") +
+      ggplot2::aes(
+        xmin = min(info$wtrange),
+        xmax = max(info$wtrange),
+        ymin = 0,
+        ymax = 1.1
+      ),
+      fill = "white"
+    ) +
     ggplot2::geom_rect(
-      data = data.frame(
+      ggplot2::aes(
         xmin = c(min(info$wtrange), info$weight_cutoffs[2:4]),
-        xmax = c(info$weight_cutoffs[2:4], info$plot_max_weight),
+        xmax = c(info$weight_cutoffs[2:4], max(info$wtrange)),
         ymin = c(.75, 0, .75, .75),
         ymax = c(1.1, 1.1, 1.1, 1.1),
         fill = category_fills
       ),
-      ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = fill),
       alpha = .6,
       inherit.aes = FALSE
     ) +
@@ -204,34 +230,51 @@ generate_weight_bar_plot <- function(wt, ht) {
 
     ggplot2::geom_hline(yintercept = 0.75, linewidth = 0.75) +
     ggplot2::geom_segment(
-      data = data.frame(x = info$weight_cutoffs[2:4]),
-      ggplot2::aes(x = x, xend = x, y = 0, yend = 0.75),
-      linetype = "dashed", linewidth = 0.75
+      ggplot2::aes(
+        x = info$weight_cutoffs[2:4],
+        xend = info$weight_cutoffs[2:4],
+        y = 0,
+        yend = 0.75
+      ),
+      linetype = "dashed",
+      linewidth = 0.75
     ) +
     ggplot2::geom_segment(
-      data = data.frame(x = info$weight_cutoffs[2:4]),
-      ggplot2::aes(x = x, xend = x, y = 0.75, yend = 1.1),
-      linetype = "solid", linewidth = 0.75
+      ggplot2::aes(
+        x = info$weight_cutoffs[2:4],
+        xend = info$weight_cutoffs[2:4],
+        y = 0.75,
+        yend = 1.1
+      ),
+      linetype = "solid",
+      linewidth = 0.75
     ) +
     add_wt_line(info) +
     add_wt_text(info) +
     ggplot2::scale_x_continuous(
       breaks = round(info$weight_cutoffs[2:4], 0),
       labels = paste0(round(info$weight_cutoffs[2:4]), " lbs"),
-      expand = c(0.005,0.005)
+      expand = c(0.003, 0.003)
     ) +
     ggplot2::scale_y_continuous(expand = c(0.015, 0.015)) +
     ggplot2::labs(x = "Weight (lbs)") +
     ggplot2::coord_fixed(ratio = 40) +
     ggplot2::theme(
-      axis.title.x = ggplot2::element_text(size = 12, color = "black", margin = ggplot2::margin(t = 15)),
+      axis.title.x = ggplot2::element_text(
+        size = 12,
+        color = "black",
+        margin = ggplot2::margin(t = 10)
+      ),
       axis.title.y = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(size = 10, color = "black"),
       axis.text.y = ggplot2::element_blank(),
       axis.ticks.x = ggplot2::element_blank(),
       axis.ticks.y = ggplot2::element_blank(),
       panel.grid = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(fill = "white", color = "black", linewidth = 2)
+      panel.background = ggplot2::element_rect(
+        fill = "white",
+        color = "black",
+        linewidth = 2
+      )
     )
 }
-
