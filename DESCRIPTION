@@ -1,6 +1,6 @@
 Package: BRIDGE21
 Title: Building Reports and Insights for Down syndrome Guidance and Empowerment
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person(c("Brian", "C."), "Helsel", email = "bhelsel@kumc.edu", role = c("aut", "cre")),
     person(c("Julianne", "G."), "Clina", email = "jclina@kumc.edu", role = c("ctb")),
