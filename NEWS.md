@@ -1,3 +1,10 @@
+# BRIDGE21 0.3.0
+* Add visual for body fat percentage from DXA scan
+* Make DXA table and text conditional for bone mineral density
+* Update visual for body mass index by removing history table
+* Add weight history to DXA scan table
+* Add BRIDGE21 hex sticker
+
 # BRIDGE21 0.2.0
 * Update formatting using Posit Air
 * Changed NTG-EDSD to show domain scores
