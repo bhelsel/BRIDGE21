@@ -244,10 +244,6 @@ if (!missing_bmi) {
     height_in_last
   )
 
-  # Adjust alignment on Quarto ouput
-  weight_plot <- weight_plot +
-    ggplot2::theme(plot.margin = ggplot2::margin(t = -20))
-
   ggplot2::ggsave(
     filename = "weight_plot.png",
     weight_plot,
@@ -290,6 +286,8 @@ total_mass <-
     drop = TRUE
   ]
 
+total_mass <- ifelse(total_mass == -999, NA, total_mass)
+
 lean_tissue <-
   subjinfo[
     grepl("visit", subjinfo$redcap_event_name) &
@@ -299,6 +297,8 @@ lean_tissue <-
     drop = TRUE
   ]
 
+lean_tissue <- ifelse(lean_tissue == -999, NA, lean_tissue)
+
 fat_tissue <-
   subjinfo[
     grepl("visit", subjinfo$redcap_event_name) &
@@ -307,6 +307,8 @@ fat_tissue <-
     which(colnames(subjinfo) == "fat"),
     drop = TRUE
   ]
+
+fat_tissue <- ifelse(fat_tissue == -999, NA, fat_tissue)
 
 fat_tissue_percent <-
   subjinfo[
@@ -355,7 +357,7 @@ if (length(fitness_date) >= 1) {
       "Lean Tissue",
       "Fat Tissue",
       "Fat (%)",
-      "BMD (z-score)"
+      "BMD"
     )
 
     if (all(is.na(bodycomp$bone_density))) {
@@ -388,7 +390,7 @@ if (length(fitness_date) >= 1) {
     ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
 
     if ("bone_density" %in% colnames(bodycomp)) {
-      bmd_footnote <- "BMD: Bone Mineral Density"
+      bmd_footnote <- "BMD: Bone Mineral Density (Z-score)"
       ft_footnote <- paste(c(ft_footnote, bmd_footnote), collapse = "\n")
     }
 
@@ -416,6 +418,11 @@ if (length(fitness_date) >= 1) {
 if (!missing_dxa) {
   paste("", "![](body_fat_percent_plot.png)", "") |>
     cat(sep = "\n")
+
+  if ("bone_density" %in% colnames(bodycomp)) {
+    paste("", "\\input{sections/lifestyle/latex/bmd.tex}", "\n") |>
+      cat(sep = "\n")
+  }
 
   paste("", "\\input{sections/lifestyle/latex/after-dxa.tex}", "") |>
     cat(sep = "\n")
