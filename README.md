@@ -8,11 +8,11 @@ the participants and their families.
 
 ## Package Structure
 
-<img src = "man/figures/overview.png" width="75%" height="75%"/> 
+<img src = "man/figures/overview.png" width="100%" height="100%"/>
 
 ## Hex Sticker
 
-``` r
+```r
 # To reproduce hex sticker after package is installed
 # Change filename if you want to save it in a different location
 
