@@ -8,7 +8,7 @@ the participants and their families.
 
 ## Package Structure
 
-<img src = "man/figures/overview.png" width="100%" height="100%"/>
+<img src = "man/figures/overview.png" width="800" height="500"/>
 
 ## Hex Sticker
 
