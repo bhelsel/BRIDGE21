@@ -62,6 +62,15 @@ plot_time_series_by_date <- function(IMP, summary_data) {
 
   maxENMO <- max(data2plot$ENMO, na.rm = TRUE)
 
+  lengthUniqueDates <- length(unique(as.Date(data2plot$timestamp)))
+
+  numberRowsFacets <- dplyr::case_when(
+    lengthUniqueDates == 7 ~ 4,
+    lengthUniqueDates == 6 ~ 3,
+    lengthUniqueDates == 5 ~ 3,
+    TRUE ~ 2
+  )
+
   plot <- data2plot |>
     dplyr::mutate(date = as.Date(timestamp), .before = 1) |>
     dplyr::left_join(y = summary_data, by = "date") |>
@@ -91,7 +100,7 @@ plot_time_series_by_date <- function(IMP, summary_data) {
           levels = date_labels
         )
       ),
-      nrow = 4,
+      nrow = numberRowsFacets,
       scales = "free_x"
     ) +
     ggplot2::scale_x_datetime(
