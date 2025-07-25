@@ -123,8 +123,7 @@ if (showTau) {
 
 ```
 
-
-<!--- insert apoe section here when available --->
+\newpage
 
 ```{r}
 #| echo: false
@@ -147,7 +146,6 @@ if (length(apoeCarrierStatus) != 0) {
 cat("\\textbf{YOUR APOE RESULT}: ", apoeCarrierStatus)
 
 ```
-
 
 \newpage
 
