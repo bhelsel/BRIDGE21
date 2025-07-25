@@ -3,8 +3,19 @@ editor_options:
   chunk_output_type: console
 ---
 
+
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$blood
+
+cat("# UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK")
+
+```
+
 ```{r calculate ptau categories}
 #| echo: false
+#| eval: !expr params$blood
 
 # < 0.4 “Negative --  AD pathology not indicated” Not elevated
 # ≥ 0.4 to ≤ 0.62  “Intermediate --  AD pathology possible” Intermediate
@@ -25,7 +36,10 @@ if (nrow(ptau) >= 1) {
 
   ptau <- ptau[, c("ptau217_date", "ptau217_pgml")]
 
-  ptau$ptau217_date <- format(ptau$ptau217_date, "%m/%d/%Y")
+  ptau$ptau217_date <- format(
+    as.Date(ptau$ptau217_date, tryFormats = c("%m/%d/%y", "%m/%d/%Y")),
+    "%m/%d/%Y"
+  )
 
   ptau$category <- cut(
     ptau$ptau217_pgml,
@@ -53,6 +67,7 @@ if (nrow(ptau) >= 1) {
 ```{r add blood protein text}
 #| echo: false
 #| results: asis
+#| eval: !expr params$blood
 
 if (showTau) {
   paste("", "\\input{sections/blood/latex/proteins.tex}", "") |>
@@ -63,6 +78,7 @@ if (showTau) {
 
 ```{r print flextable of ptau results, ft.align="left"}
 #| echo: false
+#| eval: !expr params$blood
 
 if (showTau) {
   flextable::flextable(ptau) |>
@@ -98,6 +114,7 @@ if (showTau) {
 ```{r add text describing ptau}
 #| echo: false
 #| results: asis
+#| eval: !expr params$blood
 
 if (showTau) {
   paste("", "\\input{sections/blood/latex/after-tau.tex}", "") |>
@@ -109,11 +126,35 @@ if (showTau) {
 
 <!--- insert apoe section here when available --->
 
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$blood
+
+apoedf <- subjinfo[
+    subjinfo$redcap_event_name == "annual_forms_arm_1" &
+      is.na(subjinfo$redcap_repeat_instrument),
+    c("ku_apoe1", "ku_apoe2")
+  ]
+
+apoeCarrierStatus <- sprintf("E%s/E%s", apoedf[1], apoedf[1])
+
+if (length(apoeCarrierStatus) != 0) {
+  cat(paste0("", "\\input{sections/blood/latex/apoe.tex}"), sep = "\n")
+}
+
+
+cat("\\textbf{YOUR APOE RESULT}: ", apoeCarrierStatus)
+
+```
+
+
 \newpage
 
 ```{r karyotype results}
 #| echo: false
 #| results: asis
+#| eval: !expr params$blood
 
 karyotype_no <-
   subjinfo[
@@ -172,5 +213,12 @@ cat("\\textbf{Karyotype Result}: ", karyotype_label)
 
 ```
 
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$blood
 
+cat("\\newpage")
+
+```
 
