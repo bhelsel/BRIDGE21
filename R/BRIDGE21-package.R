@@ -16,6 +16,7 @@
 #' @import gridExtra
 #' @import abcds
 #' @importFrom patchwork inset_element
+#' @importFrom yaml read_yaml
 #'
 #'
 #' @name BRIDGE21
