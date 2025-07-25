@@ -19,6 +19,7 @@ Imports:
   flextable,
   GGIR, 
   ggplot2,
+  glue,
   grid,
   gridExtra,
   kuadrc.xnat,
