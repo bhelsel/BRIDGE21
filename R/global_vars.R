@@ -6,6 +6,7 @@ if (getRversion() >= "2.15.1") {
     "ENMO",
     "category",
     "timestamp",
-    "label"
+    "label",
+    "coenrol_studyid"
   ))
 }
