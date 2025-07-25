@@ -1,7 +1,7 @@
 #' @title generate_report
 #' @description Generates a Quarto pdf report containing participant feedback from the study visit
 #' @param id The patient id as represented in the study database
-#' @param datadir The path name of the directory containing the dataset as a .csv file
+#' @param datafile The path name of the file containing the data as a .csv file
 #' @param acceldir The path name of the directory containing the raw .gt3x accelerometer files
 #' @param outputdir The path name of the directory containing the participant feedback reports
 #' @return The location of the participant feedback report
@@ -14,11 +14,17 @@
 #' @rdname generate_report
 #' @export
 #' @importFrom readr read_csv
-#' @importFrom kuadrc.xnat get_projects get_experiments get_scans xnat_download convert_to_nifti save_nifti_image
 #' @importFrom yaml write_yaml
 #' @importFrom quarto quarto_render
 
-generate_report <- function(id, datadir, acceldir, outputdir) {
+generate_report <- function(
+  id,
+  datafile,
+  acceldir,
+  outputdir,
+  reports = NULL,
+  example_report = FALSE
+) {
   if (outputdir == getwd()) {
     stop(
       "\nCurrent working directory is: ",
@@ -26,11 +32,24 @@ generate_report <- function(id, datadir, acceldir, outputdir) {
       "\noutputdir needs to be different than your current working directory"
     )
   }
-  # Locate data file and verify that id is in the ptid variable
-  datafile <- list.files(datadir, "All_Data", full.names = TRUE)
-  if (length(datafile) == 0) {
-    stop(sprintf("Could not locate the REDCap Data in '%s'", datadir))
+
+  allReports <- c("cognition", "imaging", "blood", "activity", "lifestyle")
+
+  if (is.null(reports)) {
+    reports <- allReports
   }
+
+  reports <- lapply(allReports, FUN = function(x) {
+    ifelse(x %in% reports, TRUE, FALSE)
+  })
+
+  names(reports) <- allReports
+
+  if (example_report) {
+    id = "test_jayhawk"
+    datafile = system.file("extdata/example.csv", package = "BRIDGE21")
+  }
+
   data <- readr::read_csv(
     datafile,
     show_col_types = FALSE,
@@ -48,112 +67,33 @@ generate_report <- function(id, datadir, acceldir, outputdir) {
   if (!dir.exists(imagedir)) {
     dir.create(imagedir)
   }
-  # Retrieve and download scans from the XNAT API
-  checkdicm <- unique(dirname(list.files(
-    imagedir,
-    recursive = TRUE,
-    pattern = ".dcm$"
-  )))
 
-  #todownload = c()
-  project <- "DS-Cohort"
-
-  if (!any(grepl("Sagittal_3D_Accelerated_MPRAGE", checkdicm))) {
-    project_no_ds_cohort <- kuadrc.xnat::get_projects(name = project)
-    subject_no_ds_cohort <- kuadrc.xnat::get_subjects(
-      project = project_no_ds_cohort,
-      subject = sprintf("%s_%s", project_no_ds_cohort, gsub("RED_", "", id))
+  if (example_report) {
+    mriFiles <- system.file(
+      c("images/axialImage.png", "images/sagittalImage.png"),
+      package = "BRIDGE21"
     )
-
-    experiments <- tryCatch(
-      {
-        project_no <- project_no_ds_cohort
-        subject_no <- subject_no_ds_cohort
-
-        kuadrc.xnat::get_experiments(
-          project = project_no_ds_cohort,
-          subject = subject_no_ds_cohort
-        )
-      },
-      error = function(e) {
-        return(NULL)
-      }
-    )
-
-    # Check for ABC-DS ID if experiments is NULL
-
-    if (is.null(experiments)) {
-      coenrol_studyid <- data[
-        which(data$ptid == id),
-        "coenrol_studyid",
-        drop = TRUE
-      ]
-
-      coenrol_studyid <- coenrol_studyid[
-        !is.na(coenrol_studyid) & startsWith(coenrol_studyid, "BDS")
-      ]
-
-      if (length(coenrol_studyid) != 0) {
-        project <- "ABC-DS"
-        project_no_abcds <- kuadrc.xnat::get_projects(name = project)
-        subject_no_abcds <- kuadrc.xnat::get_subjects(
-          project = project_no_abcds,
-          subject = coenrol_studyid
-        )
-        experiments <- tryCatch(
-          {
-            project_no <- project_no_abcds
-            subject_no <- coenrol_studyid
-            kuadrc.xnat::get_experiments(
-              project = project_no_abcds,
-              subject = subject_no_abcds
-            )
-          },
-          error = function(e) {
-            return(NULL)
-          }
-        )
-      }
-    }
-
-    if (!is.null(experiments)) {
-      experiments <- experiments[grep("mr", experiments$xsiType), ]
-      scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)
-      if (!any(grepl("Sagittal & Accelerated & MPRAGE", checkdicm))) {
-        scan_no <- which(
-          scans$type == "Sagittal 3D Accelerated MPRAGE" |
-            scans$type == "Accelerated Sagittal MPRAGE (MSV21)"
-        )
-      }
-      if (length(scans) == 1) {
-        kuadrc.xnat::xnat_download(
-          outdir = imagedir,
-          project = project_no,
-          subject = subject_no,
-          experiment = experiments$ID,
-          scan = scan_no
-        )
-      }
-    }
+    invisible(file.copy(
+      from = mriFiles,
+      to = file.path(imagedir, basename(mriFiles))
+    ))
+  } else {
+    invisible(save_xnat_images(imagedir, data, id))
   }
 
-  # Convert to nifti files and save the default image as a .png file
-  checkpng <- list.files(imagedir, recursive = TRUE, pattern = ".png$")
-  scandir <- list.files(file.path(imagedir, project), full.names = TRUE)
-
-  if (length(checkpng) == 0 & length(scandir) != 0) {
-    kuadrc.xnat::convert_to_nifti(directory = scandir)
-    kuadrc.xnat::save_nifti_image(
-      path = file.path(scandir, "nifti"),
-      plane = "axial",
-      save_file_as = sprintf("%s_axial.png", id)
+  # Process accelerometer data
+  if (example_report) {
+    accelFolder <- system.file("extdata/accelerometer", package = "BRIDGE21")
+    file.copy(
+      from = accelFolder,
+      to = persondir,
+      recursive = TRUE
     )
-    kuadrc.xnat::save_nifti_image(
-      path = file.path(scandir, "nifti"),
-      plane = "sagittal",
-      save_file_as = sprintf("%s_sagittal.png", id)
-    )
+    accelres <- file.path(outputdir, id, "accelerometer", "results")
+  } else {
+    accelres <- run_ggir(id = id, acceldir = acceldir, outputdir = outputdir)
   }
+
   # Copy the qmd file from the CohortT21Disclosure package to render locally
   qmdfolder <- system.file("qmd", package = "BRIDGE21")
   if (!dir.exists(id)) {
@@ -165,16 +105,18 @@ generate_report <- function(id, datadir, acceldir, outputdir) {
     recursive = TRUE,
     overwrite = TRUE
   ))
-  # Process accelerometer data
-  accelres <- run_ggir(id = id, acceldir = acceldir, outputdir = outputdir)
+
   # Saves a yaml file to pass the id and directory information to the quarto document
   yaml::write_yaml(
-    list(
-      id = id,
-      datadir = datadir,
-      outputdir = outputdir,
-      imagedir = imagedir,
-      accelres = accelres
+    c(
+      list(
+        id = id,
+        datafile = datafile,
+        outputdir = outputdir,
+        imagedir = imagedir,
+        accelres = accelres
+      ),
+      reports
     ),
     file = sprintf("%s/_variables.yaml", id)
   )

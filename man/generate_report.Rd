@@ -4,12 +4,19 @@
 \alias{generate_report}
 \title{generate_report}
 \usage{
-generate_report(id, datadir, acceldir, outputdir)
+generate_report(
+  id,
+  datafile,
+  acceldir,
+  outputdir,
+  reports = NULL,
+  example_report = FALSE
+)
 }
 \arguments{
 \item{id}{The patient id as represented in the study database}
 
-\item{datadir}{The path name of the directory containing the dataset as a .csv file}
+\item{datafile}{The path name of the file containing the data as a .csv file}
 
 \item{acceldir}{The path name of the directory containing the raw .gt3x accelerometer files}
 
