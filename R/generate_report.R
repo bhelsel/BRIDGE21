@@ -4,6 +4,8 @@
 #' @param datafile The path name of the file containing the data as a .csv file
 #' @param acceldir The path name of the directory containing the raw .gt3x accelerometer files
 #' @param outputdir The path name of the directory containing the participant feedback reports
+#' @param reports A vector of reports to generate including cognition, imaging, blood, activity, and lifestyle, Default = NULL returns all available reports,
+#' @param example_report Used with outputdir to generate a sample report using example data, Default = FALSE
 #' @return The location of the participant feedback report
 #' @details Generates a Quarto pdf report containing participant feedback from the study visit
 #' @seealso

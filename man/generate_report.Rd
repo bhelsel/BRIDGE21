@@ -21,6 +21,10 @@ generate_report(
 \item{acceldir}{The path name of the directory containing the raw .gt3x accelerometer files}
 
 \item{outputdir}{The path name of the directory containing the participant feedback reports}
+
+\item{reports}{A vector of reports to generate including cognition, imaging, blood, activity, and lifestyle, Default = NULL returns all available reports,}
+
+\item{example_report}{Used with outputdir to generate a sample report using example data, Default = FALSE}
 }
 \value{
 The location of the participant feedback report
