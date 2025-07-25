@@ -2,9 +2,33 @@
 editor_options: 
   chunk_output_type: console
 ---
+
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$lifestyle
+
+cat("## Lifestyle and Disease Risk")
+
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$lifestyle
+
+cat(paste(
+  "We assessed various measures that can affect your overall brain health.",
+  "Recent research suggests that a healthy lifestyle is a key components of brain health."
+), sep = "\n")
+
+
+```
+
 ```{r blood pressure}
 #| echo: false
 #| results: asis
+#| eval: !expr params$lifestyle
 
 bpsys <-
   subjinfo[
@@ -98,18 +122,22 @@ if (length(bpsys) >= 1) {
     height = 6,
     dpi = 300
   )
+  
+  cat(paste0("", "![](bp_plot.png)", ""), sep = "\n")
+
 }
 
 
 ```
 
-![](bp_plot.png)
+
 
 \newpage
 
 ```{r accelerometer text and plot}
 #| echo: false
 #| results: asis
+#| eval: !expr params$activity
 
 if (!params$accelres == "~") {
   accelMetaDir <- file.path(params$accelres, "output_data", "meta")
@@ -171,9 +199,14 @@ if (!params$accelres == "~") {
 
 ```
 
+```{r activity newpage}
+#| echo: false
+#| results: asis
+#| eval: !expr params$activity
 
+cat("\\newpage")
 
-\newpage
+```
 
 <!--- Body Mass Index --->
 
@@ -181,6 +214,7 @@ if (!params$accelres == "~") {
 #| echo: false
 #| results: asis
 #| fig-align: center
+#| eval: !expr params$lifestyle
 
 weight_lbs <-
   subjinfo[
@@ -267,15 +301,19 @@ if (!missing_bmi) {
 ```{r body composition, ft.align = "left"}
 #| echo: false
 #| results: asis
+#| eval: !expr params$lifestyle
 
 fitness_date <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$fittest_date),
-    grepl("fittest_date", colnames(subjinfo)),
-    drop = TRUE
-  ]
+  as.Date(
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$fittest_date),
+      grepl("fittest_date", colnames(subjinfo)),
+      drop = TRUE
+    ],
+    tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+  )
 
 total_mass <-
   subjinfo[
@@ -334,7 +372,7 @@ bone_density <- ifelse(bone_density == -999, NA, bone_density)
 
 if (length(fitness_date) >= 1) {
   bodycomp <- data.frame(
-    date = format(as.Date(fitness_date), "%m/%d/%Y"),
+    date = format(fitness_date, "%m/%d/%Y"),
     weight_lbs = round(total_mass * 2.205),
     lean_tissue = round(
       ((ifelse(lean_tissue == -999, NA, lean_tissue)) / 1000) * 2.205
@@ -350,7 +388,7 @@ if (length(fitness_date) >= 1) {
     all(is.na(x))
   })
 
-  if (!missing_dxa) {
+  if (!tail(missing_dxa, 1)) {
     bodycomp_header_labels <- c(
       "Date",
       "Weight",
@@ -368,7 +406,7 @@ if (length(fitness_date) >= 1) {
     body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
       total_fat = tail(na.omit(fat_tissue_percent), 1),
       subject_sex = subject_sex,
-      subject_birthdate = subjinfo$subject_birthdate[1],
+      subject_birthdate = dob,
       fittest_date = tail(na.omit(fitness_date), 1)
     )
 
@@ -410,12 +448,13 @@ if (length(fitness_date) >= 1) {
 
 ```
 
-```{r}
+```{r add additional text}
 #| echo: false
 #| results: asis
 #| fig-align: center
+#| eval: !expr params$lifestyle
 
-if (!missing_dxa) {
+if (!tail(missing_dxa, 1)) {
   paste("", "![](body_fat_percent_plot.png)", "") |>
     cat(sep = "\n")
 
@@ -452,5 +491,14 @@ if (!missing_dxa) {
 
 # paste("", "\\input{sections/lifestyle/latex/diet.tex}", "") |>
 #     cat(sep = "\n")
+
+```
+
+```{r lifestyle newpage}
+#| echo: false
+#| results: asis
+#| eval: !expr params$lifestyle
+
+cat("\\newpage")
 
 ```

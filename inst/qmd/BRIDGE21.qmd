@@ -35,20 +35,10 @@ Each time you are seen, we have a team of clinicians review your cognitive asses
 #| echo: false
 #| message: false
 
-extract_params <- function(yaml_file) {
-  yaml <- readLines(yaml_file, warn = FALSE)
-  setNames(
-    lapply(yaml, function(x) sub("^.*: ", "", x)),
-    sub(":.*$", "", yaml)
-  )
-}
-
-if (!exists("params")) {
-  params <- extract_params("_variables.yaml")
-}
+params <- yaml::read_yaml("_variables.yaml")
 
 data <- readr::read_csv(
-  list.files(params$datadir, "All_Data", full.names = TRUE),
+  params$datafile,
   show_col_types = FALSE
 )
 
@@ -70,12 +60,12 @@ subject_lname <-
     drop = TRUE
   ]
 
-subject_age <- subjinfo[
-  subjinfo$redcap_event_name == "annual_forms_arm_1" &
-    is.na(subjinfo$redcap_repeat_instrument),
-  "subject_age",
-  drop = TRUE
-]
+# subject_age <- subjinfo[
+#   subjinfo$redcap_event_name == "annual_forms_arm_1" &
+#     is.na(subjinfo$redcap_repeat_instrument),
+#   "subject_age",
+#   drop = TRUE
+# ]
 
 dates <- subjinfo[
   grepl("visit", subjinfo$redcap_event_name) &
@@ -93,19 +83,22 @@ dates$date_of_visit <- as.Date(
   )
 )
 
-dob <- subjinfo[
-  subjinfo$redcap_event_name == "annual_forms_arm_1" &
-    !is.na(subjinfo$subject_birthdate),
-  "subject_birthdate",
-  drop = TRUE
-]
+dob <- as.Date(
+  subjinfo[
+    subjinfo$redcap_event_name == "annual_forms_arm_1" &
+      !is.na(subjinfo$subject_birthdate),
+    "subject_birthdate",
+    drop = TRUE
+  ],
+  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+)
 
 subject_sex <- subjinfo[
   subjinfo$redcap_event_name == "visit1_arm_1" &
     is.na(subjinfo$redcap_repeat_instrument),
   "sex",
   drop = TRUE
-] 
+]
 
 dates$age_at_visit <- floor(as.numeric(dates$date_of_visit - dob) / 365.25)
 
@@ -151,29 +144,13 @@ cat(
 
 \newpage
 
-## MEMORY AND THINKING TEST SCORES
-
 {{< include sections/cognition/cognition.qmd >}}
-
-\newpage
 
 {{< include sections/imaging/imaging.qmd >}}
 
-\newpage
-
-# UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK
-
 {{< include sections/blood/blood.qmd >}}
 
-\newpage
-
-# Lifestyle and Disease Risk
-
-We assessed various measures that can affect your overall brain health. Recent research suggests that a healthy lifestyle is a key components of brain health.
-
 {{< include sections/lifestyle/lifestyle.qmd >}}
-
-\newpage
 
 # Additional Resources
 

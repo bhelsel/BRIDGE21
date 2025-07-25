@@ -3,8 +3,18 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r}
+#| echo: false
+#| results: asis
+#| eval: !expr params$cognition
+
+cat("## MEMORY AND THINKING TEST SCORES")
+
+```
+
 ```{r memory scores}
 #| echo: false
+#| eval: !expr params$cognition
 
 showdsmse <- showntg <- showmcrt <- FALSE
 
@@ -59,6 +69,7 @@ showmcrt <- nrow(mcrt_df) >= 1 &
 ```{r down syndrome mental state exam, ft.align="left"}
 #| echo: false
 #| results: asis
+#| eval: !expr params$cognition
 
 if (showdsmse) {
   paste("", "\\input{sections/cognition/latex/dsmse.tex}", "") |>
@@ -97,6 +108,7 @@ if (showdsmse & !showmcrt) {
 ```{r modified cued recall test, ft.align="left"}
 #| echo: false
 #| results: asis
+#| eval: !expr params$cognition
 
 if (showmcrt) {
   paste("", "\\input{sections/cognition/latex/cued-recall.tex}", "") |>
@@ -125,6 +137,7 @@ if (!showdsmse & showmcrt | showdsmse & showmcrt) {
 ```{r ntgedsd calculate scores, ft.align="left"}
 #| echo: false
 #| results: asis
+#| eval: !expr params$cognition
 
 ntgedsd <- data.frame(
   date = format(dates$date_of_visit, "%m/%d/%Y"),
@@ -148,26 +161,6 @@ ntgedsd_labels <- c(
   "Adult's Self-Report Problems",
   "Significant Changes Observed by Others"
 )
-
-# ntgedsd$dsother1 <- NA
-# ntgedsd <- rbind(ntgedsd, ntgedsd)
-
-# check_missing <- function(ntgedsd) {
-#   missing <- rowSums(is.na(ntgedsd))
-#   ncols <- ncol(ntgedsd[, -which(colnames(ntgedsd) == "date")])
-#   dates <- ntgedsd$date
-#   missing_label <- paste0(
-#     round(missing / ncols, 2),
-#     "% (n = ",
-#     missing,
-#     ") missing on ",
-#     dates,
-#     collapse = "\n\n"
-#   )
-#   return(missing_label)
-# }
-
-# check_missing(ntgedsd)
 
 showntg <- all(dim(ntgedsd) >= 1) & all(!is.na(ntgedsd[1, ]))
 
@@ -229,5 +222,14 @@ if (showntg) {
       align = "center"
     )
 }
+
+```
+
+```{r cognition newpage}
+#| echo: false
+#| results: asis
+#| eval: !expr params$cognition
+
+cat("\\newpage")
 
 ```
