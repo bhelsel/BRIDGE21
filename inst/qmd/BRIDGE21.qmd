@@ -152,6 +152,10 @@ cat(
 
 {{< include sections/lifestyle/lifestyle.qmd >}}
 
+![](sections/resources/TheSuperSix/TheSuperSix.png)
+
+\newpage
+
 # Additional Resources
 
 \input{sections/resources/latex/resources.tex}
