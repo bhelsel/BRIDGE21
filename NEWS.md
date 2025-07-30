@@ -1,3 +1,7 @@
+# BRIDGE21 0.5.0
+
+- Added the Super Six infographic to the report before the resources section
+
 # BRIDGE21 0.4.0
 
 - Add example data set and list of variables included in the report
