@@ -3,6 +3,7 @@
 - Added the Super Six infographic to the report before the resources section
 - Added missing variables to the csv file stored in extdata
 - Allow more control over manually adding report sections by separating APOE, MRI, and PET from blood and imaging
+- Add a Shiny UI to update MRI images when the automatic detection fails to produce quality images for the report
 
 # BRIDGE21 0.4.0
 

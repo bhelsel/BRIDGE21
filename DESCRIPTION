@@ -28,6 +28,7 @@ Imports:
   quarto, 
   readr,
   scales,
+  shiny,
   yaml
 Remotes:
   bhelsel/abcds,
