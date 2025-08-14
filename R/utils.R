@@ -45,7 +45,7 @@ pet_amyloid_description <- function(
       "Your amyloid is not high but you have some changes in memory and thinking.",
       "Anytime you have changes in memory and thinking, it is important to talk to your doctor about what could be causing the changes.",
       "You can share with your doctor that you did not have high amyloid as of {petScanDate}.",
-      "It is likely the cause is something other than Alzheimer’s disease.",
+      "It is likely the cause is something other than Alzheimer\u0027s disease.",
       "Talk to your doctor about the things that can cause memory and thinking problems, including sleep apnea, depression, low levels of B12, or low levels of thyroid.",
       petScanDate = petScanDate,
       .sep = " "
@@ -53,7 +53,7 @@ pet_amyloid_description <- function(
   } else {
     paste(
       "Your amyloid is not high and you do not have changes in memory thinking.",
-      "This means brain changes common in Alzheimer’s were not found at this time.",
+      "This means brain changes common in Alzheimer\u0027s were not found at this time.",
       "It is possible amyloid is present in the brain but not at a high level.",
       "It is still possible to develop high amyloid or dementia in the future."
     )
