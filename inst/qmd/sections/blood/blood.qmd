@@ -128,13 +128,13 @@ if (showTau) {
 ```{r}
 #| echo: false
 #| results: asis
-#| eval: !expr params$blood
+#| eval: !expr params$apoe
 
 apoedf <- subjinfo[
-    subjinfo$redcap_event_name == "annual_forms_arm_1" &
-      is.na(subjinfo$redcap_repeat_instrument),
-    c("ku_apoe1", "ku_apoe2")
-  ]
+  subjinfo$redcap_event_name == "annual_forms_arm_1" &
+    is.na(subjinfo$redcap_repeat_instrument),
+  c("ku_apoe1", "ku_apoe2")
+]
 
 apoeCarrierStatus <- sprintf("E%s/E%s", apoedf[1], apoedf[1])
 

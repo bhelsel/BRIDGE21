@@ -8,7 +8,7 @@ editor_options:
 ```{r mri imaging}
 #| echo: false
 #| results: asis
-#| eval: !expr params$imaging
+#| eval: !expr params$mri
 
 imageFiles <- list.files(
   params$imagedir,
@@ -71,7 +71,7 @@ if (length(imageFiles) >= 1) {
 ```{r pet imaging}
 #| echo: false
 #| results: asis
-#| eval: !expr params$imaging
+#| eval: !expr params$pet
 
 cognitiveDecline <- TRUE
 
