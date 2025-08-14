@@ -9,6 +9,7 @@ visityr,,,Visit Year,,Clinical
 subject_birthdate,,,Patient's birth date,,Clinical
 subject_fname,,,Patient's first name,,Clinical
 subject_lname,,,Patient's last name,,Clinical
+sex,,,Patient's biological sex,,Clinical
 final_impression,,,Clinical summary and recommendations,,Clinical
 dsmsett2,,,Total Score,,Down Syndrome Mental Status Exam
 dslgtot2,,,Language Score,,Down Syndrome Mental Status Exam
@@ -82,10 +83,14 @@ dsother5,,,Changes in weight,Significant Changes Observed by Others,NTG-EDSD
 dsother6,,,Changes in abnormal voluntary movements,Significant Changes Observed by Others,NTG-EDSD
 scan_date,,,Scan Date,,Imaging
 radiology_read,,,Radiology Read,,Imaging
+centiloid_apet,,,Centiloid Value,,Imaging
+img_scan_date_apet,,,PET Scan Date,,Imaging
 ptau217_pgml,,,pTau 217 (pg/ml),,Blood Draw
 ptau217_date,,,pTau 217 Assay Date,,Blood Draw
 dschrom,,,Karyotype,,Blood Draw
 chromsm_source,,,Source of Chromosomal Information,,Blood Draw
+ku_apoe1,,,APOE Allele 1,,Blood Draw
+ku_apoe2,,,APOE Allele 2,,Blood Draw
 bpsys,,,Systolic Blood Pressure (mmHg),,Lifestyle
 bpdias,,,Diastolic Blood Pressure (mmHg),,Lifestyle
 height,,,Height (inches),,Lifestyle
