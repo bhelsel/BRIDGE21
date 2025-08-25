@@ -17,10 +17,13 @@ cat("## Lifestyle and Disease Risk")
 #| results: asis
 #| eval: !expr params$lifestyle
 
-cat(paste(
-  "We assessed various measures that can affect your overall brain health.",
-  "Recent research suggests that a healthy lifestyle is a key components of brain health."
-), sep = "\n")
+cat(
+  paste(
+    "We assessed various measures that can affect your overall brain health.",
+    "Recent research suggests that a healthy lifestyle is a key components of brain health."
+  ),
+  sep = "\n"
+)
 
 
 ```
@@ -122,9 +125,8 @@ if (length(bpsys) >= 1) {
     height = 6,
     dpi = 300
   )
-  
-  cat(paste0("", "![](bp_plot.png)", ""), sep = "\n")
 
+  cat(paste0("", "![](bp_plot.png)", ""), sep = "\n")
 }
 
 
@@ -138,8 +140,8 @@ if (length(bpsys) >= 1) {
 #| echo: false
 #| results: asis
 #| eval: !expr params$activity
-
-if (!params$accelres == "~") {
+#|
+if (!is.null(params$accelres)) {
   accelMetaDir <- file.path(params$accelres, "output_data", "meta")
   accelResDir <- file.path(params$accelres, "output_data", "results")
 
@@ -315,62 +317,66 @@ fitness_date <-
     tryFormats = c("%m/%d/%y", "%m/%d/%Y")
   )
 
-total_mass <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$mass),
-    grepl("mass", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-total_mass <- ifelse(total_mass == -999, NA, total_mass)
-
-lean_tissue <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$lean),
-    grepl("lean", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-lean_tissue <- ifelse(lean_tissue == -999, NA, lean_tissue)
-
-fat_tissue <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$fat),
-    which(colnames(subjinfo) == "fat"),
-    drop = TRUE
-  ]
-
-fat_tissue <- ifelse(fat_tissue == -999, NA, fat_tissue)
-
-fat_tissue_percent <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$total_fat),
-    grepl("total_fat", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-fat_tissue_percent <- ifelse(fat_tissue_percent == -999, NA, fat_tissue_percent)
-
-bone_density <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$dxa_bmd_z),
-    grepl("dxa_bmd_z", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-bone_density <- ifelse(bone_density == -999, NA, bone_density)
-
 if (length(fitness_date) >= 1) {
+  total_mass <-
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$mass),
+      grepl("mass", colnames(subjinfo)),
+      drop = TRUE
+    ]
+
+  total_mass <- ifelse(total_mass == -999, NA, total_mass)
+
+  lean_tissue <-
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$lean),
+      grepl("lean", colnames(subjinfo)),
+      drop = TRUE
+    ]
+
+  lean_tissue <- ifelse(lean_tissue == -999, NA, lean_tissue)
+
+  fat_tissue <-
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$fat),
+      which(colnames(subjinfo) == "fat"),
+      drop = TRUE
+    ]
+
+  fat_tissue <- ifelse(fat_tissue == -999, NA, fat_tissue)
+
+  fat_tissue_percent <-
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$total_fat),
+      grepl("total_fat", colnames(subjinfo)),
+      drop = TRUE
+    ]
+
+  fat_tissue_percent <- ifelse(
+    fat_tissue_percent == -999,
+    NA,
+    fat_tissue_percent
+  )
+
+  bone_density <-
+    subjinfo[
+      grepl("visit", subjinfo$redcap_event_name) &
+        is.na(subjinfo$redcap_repeat_instrument) &
+        !is.na(subjinfo$dxa_bmd_z),
+      grepl("dxa_bmd_z", colnames(subjinfo)),
+      drop = TRUE
+    ]
+
+  bone_density <- ifelse(bone_density == -999, NA, bone_density)
+
   bodycomp <- data.frame(
     date = format(fitness_date, "%m/%d/%Y"),
     weight_lbs = round(total_mass * 2.205),
@@ -454,17 +460,19 @@ if (length(fitness_date) >= 1) {
 #| fig-align: center
 #| eval: !expr params$lifestyle
 
-if (!tail(missing_dxa, 1)) {
-  paste("", "![](body_fat_percent_plot.png)", "") |>
-    cat(sep = "\n")
+if (length(fitness_date) >= 1) {
+  if (!tail(missing_dxa, 1)) {
+    paste("", "![](body_fat_percent_plot.png)", "") |>
+      cat(sep = "\n")
 
-  if ("bone_density" %in% colnames(bodycomp)) {
-    paste("", "\\input{sections/lifestyle/latex/bmd.tex}", "\n") |>
+    if ("bone_density" %in% colnames(bodycomp)) {
+      paste("", "\\input{sections/lifestyle/latex/bmd.tex}", "\n") |>
+        cat(sep = "\n")
+    }
+
+    paste("", "\\input{sections/lifestyle/latex/after-dxa.tex}", "") |>
       cat(sep = "\n")
   }
-
-  paste("", "\\input{sections/lifestyle/latex/after-dxa.tex}", "") |>
-    cat(sep = "\n")
 }
 
 ```
