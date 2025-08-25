@@ -152,5 +152,5 @@ generate_report <- function(
   invisible(file.remove(pdffile))
   # Unlink the temporary folder to remove it
   invisible(unlink(id, recursive = TRUE))
-  return(file.path(persondir, pdffile))
+  return(file.path(persondir, basename(pdffile)))
 }
