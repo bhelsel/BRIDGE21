@@ -145,7 +145,7 @@ generate_report <- function(
 
   invisible(file.copy(
     from = pdffile,
-    to = file.path(persondir, pdffile),
+    to = file.path(persondir, basename(pdffile)),
     overwrite = TRUE
   ))
   # Remove pdf file after it is copied to the output directory
