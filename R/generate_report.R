@@ -137,6 +137,12 @@ generate_report <- function(
     input = sprintf("%s/BRIDGE21.qmd", id),
     output_file = pdffile
   )
+
+  # Adjust pdffile location if it is added to the id folder
+  if (!file.exists(pdffile)) {
+    pdffile <- file.path(getwd(), id, pdffile)
+  }
+
   invisible(file.copy(
     from = pdffile,
     to = file.path(persondir, pdffile),
