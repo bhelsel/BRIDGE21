@@ -1,6 +1,7 @@
 
 ```{r extract person information from kuadrc cohort used for other parts of the report}
 #| echo: false
+#| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE))
 
 intake <- BRIDGE21::get_database_values(
   subject_fname,
