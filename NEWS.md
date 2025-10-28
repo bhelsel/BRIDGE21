@@ -1,3 +1,8 @@
+# BRIDGE21 0.6.0
+
+- Create new helper functions to format Quarto, get values from the database, and join strings, calculate NTG-EDSD scores, and assist in report selection
+- Restructure the Quarto document to prepare it for use by other Down syndrome studies
+
 # BRIDGE21 0.5.0
 
 - Added the Super Six infographic to the report before the resources section
