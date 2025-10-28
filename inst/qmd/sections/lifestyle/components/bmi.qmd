@@ -58,3 +58,66 @@ paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
 BRIDGE21::format_quarto(type = "newpage")
 
 ```
+
+
+```{r display body mass index table and plot for the bold study, ft.align = "left"}
+#| echo: false
+#| results: asis
+#| fig-align: center
+#| eval: !expr params$bold_bmi
+
+weight_kg_last <- anthro$average_weight[length(anthro$average_weight)]
+height_cm_last <- anthro$average_height[length(anthro$average_height)]
+bmi_last = anthro$bmi_calc[length(anthro$bmi_calc)]
+
+weight_lbs_last <- round(weight_kg_last * 2.205, 1)
+height_in_last <- round(height_cm_last / 2.54, 1)
+
+
+ltex <- paste(
+  readLines("sections/lifestyle/latex/bmi.tex"),
+  collapse = "\n"
+)
+
+ltex <- glue::glue(
+  ltex,
+  bmiLast = bmi_last,
+  .open = "{{",
+  .close = "}}"
+)
+
+cat(paste0("", ltex, ""), sep = "\n")
+
+bmi_plot <- BRIDGE21::generate_bmi_arch_plot(weight_lbs_last, height_in_last)
+
+# Adjust alignment on Quarto ouput
+bmi_plot <- bmi_plot +
+  ggplot2::theme(plot.margin = ggplot2::margin(t = -40, r = -45))
+
+ggplot2::ggsave(
+  filename = "bmi_plot.png",
+  bmi_plot,
+  width = 6,
+  height = 3,
+  dpi = 300
+)
+
+weight_plot <- BRIDGE21::generate_weight_bar_plot(
+  weight_lbs_last,
+  height_in_last
+)
+
+ggplot2::ggsave(
+  filename = "weight_plot.png",
+  weight_plot,
+  width = 8,
+  height = 2,
+  dpi = 300
+)
+
+paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
+  cat(sep = "\n")
+
+BRIDGE21::format_quarto(type = "newpage")
+
+```

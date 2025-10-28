@@ -3,10 +3,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r display mcrt calculated scores from the kuadrc cohort, ft.align="left"}
+```{r display mcrt calculated scores from the kuadrc cohort or bold study, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_mcrt
+#| eval: !expr (params$kuadrc_mcrt) | (params$bold_mcrt)
 
 BRIDGE21::format_quarto(
   "sections/cognition/latex/cued-recall.tex",
@@ -31,8 +31,10 @@ mcrt_df %>%
 
 if (
   !params$kuadrc_dsmse &
-    params$kuadrc_mcrt |
-    params$kuadrc_dsmse & params$kuadrc_mcrt
+    !params$bold_dsmse &
+    (params$kuadrc_mcrt | params$bold_mcrt) |
+    (params$kuadrc_dsmse | params$bold_dsmse) |
+    (params$kuadrc_mcrt | params$bold_mcrt)
 ) {
   BRIDGE21::format_quarto(
     "sections/cognition/latex/after-memory.tex",
@@ -42,11 +44,3 @@ if (
 
 ```
 
-```{r display mcrt calculated scores from the bold study, ft.align="left"}
-#| echo: false
-#| results: asis
-#| eval: !expr params$bold_mcrt
-
-# Add bold mcrt here...
-
-```

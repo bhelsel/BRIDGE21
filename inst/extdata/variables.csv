@@ -96,7 +96,7 @@ apoe,,,,APOE Genotype,,Blood Draw
 hdl_mgdl,,,,HDL (mg/dL),,Blood Draw
 ldl_mgdl,,,,LDL (mg/dL),,Blood Draw
 totchol_mgdl,,,,Total Cholesterol (mg/dL),,Blood Draw
-triglyc_mgdl,,,,Triglucerides (mg/dL),,Blood Draw
+triglyc_mgdl,,,,Triglycerides (mg/dL),,Blood Draw
 hba1c,,,,HbA1c (%),,Blood Draw
 glucose,,,,Fasting Glucose (mg/dL),,Blood Draw
 ptau181_pgml,,,,pTau-181 (pg/mL),,Blood Draw
@@ -108,7 +108,7 @@ bpdias,bpdias,,,Diastolic Blood Pressure (mmHg),,Lifestyle
 dxa_total_kg,mass,,,Total Mass (kilograms),,Lifestyle
 dxa_lean_g,lean,,,Total Lean Mass (grams),,Lifestyle
 dxa_fat_g,fat,,,Total Fat Mass (grams),,Lifestyle
-fxa_fat_percent,total_fat,,,Total Body Fat Percentage,,Lifestyle
+dxa_fat_percent,total_fat,,,Total Body Fat Percentage,,Lifestyle
 dxa_bmd_z,dxa_bmd_z,,,Bone Mineral Density (z-score),,Lifestyle
 veggiemeter,,,,VeggieMeter Score,,Lifestyle
 circ_waist1,,,,Waist Circumference,,Lifestyle

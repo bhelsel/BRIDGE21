@@ -40,6 +40,7 @@ visit$age_at_visit <- floor(
 
 ```
 
+
 ```{r display person information in a table format for kuadrc cohort}
 #| echo: false
 #| eval: !expr params$kuadrc_demographics
@@ -84,11 +85,34 @@ BRIDGE21::format_quarto(type = "newpage")
 ```
 
 
-
-```{r add person information from the bold study}
+```{r extract person information from bold study used for other parts of the report}
 #| echo: false
-#| eval: !expr params$bold_demographics
+#| eval: !expr (any(params[grepl("bold, names(params))] == TRUE))
 
-# Add bold demographics here...
+intake <- BRIDGE21::get_database_values(
+  firstname,
+  lastname,
+  scrn_dob,
+  data = data,
+  event_name = redcap_event_name
+)
+
+intake$scrn_dob <- as.Date(
+  intake$scrn_dob,
+  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+)
+
+visit <- BRIDGE21::get_database_values(
+  visitdt,
+  sex,
+  data = data,
+  event_name = redcap_event_name
+)
+
+visit$formatted_date_of_visit <- format(visit$visitdt, "%m/%d/%Y")
+
+visit$age_at_visit <- floor(
+  as.numeric(visit$date_of_visit - intake$scrn_dob) / 365.25
+)
 
 ```

@@ -6,7 +6,7 @@ editor_options:
 ```{r display ntgedsd calculated scores from the kuadrc cohort, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_ntgedsd
+#| eval: !expr (params$kuadrc_ntgedsd) | (params$bold_ntgedsd)
 
 ntgedsd_domains <- list(
   all = "Total Score",
@@ -59,11 +59,3 @@ BRIDGE21::format_quarto(type = "newpage")
 
 ```
 
-```{r display ntgedsd calculated scores from the bold study, ft.align="left"}
-#| echo: false
-#| results: asis
-#| eval: !expr params$bold_ntgedsd
-
-# Add bold ntgedsd here...
-
-```

@@ -49,6 +49,8 @@ data <- data[data$ptid == params$id, ]
 
 # For Testing
 # data <- readr::read_csv(system.file("extdata/example.csv", package = "BRIDGE21"))
+# BOLD data
+# data <- readr::read_csv("p:/IRB_STUDY00150542_BOLD/Disclosure Reports/data for testing/BOLDRCT-12MonthDisclosureRep_DATA_2025-10-28_1210.csv")
 
 ```
 

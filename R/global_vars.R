@@ -23,7 +23,8 @@ if (getRversion() >= "2.15.1") {
   ),
   bold = c(
     "demographics",
-    "cognition"
+    "cognition",
+    "lifetsyle"
   )
 )
 

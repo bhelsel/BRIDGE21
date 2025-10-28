@@ -19,3 +19,24 @@ if (!is.na(apoe[1]) & !is.na(apoe[2])) {
 }
 
 ```
+
+```{r display apoe status from the bold study}
+#| echo: false
+#| results: asis
+#| eval: !expr params$bold_apoe
+
+apoe <- BRIDGE21::get_database_values(
+  apoe,
+  data = data
+)
+
+params$bold_apoe <- !is.na(apoe)
+
+if (!is.na(apoe)) {
+  apoeCarrierStatus <- apoe
+  BRIDGE21::format_quarto("sections/blood/latex/apoe.tex", type = "input")
+  cat("\\textbf{YOUR APOE RESULT}: ", apoeCarrierStatus)
+  BRIDGE21::format_quarto(type = "newpage")
+}
+
+```
