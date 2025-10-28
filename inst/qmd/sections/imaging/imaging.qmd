@@ -1,131 +1,17 @@
----
-editor_options: 
-  chunk_output_type: console
----
+```{r controller to decide whether to display an imaging section}
+#| echo: false
+#| eval: !expr (params$kuadrc_mri) | (params$kuadrc_pet)
+#| results: asis
+
+BRIDGE21::format_quarto("IMAGING SCANS", type = "section")
+
+```
 
 <!--- MRI Imaging --->
 
-```{r mri imaging}
-#| echo: false
-#| results: asis
-#| eval: !expr params$mri
-
-imageFiles <- list.files(
-  params$imagedir,
-  pattern = ".png$",
-  recursive = TRUE,
-  full.names = TRUE
-)
-axialImage <- paste0("{", imageFiles[grep("axial", imageFiles)], "}")
-sagittalImage <- paste0("{", imageFiles[grep("sagittal", imageFiles)], "}")
-
-scanDate <- format(
-  as.Date(
-    subjinfo[
-      subjinfo$redcap_event_name == "annual_forms_arm_1" &
-        !is.na(subjinfo$scan_date),
-      "scan_date",
-      drop = TRUE
-    ],
-    tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-  ),
-  "%B %d, %Y"
-)
-
-radiologyRead <-
-  paste0(
-    "{",
-    subjinfo[
-      subjinfo$redcap_event_name == "annual_forms_arm_1" &
-        !is.na(subjinfo$radiology_read),
-      "radiology_read",
-      drop = TRUE
-    ],
-    "}"
-  )
-
-if (length(imageFiles) >= 1) {
-  ltex <- paste(
-    #readLines("inst/qmd/sections/imaging/latex/mri.tex"),
-    readLines("sections/imaging/latex/mri.tex"),
-    collapse = "\n"
-  )
-  ltex <- glue::glue(
-    ltex,
-    scanDate = scanDate,
-    axialImage = axialImage,
-    sagittalImage = sagittalImage,
-    radiologyRead = radiologyRead,
-    .open = "{{",
-    .close = "}}"
-  )
-  cat(paste0("", ltex, ""), sep = "\n")
-}
-
-```
-
-\newpage
+{{< include sections/imaging/components/mri.qmd >}}
 
 <!--- PET Imaging --->
 
-```{r pet imaging}
-#| echo: false
-#| results: asis
-#| eval: !expr params$pet
+{{< include sections/imaging/components/pet.qmd >}}
 
-cognitiveDecline <- TRUE
-
-centiloid <- subjinfo[
-  subjinfo$redcap_event_name == "annual_forms_arm_1" &
-    !is.na(subjinfo$centiloid_apet),
-  "centiloid_apet",
-  drop = TRUE
-]
-
-petScanDate <- format(
-  as.Date(
-    subjinfo[
-      subjinfo$redcap_event_name == "annual_forms_arm_1" &
-        !is.na(subjinfo$img_scan_date_apet),
-      "img_scan_date_apet",
-      drop = TRUE
-    ],
-    tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-  ),
-  "%B %d, %Y"
-)
-
-petScanDescription <- BRIDGE21:::pet_amyloid_description(
-  centiloid,
-  cognitive_decline = cognitiveDecline,
-  petScanDate = petScanDate
-)
-
-if (length(centiloid) >= 1) {
-  ltex <- paste(
-    readLines("sections/imaging/latex/pet.tex"),
-    #readLines("inst/qmd/sections/imaging/latex/pet.tex"),
-    collapse = "\n"
-  )
-  ltex <- glue::glue(
-    ltex,
-    petScanImage = "{sections/imaging/latex/images/pet_amyloid.jpeg}",
-    centiloid = centiloid,
-    amyloidHigh = ifelse(centiloid >= 19, "high", "not high"),
-    petScanDescription = petScanDescription,
-    .open = "{{",
-    .close = "}}"
-  )
-  cat(paste0("", ltex, ""), sep = "\n")
-}
-
-```
-
-```{r imaging newpage}
-#| echo: false
-#| results: asis
-#| eval: !expr params$imaging
-
-cat("\\newpage")
-
-```

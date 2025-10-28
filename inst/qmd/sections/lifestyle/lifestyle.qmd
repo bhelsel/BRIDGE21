@@ -3,510 +3,83 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r}
+```{r controller to determine what lifestyle sections would have data for the kuadrc cohort}
 #| echo: false
 #| results: asis
-#| eval: !expr params$lifestyle
+#| eval: !expr params$kuadrc_lifestyle
 
-cat("## Lifestyle and Disease Risk")
+BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
 
-```
-
-```{r}
-#| echo: false
-#| results: asis
-#| eval: !expr params$lifestyle
-
-cat(
-  paste(
-    "We assessed various measures that can affect your overall brain health.",
-    "Recent research suggests that a healthy lifestyle is a key components of brain health."
+BRIDGE21::format_quarto(
+  BRIDGE21::add_string(
+    "We assessed various measures that can affect your overall brain health. " +
+      "Recent research suggests that a healthy lifestyle is a key components of brain health."
   ),
-  sep = "\n"
+  type = "strwrap"
 )
 
-
-```
-
-```{r blood pressure}
-#| echo: false
-#| results: asis
-#| eval: !expr params$lifestyle
-
-bpsys <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$bpsys),
-    grepl("bpsys", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-bpdias <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$bpdias),
-    grepl("bpdias", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-
-bpsys_cat <- BRIDGE21:::classify_blood_pressure(bpsys, type = "systolic")
-
-bpdias_cat <- BRIDGE21:::classify_blood_pressure(bpdias, type = "diastolic")
-
-bp_cat <-
-  ifelse(
-    bpsys_cat == "Low" | bpdias_cat == "Low",
-    "Low BP",
-    ifelse(
-      bpsys_cat == "Normal" & bpdias < 80,
-      "Normal",
-      ifelse(
-        bpsys_cat == "Elevated" & bpdias < 80,
-        "Elevated",
-        ifelse(bpsys_cat == "High" | bpdias >= 80, "High", "Normal")
-      )
-    )
+blood_pressure <-
+  BRIDGE21::get_database_values(
+    bpsys,
+    bpdias,
+    data = data
   )
 
-
-if (length(bpsys) >= 1) {
-  paste("", "\\input{sections/lifestyle/latex/bp.tex}", "") |>
-    cat(sep = "\n")
-  bpdata <-
-    data.frame(
-      dates = format(dates$date_of_visit, "%m/%d/%Y"),
-      bpsys,
-      bpdias,
-      bp_cat
-    )
-
-  bpft <-
-    flextable::flextable(bpdata) |>
-    flextable::set_header_labels(
-      values = c("Date", "Systolic", "Diastolic", "Cateogry")
-    ) |>
-    flextable::width(j = 1:3, width = 0.7) |>
-    flextable::width(j = 4, width = 1.25) |>
-    flextable::align(j = 1:4, part = "all", align = "center") |>
-    flextable::bold(i = 1, part = "header") |>
-    flextable::height(height = 0.25) |>
-    flextable::hrule(rule = "exact")
-
-  bp_plot <-
-    BRIDGE21::generate_bp_plot(
-      bpsys = bpdata$bpsys[length(bpdata$bpsys)],
-      bpdia = bpdata$bpdias[length(bpdata$bpdias)]
-    ) +
-    patchwork::inset_element(
-      flextable::gen_grob(bpft, fit = "width"),
-      left = 0.05,
-      bottom = 0.6,
-      right = 0.5,
-      top = 0.85
-    ) +
-    patchwork::inset_element(
-      grid::textGrob(
-        label = "Blood Pressure History",
-        gp = grid::gpar(fontface = "bold")
-      ),
-      left = 0.05,
-      bottom = 0.87,
-      right = 0.5,
-      top = 0.87
-    )
-
-  ggplot2::ggsave(
-    filename = "bp_plot.png",
-    plot = bp_plot,
-    width = 8,
-    height = 6,
-    dpi = 300
-  )
-
-  cat(paste0("", "![](bp_plot.png)", ""), sep = "\n")
+if (rlang::is_empty(blood_pressure)) {
+  params$kuadrc_blood_pressure <- FALSE
 }
 
-
-```
-
-
-
-\newpage
-
-```{r accelerometer text and plot}
-#| echo: false
-#| results: asis
-#| eval: !expr params$activity
-#|
 if (!is.null(params$accelres)) {
-  accelMetaDir <- file.path(params$accelres, "output_data", "meta")
-  accelResDir <- file.path(params$accelres, "output_data", "results")
-
-  dayMMFile <- list.files(accelResDir, "day.*MM", full.names = TRUE)
-  accel_df <- readr::read_csv(dayMMFile, show_col_types = FALSE)
-
-  accel_df_subset <- BRIDGE21:::retrieve_accel_summary(data = accel_df)
-
-  paSleepSuccess <- sum(
-    accel_df_subset$dur_spt_min >= 480 &
-      accel_df_subset$dur_day_total_MVPA_min >= 30
-  )
-
-  if (length(accel_df) >= 1) {
-    ltexPA <- paste(
-      readLines("sections/lifestyle/latex/activity.tex"),
-      collapse = "\n"
-    )
-    ltexPA <- glue::glue(
-      ltexPA,
-      paSleepSuccess = paste0("{", paSleepSuccess, "}"),
-      accelDaysMonitored = paste0("{", nrow(accel_df), "}"),
-      .open = "{{",
-      .close = "}}"
-    )
-    cat(paste0("", ltexPA, ""), sep = "\n")
-  }
-
-  load(list.files(
-    file.path(accelMetaDir, "ms2.out"),
-    recursive = TRUE,
-    full.names = TRUE
-  ))
-  IMPdates <- unique(as.Date(IMP$metashort$timestamp))
-  IMPremove <- IMPdates[
-    !IMPdates %in% as.Date(accel_df_subset$date, "%m/%d/%Y")
-  ]
-  IMP$metashort <- IMP$metashort[
-    !as.Date(IMP$metashort$timestamp) %in% IMPremove,
-  ]
-  accel_plot <- BRIDGE21::plot_time_series_by_date(
-    IMP,
-    summary_data = accel_df_subset
-  )
-
-  ggplot2::ggsave(
-    filename = "accelerometer_plot.png",
-    accel_plot,
-    width = 11,
-    height = 8,
-    dpi = 300
-  )
-
-  paste("", "![](accelerometer_plot.png)", "") |>
-    cat(sep = "\n")
-}
-
-```
-
-```{r activity newpage}
-#| echo: false
-#| results: asis
-#| eval: !expr params$activity
-
-cat("\\newpage")
-
-```
-
-<!--- Body Mass Index --->
-
-```{r body mass index, ft.align = "left"}
-#| echo: false
-#| results: asis
-#| fig-align: center
-#| eval: !expr params$lifestyle
-
-weight_lbs <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$weight),
-    grepl("weight", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-height_in <-
-  subjinfo[
-    grepl("visit", subjinfo$redcap_event_name) &
-      is.na(subjinfo$redcap_repeat_instrument) &
-      !is.na(subjinfo$height),
-    grepl("height", colnames(subjinfo)),
-    drop = TRUE
-  ]
-
-missing_bmi <- (length(weight_lbs) == 0 | length(height_in) == 0) &
-  length(weight_lbs) != length(height_in)
-
-if (!missing_bmi) {
-  weight_lbs_last = weight_lbs[length(weight_lbs)]
-  height_in_last = height_in[length(height_in)]
-  bmi_last <- round(
-    (weight_lbs_last / 2.205) / ((height_in_last * 2.54) / 100)^2,
-    1
-  )
-
-  ltex <- paste(
-    readLines("sections/lifestyle/latex/bmi.tex"),
-    collapse = "\n"
-  )
-
-  ltex <- glue::glue(
-    ltex,
-    bmiLast = bmi_last,
-    .open = "{{",
-    .close = "}}"
-  )
-
-  cat(paste0("", ltex, ""), sep = "\n")
-
-  bmi_plot <- BRIDGE21::generate_bmi_arch_plot(weight_lbs_last, height_in_last)
-
-  # Adjust alignment on Quarto ouput
-  bmi_plot <- bmi_plot +
-    ggplot2::theme(plot.margin = ggplot2::margin(t = -40, r = -45))
-
-  ggplot2::ggsave(
-    filename = "bmi_plot.png",
-    bmi_plot,
-    width = 6,
-    height = 3,
-    dpi = 300
-  )
-
-  weight_plot <- BRIDGE21::generate_weight_bar_plot(
-    weight_lbs_last,
-    height_in_last
-  )
-
-  ggplot2::ggsave(
-    filename = "weight_plot.png",
-    weight_plot,
-    width = 8,
-    height = 2,
-    dpi = 300
-  )
-
-  paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
-    cat(sep = "\n")
-}
-
-
-```
-
-
-\newpage
-
-<!--- Body Composition --->
-
-```{r body composition, ft.align = "left"}
-#| echo: false
-#| results: asis
-#| eval: !expr params$lifestyle
-
-fitness_date <-
-  as.Date(
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$fittest_date),
-      grepl("fittest_date", colnames(subjinfo)),
-      drop = TRUE
-    ],
-    tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-  )
-
-if (length(fitness_date) >= 1) {
-  total_mass <-
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$mass),
-      grepl("mass", colnames(subjinfo)),
-      drop = TRUE
-    ]
-
-  total_mass <- ifelse(total_mass == -999, NA, total_mass)
-
-  lean_tissue <-
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$lean),
-      grepl("lean", colnames(subjinfo)),
-      drop = TRUE
-    ]
-
-  lean_tissue <- ifelse(lean_tissue == -999, NA, lean_tissue)
-
-  fat_tissue <-
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$fat),
-      which(colnames(subjinfo) == "fat"),
-      drop = TRUE
-    ]
-
-  fat_tissue <- ifelse(fat_tissue == -999, NA, fat_tissue)
-
-  fat_tissue_percent <-
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$total_fat),
-      grepl("total_fat", colnames(subjinfo)),
-      drop = TRUE
-    ]
-
-  fat_tissue_percent <- ifelse(
-    fat_tissue_percent == -999,
-    NA,
-    fat_tissue_percent
-  )
-
-  bone_density <-
-    subjinfo[
-      grepl("visit", subjinfo$redcap_event_name) &
-        is.na(subjinfo$redcap_repeat_instrument) &
-        !is.na(subjinfo$dxa_bmd_z),
-      grepl("dxa_bmd_z", colnames(subjinfo)),
-      drop = TRUE
-    ]
-
-  bone_density <- ifelse(bone_density == -999, NA, bone_density)
-
-  bodycomp <- data.frame(
-    date = format(fitness_date, "%m/%d/%Y"),
-    weight_lbs = round(total_mass * 2.205),
-    lean_tissue = round(
-      ((ifelse(lean_tissue == -999, NA, lean_tissue)) / 1000) * 2.205
-    ),
-    fat_tissue = round(
-      ((ifelse(fat_tissue == -999, NA, fat_tissue)) / 1000) * 2.205
-    ),
-    fat_tissue_percent,
-    bone_density
-  )
-
-  missing_dxa <- apply(bodycomp[, 2:ncol(bodycomp)], 1, FUN = function(x) {
-    all(is.na(x))
-  })
-
-  if (!tail(missing_dxa, 1)) {
-    bodycomp_header_labels <- c(
-      "Date",
-      "Weight",
-      "Lean Tissue",
-      "Fat Tissue",
-      "Fat (%)",
-      "BMD"
-    )
-
-    if (all(is.na(bodycomp$bone_density))) {
-      bodycomp$bone_density <- NULL
-      bodycomp_header_labels <- bodycomp_header_labels[1:5]
+  accel_df <- tryCatch(
+    {
+      accelMetaDir <- file.path(params$accelres, "output_data", "meta")
+      accelResDir <- file.path(params$accelres, "output_data", "results")
+      dayMMFile <- list.files(accelResDir, "day.*MM", full.names = TRUE)
+      readr::read_csv(dayMMFile, show_col_types = FALSE)
+    },
+    error = function(e) {
+      params$kuadrc_activity <- FALSE
     }
+  )
+} else {
+  params$kuadrc_activity <- FALSE
+}
 
-    body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
-      total_fat = tail(na.omit(fat_tissue_percent), 1),
-      subject_sex = subject_sex,
-      subject_birthdate = dob,
-      fittest_date = tail(na.omit(fitness_date), 1)
-    )
+anthro <- BRIDGE21::get_database_values(
+  weight,
+  height,
+  data = data
+)
 
-    # Adjust alignment on Quarto ouput
-    body_fat_percent_plot <- body_fat_percent_plot +
-      ggplot2::theme(plot.margin = ggplot2::margin(t = -30))
+missing_bmi <- (length(anthro$weight) == 0 | length(anthro$height) == 0) &
+  length((anthro$weight) != length(anthro$height))
 
-    ggplot2::ggsave(
-      filename = "body_fat_percent_plot.png",
-      plot = body_fat_percent_plot,
-      width = 8,
-      height = 2,
-      dpi = 300
-    )
+if (missing_bmi) {
+  params$kuadrc_bmi <- FALSE
+}
 
-    paste("", "\\input{sections/lifestyle/latex/dxa.tex}", "") |>
-      cat(sep = "\n")
+dxa <-
+  BRIDGE21::get_database_values(
+    fittest_date,
+    mass,
+    lean,
+    fat,
+    total_fat,
+    dxa_bmd_z,
+    data = data
+  )
 
-    ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
-
-    if ("bone_density" %in% colnames(bodycomp)) {
-      bmd_footnote <- "BMD: Bone Mineral Density (Z-score)"
-      ft_footnote <- paste(c(ft_footnote, bmd_footnote), collapse = "\n")
-    }
-
-    flextable::flextable(bodycomp) |>
-      flextable::set_header_labels(
-        values = bodycomp_header_labels
-      ) |>
-      flextable::width(j = 1:ncol(bodycomp), width = 1) |>
-      flextable::align(part = "all", align = "center") |>
-      flextable::bold(part = "header") |>
-      flextable::add_footer_row(
-        values = ft_footnote,
-        colwidths = ncol(bodycomp)
-      )
-  }
+if (nrow(dxa) == 0) {
+  params$kuadrc_dxa <- FALSE
 }
 
 ```
 
-```{r add additional text}
-#| echo: false
-#| results: asis
-#| fig-align: center
-#| eval: !expr params$lifestyle
+{{< include sections/lifestyle/components/bp.qmd >}}
 
-if (length(fitness_date) >= 1) {
-  if (!tail(missing_dxa, 1)) {
-    paste("", "![](body_fat_percent_plot.png)", "") |>
-      cat(sep = "\n")
+{{< include sections/lifestyle/components/activity.qmd >}}
 
-    if ("bone_density" %in% colnames(bodycomp)) {
-      paste("", "\\input{sections/lifestyle/latex/bmd.tex}", "\n") |>
-        cat(sep = "\n")
-    }
+{{< include sections/lifestyle/components/bmi.qmd >}}
 
-    paste("", "\\input{sections/lifestyle/latex/after-dxa.tex}", "") |>
-      cat(sep = "\n")
-  }
-}
+{{< include sections/lifestyle/components/dxa.qmd >}}
 
-```
-
-
-<!--- Diet Questionnaire --->
-
-```{r diet questionnaire, ft.align = "left"}
-#| echo: false
-#| results: asis
-#| include: false
-
-# load(system.file("extdata/constants.RData", package = "ncidsq"))
-
-# ncidsqvars <- constants$fm_equation_coeff$variable[!grepl("_low|_high", constants$fm_equation_coeff$variable)]
-
-# dsqdata <-
-#   ncidsq::get_dsq(
-#     data = df, id = "ptid", timepoint = "redcap_event_name",
-#     birthdate = "subject_birthdate", reference = "kumc",
-#     visitdate = c("visityr", "visitmo", "visitday")) %>%
-#     dplyr::select(ptid, visitdate, sex, dplyr::all_of(ncidsqvars)) %>%
-#     dplyr::filter(!dplyr::if_all(dplyr::all_of(ncidsqvars), is.na))
-
-# paste("", "\\input{sections/lifestyle/latex/diet.tex}", "") |>
-#     cat(sep = "\n")
-
-```
-
-```{r lifestyle newpage}
-#| echo: false
-#| results: asis
-#| eval: !expr params$lifestyle
-
-cat("\\newpage")
-
-```
