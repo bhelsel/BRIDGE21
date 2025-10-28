@@ -7,8 +7,8 @@
 generate_report(
   id,
   datafile,
-  acceldir,
   outputdir,
+  acceldir = NULL,
   reports = NULL,
   example_report = FALSE
 )
@@ -18,9 +18,9 @@ generate_report(
 
 \item{datafile}{The path name of the file containing the data as a .csv file}
 
-\item{acceldir}{The path name of the directory containing the raw .gt3x accelerometer files}
-
 \item{outputdir}{The path name of the directory containing the participant feedback reports}
+
+\item{acceldir}{The path name of the directory containing the raw .gt3x accelerometer files, Default = NULL}
 
 \item{reports}{A vector of reports to generate including cognition, mri, pet, blood, apoe, activity, and lifestyle, Default = NULL returns all available reports,}
 

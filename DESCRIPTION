@@ -25,10 +25,14 @@ Imports:
   kuadrc.xnat,
   magick,
   patchwork,
+  purrr,
   quarto, 
   readr,
+  rlang,
   scales,
   shiny,
+  tibble,
+  tidyr,
   yaml
 Remotes:
   bhelsel/abcds,

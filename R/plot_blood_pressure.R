@@ -259,7 +259,8 @@ generate_bp_plot <- function(bpsys, bpdia) {
     ggplot2::geom_label(
       ggplot2::aes(x = 87.5, y = bpdia + 7),
       label = bpdia,
-      fontface = "bold"
+      fontface = "bold",
+      fill = "white"
     ) +
     # Numeric Axis Labels
     ggplot2::annotate(

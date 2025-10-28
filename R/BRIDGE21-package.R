@@ -16,6 +16,7 @@
 #' @import gridExtra
 #' @import abcds
 #' @importFrom patchwork inset_element
+#' @importFrom purrr imap_dfc imap
 #' @importFrom yaml read_yaml
 #'
 #'

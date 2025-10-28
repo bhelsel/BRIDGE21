@@ -2,8 +2,8 @@
 #' @description Generates a Quarto pdf report containing participant feedback from the study visit
 #' @param id The patient id as represented in the study database
 #' @param datafile The path name of the file containing the data as a .csv file
-#' @param acceldir The path name of the directory containing the raw .gt3x accelerometer files
 #' @param outputdir The path name of the directory containing the participant feedback reports
+#' @param acceldir The path name of the directory containing the raw .gt3x accelerometer files, Default = NULL
 #' @param reports A vector of reports to generate including cognition, mri, pet, blood, apoe, activity, and lifestyle, Default = NULL returns all available reports,
 #' @param example_report Used with outputdir to generate a sample report using example data, Default = FALSE
 #' @return The location of the participant feedback report
@@ -22,8 +22,8 @@
 generate_report <- function(
   id,
   datafile,
-  acceldir,
   outputdir,
+  acceldir = NULL,
   reports = NULL,
   example_report = FALSE
 ) {
@@ -35,18 +35,16 @@ generate_report <- function(
     )
   }
 
-  allReports <- c(
-    "cognition",
-    "mri",
-    "pet",
-    "blood",
-    "apoe",
-    "activity",
-    "lifestyle"
-  )
+  allReports <- unname(unlist(purrr::imap(.allReports, ~ paste0(.y, "_", .x))))
 
   if (is.null(reports)) {
     reports <- allReports
+  } else if (length(reports) == 1 & any(reports %in% names(.allReports))) {
+    reports <- allReports[grepl(reports, allReports)]
+  } else if (any(reports %in% allReports)) {
+    reports <- allReports[allReports %in% reports]
+  } else {
+    stop("Could not match the reports.")
   }
 
   reports <- lapply(allReports, FUN = function(x) {
@@ -54,6 +52,8 @@ generate_report <- function(
   })
 
   names(reports) <- allReports
+
+  reports <- expand_reports(reports)
 
   if (example_report) {
     id = "test_jayhawk"
@@ -100,8 +100,10 @@ generate_report <- function(
       recursive = TRUE
     )
     accelres <- file.path(outputdir, id, "accelerometer", "results")
-  } else {
+  } else if (!is.null(acceldir)) {
     accelres <- run_ggir(id = id, acceldir = acceldir, outputdir = outputdir)
+  } else {
+    accelres <- NULL
   }
 
   # Copy the qmd file from the CohortT21Disclosure package to render locally
@@ -148,6 +150,13 @@ generate_report <- function(
     to = file.path(persondir, basename(pdffile)),
     overwrite = TRUE
   ))
+
+  invisible(file.copy(
+    from = file.path(getwd(), id, "_variables.yaml"),
+    to = file.path(persondir, "_variables.yaml"),
+    overwrite = TRUE
+  ))
+
   # Remove pdf file after it is copied to the output directory
   invisible(file.remove(pdffile))
   # Unlink the temporary folder to remove it
