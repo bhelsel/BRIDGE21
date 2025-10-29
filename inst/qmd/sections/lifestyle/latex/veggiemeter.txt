@@ -1,0 +1,3 @@
+\subsection{VeggieMeter}
+
+The VeggieMeter is a device that takes a picture of your finger to tell us how many fruits and vegetables you are eating. A higher score means you are eating more fruits and vegetables. Fruits and vegetables are an important part of a healthy diet and can help keep your body strong and even keep you from getting sick! 

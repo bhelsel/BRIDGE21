@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+format: html
+---
+
+
+```{r display VeggieMeter Score tabl for the bold study, ft.align = "left"}
+#| echo: false
+#| results: asis
+#| eval: !expr params$bold_veggiemeter
+
+date_var <- data$visitdt
+vm_score <- data$veggiemeter
+
+# < 400 “Low”
+# ≥ 400 to ≤ 600  “Good"
+# ≥ 600 “Excellent"
+
+data$vm_category <- cut(
+  vm_score,
+  breaks = c(-Inf, 400, 600, Inf),
+  labels = c("Low", "Good", "Excellent"),
+  right = FALSE
+)
+
+data$vm_interpretation <- factor(
+  data$vm_category,
+  levels = c("Low", "Good", "Excellent"),
+  labels = c(
+    "Your fruit and vegetable intake is low — try adding more into your diet.",
+    "Your fruit and vegetable intake is good — keep it up!",
+    "Your fruit and vegetable intake is excellent! Keep up the good work!"
+  )
+)
+
+veggie_table <- data.frame(
+  Date = date_var,
+  `Veggie Meter Score` = round(vm_score, 1),
+  Category = data$vm_category,
+  Interpretation = data$vm_interpretation
+)
+
+BRIDGE21::format_quarto(
+  "sections/lifestyle/latex/veggiemeter.tex",
+  type = "input"
+)
+
+
+flextable::flextable(veggie_table) %>%
+  flextable::set_header_labels(
+    Date = "Date",
+    `Veggie Meter Score` = "Veggie Meter Score",
+    Category = "Category",
+    Interpretation = "Interpretation"
+  ) %>%
+  flextable::width(j = 1:2, width = 0.75) %>%
+  flextable::width(j = 3, width = 1) %>%
+  flextable::width(j = 4, width = 4) %>%
+  flextable::align(j = 1:4, part = "all", align = "center") %>%
+  flextable::add_header_row(
+    values = "VeggieMeter Score and Interpretation",
+    colwidths = 4
+  ) %>%
+  flextable::add_footer_row(
+    values = "VeggieMeter Scores range from 0–800",
+    colwidths = 4
+  ) %>%
+  flextable::align(i = 1, part = "head", align = "left") %>%
+  flextable::border(
+    i = 1,
+    part = "head",
+    border = flextable::fp_border(width = 0, color = "black", style = "solid")
+  )
+
+
+BRIDGE21::format_quarto(type = "newpage")
+```

@@ -99,3 +99,5 @@ if (rlang::is_empty(dxa)) {
 
 {{< include sections/lifestyle/components/dxa.qmd >}}
 
+{{< include sections/lifestyle/components/veggiemeter.qmd >}}
+
