@@ -1,4 +1,6 @@
 
+<!-- KU ADRC DS COHORT -->
+
 ```{r extract person information from kuadrc cohort used for other parts of the report}
 #| echo: false
 #| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE))
@@ -13,7 +15,7 @@ intake <- BRIDGE21::get_database_values(
 
 intake$subject_birthdate <- as.Date(
   intake$subject_birthdate,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+  tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
 )
 
 visit <- BRIDGE21::get_database_values(
@@ -85,6 +87,8 @@ BRIDGE21::format_quarto(type = "newpage")
 ```
 
 
+<!-- BOLD STUDY -->
+
 ```{r extract person information from bold study used for other parts of the report}
 #| echo: false
 #| eval: !expr (any(params[grepl("bold, names(params))] == TRUE))
@@ -93,18 +97,18 @@ intake <- BRIDGE21::get_database_values(
   firstname,
   lastname,
   scrn_dob,
+  sex,
   data = data,
   event_name = redcap_event_name
 )
 
 intake$scrn_dob <- as.Date(
   intake$scrn_dob,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+  tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
 )
 
 visit <- BRIDGE21::get_database_values(
   visitdt,
-  sex,
   data = data,
   event_name = redcap_event_name
 )
@@ -112,7 +116,7 @@ visit <- BRIDGE21::get_database_values(
 visit$formatted_date_of_visit <- format(visit$visitdt, "%m/%d/%Y")
 
 visit$age_at_visit <- floor(
-  as.numeric(visit$date_of_visit - intake$scrn_dob) / 365.25
+  as.numeric(visit$visitdt - intake$scrn_dob) / 365.25
 )
 
 ```
