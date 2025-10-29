@@ -1,37 +1,90 @@
 
-```{r display body composition table and plot for the kuadrc cohort, ft.align = "left"}
+```{r display body composition table and plot for the kuadrc cohort and bold study, ft.align = "left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_dxa
+#| eval: !expr (params$kuadrc_dxa) | (params$bold_dxa)
 
-dxa$fittest_date <- as.Date(
-  dxa$fittest_date,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-)
-
-dxa[dxa == -999] <- NA
-
-dxa_labels <- c("Date", "Weight", "Lean Tissue", "Fat Tissue", "Fat (%)", "BMD")
-
-if (all(is.na(dxa$dxa_bmd_z))) {
-  dxa$dxa_bmd_z <- NULL
-  dxa_labels <- dxa_labels[1:5]
+if (study == "kucohort") {
+  date_var <- "fittest_date"
+  mass_var <- "mass"
+  lean_var <- "lean"
+  fat_var <- "fat"
+  fat_pct_var <- "total_fat"
+  bmd_var <- "dxa_bmd_z"
+  dob_var <- "subject_birthdate"
+} else if (study == "bold") {
+  date_var <- "visitdt"
+  mass_var <- "dxa_total_kg"
+  lean_var <- "dxa_lean_g"
+  fat_var <- "dxa_fat_g"
+  fat_pct_var <- "dxa_fat_percent"
+  bmd_var <- "dxa_bmd_z"
+  dob_var <- "scrn_dob"
 }
 
-dxa <- dxa %>%
-  dplyr::mutate(
-    dplyr::across(lean:fat, ~ .x / 1000),
-    dplyr::across(mass:fat, ~ round(.x * 2.205, 1))
+fitness_date <- extract_visit_var(subjinfo, date_var, study)
+if (!is.null(fitness_date)) {
+  fitness_date <- as.Date(fitness_date, tryFormats = c("%m/%d/%y", "%m/%d/%Y"))
+}
+
+if (!is.null(fitness_date) && length(fitness_date) >= 1) {
+  total_mass <- extract_visit_var(subjinfo, mass_var, study)
+  lean_tissue <- extract_visit_var(subjinfo, lean_var, study)
+  fat_tissue <- extract_visit_var(subjinfo, fat_var, study)
+  fat_tissue_percent <- extract_visit_var(subjinfo, fat_pct_var, study)
+  bone_density <- extract_visit_var(subjinfo, bmd_var, study)
+
+  total_mass <- ifelse(total_mass == -999, NA, total_mass)
+  lean_tissue <- ifelse(lean_tissue == -999, NA, lean_tissue)
+  fat_tissue <- ifelse(fat_tissue == -999, NA, fat_tissue)
+  fat_tissue_percent <- ifelse(
+    fat_tissue_percent == -999,
+    NA,
+    fat_tissue_percent
+  )
+  bone_density <- ifelse(bone_density == -999, NA, bone_density)
+
+  bodycomp <- data.frame(
+    date = format(fitness_date, "%m/%d/%Y"),
+    weight_lbs = round(total_mass * 2.205),
+    lean_tissue = round((lean_tissue / 1000) * 2.205),
+    fat_tissue = round((fat_tissue / 1000) * 2.205),
+    fat_tissue_percent = fat_tissue_percent,
+    bone_density = bone_density
+  )
+}
+
+missing_dxa <- apply(bodycomp[, 2:ncol(bodycomp)], 1, FUN = function(x) {
+  all(is.na(x))
+})
+
+if (!tail(missing_dxa, 1)) {
+  dxa_labels <- c(
+    "Date",
+    "Weight",
+    "Lean Tissue",
+    "Fat Tissue",
+    "Fat (%)",
+    "BMD"
   )
 
-body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
-  total_fat = tail(na.omit(dxa$total_fat), 1),
-  subject_sex = visit$sex[1],
-  subject_birthdate = intake$subject_birthdate,
-  fittest_date = tail(na.omit(dxa$fittest_date), 1)
-)
+  if (all(is.na(bodycomp$bone_density))) {
+    bodycomp$bone_density <- NULL
+    dxa_labels <- dxa_labels[1:5]
+  }
 
-# Adjust alignment on Quarto ouput
+  subject_sex <- extract_visit_var(subjinfo, "sex", study)[1]
+  subject_dob <- extract_visit_var(subjinfo, dob_var, study)[1]
+
+  body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
+    total_fat = tail(na.omit(fat_tissue_percent), 1),
+    subject_sex = subject_sex,
+    subject_birthdate = subject_dob,
+    fittest_date = tail(na.omit(fitness_date), 1)
+  )
+}
+
+# Adjust alignment on Quarto output
 body_fat_percent_plot <- body_fat_percent_plot +
   ggplot2::theme(plot.margin = ggplot2::margin(t = -30))
 
@@ -43,30 +96,25 @@ ggplot2::ggsave(
   dpi = 300
 )
 
-BRIDGE21::format_quarto("sections/lifestyle/latex/dxa.tex", type = "input")
+paste("", "\\input{sections/lifestyle/latex/dxa.tex}", "") |>
+  cat(sep = "\n")
 
 ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
 
-if ("dxa_bmd_z" %in% colnames(dxa)) {
-  ft_footnote <- BRIDGE21::add_string(
-    ft_footnote + "\n" + "BMD: Bone Mineral Density (Z-score)"
-  )
+if ("bone_density" %in% colnames(bodycomp)) {
+  bmd_footnote <- "BMD: Bone Mineral Density (Z-score)"
+  ft_footnote <- paste(c(ft_footnote, bmd_footnote), collapse = "\n")
 }
 
-dxa %>%
-  dplyr::mutate(fittest_date = format(fittest_date, "%m/%d/%Y")) %>%
-  flextable::flextable() %>%
-  flextable::set_header_labels(
-    values = dxa_labels
-  ) %>%
-  flextable::width(j = 1:ncol(dxa), width = 1) %>%
-  flextable::align(part = "all", align = "center") %>%
-  flextable::bold(part = "header") %>%
+flextable::flextable(bodycomp) |>
+  flextable::set_header_labels(values = dxa_labels) |>
+  flextable::width(j = 1:ncol(bodycomp), width = 1) |>
+  flextable::align(part = "all", align = "center") |>
+  flextable::bold(part = "header") |>
   flextable::add_footer_row(
     values = ft_footnote,
-    colwidths = ncol(dxa)
+    colwidths = ncol(bodycomp)
   )
-
 
 paste("", "![](body_fat_percent_plot.png)", "") |>
   cat(sep = "\n")
@@ -79,92 +127,6 @@ BRIDGE21::format_quarto(
   "sections/lifestyle/latex/after-dxa.tex",
   type = "input"
 )
-
-BRIDGE21::format_quarto(type = "newpage")
-
-```
-
-```{r display body composition table and plot for the bold study, ft.align = "left"}
-#| echo: false
-#| results: asis
-#| eval: !expr params$bold_dxa
-
-dxa$visitdt <- as.Date(
-  dxa$visitdt,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-)
-
-dxa[dxa == -999] <- NA
-
-dxa_labels <- c("Date", "Weight", "Lean Tissue", "Fat Tissue", "Fat (%)", "BMD")
-
-if (all(is.na(dxa$dxa_bmd_z))) {
-  dxa$dxa_bmd_z <- NULL
-  dxa_labels <- dxa_labels[1:5]
-}
-
-dxa <- dxa %>%
-  dplyr::mutate(
-    dplyr::across(dxa_lean_g:dxa_fat_g, ~ .x / 1000),
-    dplyr::across(dxa_total_kg:dxa_fat_g, ~ round(.x * 2.205, 1))
-  )
-
-body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
-  total_fat = tail(na.omit(dxa$dxa_fat_percent), 1),
-  subject_sex = visit$sex[1],
-  subject_birthdate = intake$scrn_dobscrn_dob,
-  fittest_date = tail(na.omit(dxa$visitdt), 1)
-)
-
-# Adjust alignment on Quarto ouput
-body_fat_percent_plot <- body_fat_percent_plot +
-  ggplot2::theme(plot.margin = ggplot2::margin(t = -30))
-
-ggplot2::ggsave(
-  filename = "body_fat_percent_plot.png",
-  plot = body_fat_percent_plot,
-  width = 8,
-  height = 2,
-  dpi = 300
-)
-
-BRIDGE21::format_quarto("sections/lifestyle/latex/dxa.tex", type = "input")
-
-ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
-
-if ("dxa_bmd_z" %in% colnames(dxa)) {
-  ft_footnote <- BRIDGE21::add_string(
-    ft_footnote + "\n" + "BMD: Bone Mineral Density (Z-score)"
-  )
-}
-
-dxa %>%
-  dplyr::mutate(fittest_date = format(fittest_date, "%m/%d/%Y")) %>%
-  flextable::flextable() %>%
-  flextable::set_header_labels(
-    values = dxa_labels
-  ) %>%
-  flextable::width(j = 1:ncol(dxa), width = 1) %>%
-  flextable::align(part = "all", align = "center") %>%
-  flextable::bold(part = "header") %>%
-  flextable::add_footer_row(
-    values = ft_footnote,
-    colwidths = ncol(dxa)
-  )
-
-
-paste("", "![](body_fat_percent_plot.png)", "") |>
-  cat(sep = "\n")
-
-if ("dxa_bmd_z" %in% colnames(dxa)) {
-  BRIDGE21::format_quarto("sections/lifestyle/latex/bmd.tex", type = "input")
-}
-
-BRIDGE21::format_quarto(
-  "sections/lifestyle/latex/after-dxa.tex",
-  type = "input"
-)
-
 BRIDGE21::format_quarto(type = "newpage")
 
 ```
