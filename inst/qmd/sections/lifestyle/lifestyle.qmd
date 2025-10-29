@@ -3,10 +3,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r controller to determine what lifestyle sections would have data for the kuadrc cohort}
+```{r controller to determine what lifestyle sections would have data for the kuadrc cohort or bold study}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_lifestyle
+#| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle)
 
 BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
 
@@ -24,9 +24,8 @@ blood_pressure <-
     bpdias,
     data = data
   )
-
 if (rlang::is_empty(blood_pressure)) {
-  params$kuadrc_blood_pressure <- FALSE
+  params$kuadrc_blood_pressure <- params$bold_blood_pressure <- FALSE
 }
 
 if (!is.null(params$accelres)) {
@@ -38,28 +37,34 @@ if (!is.null(params$accelres)) {
       readr::read_csv(dayMMFile, show_col_types = FALSE)
     },
     error = function(e) {
-      params$kuadrc_activity <- FALSE
+      params$kuadrc_activity <- params$bold_activity <- FALSE
     }
   )
 } else {
-  params$kuadrc_activity <- FALSE
+  params$kuadrc_activity <- params$bold_activity <- FALSE
 }
 
-anthro <- BRIDGE21::get_database_values(
-  weight,
-  height,
-  data = data
-)
-
-missing_bmi <- (length(anthro$weight) == 0 | length(anthro$height) == 0) &
-  length((anthro$weight) != length(anthro$height))
-
-if (missing_bmi) {
-  params$kuadrc_bmi <- FALSE
+if (params$kuadrc_bmi) {
+  anthro <- BRIDGE21::get_database_values(weight, height, data = data)
+  missing_bmi <- (length(anthro$weight) == 0 | length(anthro$height) == 0) |
+    length(anthro$weight) != length(anthro$height)
+} else if (params$bold_bmi) {
+  anthro <- BRIDGE21::get_database_values(
+    average_height,
+    average_weight,
+    bmi_calc,
+    data = data
+  )
+  missing_bmi <- (length(anthro$average_weight) == 0 |
+    length(anthro$average_height) == 0) |
+    length(anthro$average_weight) != length(anthro$average_height)
+}
+if (rlang::is_empty(bmi)) {
+  params$kuadrc_bmi <- params$bold_bmi <- FALSE
 }
 
-dxa <-
-  BRIDGE21::get_database_values(
+if (params$kuadrc_dxa) {
+  dxa <- BRIDGE21::get_database_values(
     fittest_date,
     mass,
     lean,
@@ -68,71 +73,8 @@ dxa <-
     dxa_bmd_z,
     data = data
   )
-
-if (nrow(dxa) == 0) {
-  params$kuadrc_dxa <- FALSE
-}
-
-```
-
-```{r controller to determine what lifestyle sections would have data for the bold study}
-#| echo: false
-#| results: asis
-#| eval: !expr params$bold_lifestyle
-
-BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
-
-BRIDGE21::format_quarto(
-  BRIDGE21::add_string(
-    "We assessed various measures that can affect your overall brain health. " +
-      "Recent research suggests that a healthy lifestyle is a key components of brain health."
-  ),
-  type = "strwrap"
-)
-
-blood_pressure <-
-  BRIDGE21::get_database_values(
-    bpsys,
-    bpdias,
-    data = data
-  )
-
-if (rlang::is_empty(blood_pressure)) {
-  params$bold_blood_pressure <- FALSE
-}
-
-if (!is.null(params$accelres)) {
-  accel_df <- tryCatch(
-    {
-      accelMetaDir <- file.path(params$accelres, "output_data", "meta")
-      accelResDir <- file.path(params$accelres, "output_data", "results")
-      dayMMFile <- list.files(accelResDir, "day.*MM", full.names = TRUE)
-      readr::read_csv(dayMMFile, show_col_types = FALSE)
-    },
-    error = function(e) {
-      params$bold_activity <- FALSE
-    }
-  )
-} else {
-  params$bold_activity <- FALSE
-}
-
-anthro <- BRIDGE21::get_database_values(
-  average_height,
-  average_weight,
-  bmi_calc,
-  data = data
-)
-
-missing_bmi <- (length(anthro$average_weight) == 0 | length(anthro$average_height) == 0) &
-  length((anthro$average_weight) != length(anthro$average_height))
-
-if (missing_bmi) {
-  params$bold_bmi <- FALSE
-}
-
-dxa <-
-  BRIDGE21::get_database_values(
+} else if (params$bold_dxa) {
+  dxa <- BRIDGE21::get_database_values(
     visitdt,
     dxa_total_kg,
     dxa_lean_g,
@@ -141,12 +83,14 @@ dxa <-
     dxa_bmd_z,
     data = data
   )
-
-if (nrow(dxa) == 0) {
-  params$bold_dxa <- FALSE
+}
+if (rlang::is_empty(dxa)) {
+  params$kuadrc_dxa <- params$bold_dxa <- FALSE
 }
 
 ```
+
+
 {{< include sections/lifestyle/components/bp.qmd >}}
 
 {{< include sections/lifestyle/components/activity.qmd >}}

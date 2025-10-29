@@ -41,7 +41,6 @@ if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
   params$bold_vineland <- FALSE
 }
 
-
 after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
   (params$bold_dsmse & !params$bold_mcrt)
 
