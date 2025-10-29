@@ -29,13 +29,7 @@ mcrt_df %>%
   flextable::add_footer_row(values = "Max Score: 36", colwidths = 4)
 
 
-if (
-  !params$kuadrc_dsmse &
-    !params$bold_dsmse &
-    (params$kuadrc_mcrt | params$bold_mcrt) |
-    (params$kuadrc_dsmse | params$bold_dsmse) |
-    (params$kuadrc_mcrt | params$bold_mcrt)
-) {
+if (!after_memory_section) {
   BRIDGE21::format_quarto(
     "sections/cognition/latex/after-memory.tex",
     type = "input"
