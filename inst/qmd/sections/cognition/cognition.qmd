@@ -29,11 +29,24 @@ if (rlang::is_empty(ntgedsd_df)) {
   params$kuadrc_ntgedsd <- params$bold_ntgedsd <- FALSE
 }
 
+# Vineland Adaptive Behavior Scale
+vineland_variables <- c(
+  "vnld_abcss",
+  "vnld_commss",
+  "vnld_dlivss",
+  "vnld_soclss"
+)
+vineland_df <- BRIDGE21::get_database_values(!!!vineland_variables, data = data)
+if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
+  params$bold_vineland <- FALSE
+}
+
+
 after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
   (params$bold_dsmse & !params$bold_mcrt)
 
 kuadrc_cognition <- paste0("kuadrc_", c("dsmse", "mcrt", "ntgedsd"))
-bold_cognition <- paste0("bold_", c("dsmse", "mcrt", "ntgedsd"))
+bold_cognition <- paste0("bold_", c("dsmse", "mcrt", "ntgedsd", "vineland"))
 
 if (
   any(unlist(params[kuadrc_cognition])) | any(unlist(params[bold_cognition]))
@@ -57,3 +70,7 @@ if (
 <!--- National Task Group - Early Detection and Screen for Dementia (NTG-EDSD) --->
 
 {{< include sections/cognition/components/ntgedsd.qmd >}}
+
+<!--- Vineland Adaptive Behavior Scale --->
+
+{{< include sections/cognition/components/vineland.qmd >}}

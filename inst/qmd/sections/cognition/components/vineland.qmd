@@ -1,0 +1,48 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+```{r display dsmse calculated scores from the kuadrc cohort and bold study, ft.align="left"}
+#| echo: false
+#| results: asis
+#| eval: !expr params$bold_vineland
+
+BRIDGE21::format_quarto("sections/cognition/latex/vineland.tex", type = "input")
+
+vineland_labels <- c(
+  "Total Score",
+  "Communication",
+  "Daily Living Skills",
+  "Socialization"
+)
+
+vineland_df %>%
+  dplyr::mutate(
+    date_of_visit = visit$formatted_date_of_visit
+  ) %>%
+  dplyr::select(
+    date_of_visit,
+    vnld_abcss,
+    vnld_commss,
+    vnld_dlivss,
+    vnld_soclss
+  ) %>%
+  flextable::flextable() %>%
+  flextable::set_header_labels(values = c("Date", vineland_labels)) %>%
+  flextable::width(j = 1:5, width = 1.15) %>%
+  flextable::align(j = 1:5, align = "center", part = "all") %>%
+  flextable::bold(j = 1:5, part = "header") %>%
+  flextable::add_footer_row(values = "Mean Score: 100", colwidths = 5)
+
+
+BRIDGE21::format_quarto(type = "newpage")
+
+if (after_memory_section) {
+  BRIDGE21::format_quarto(
+    "sections/cognition/latex/after-memory.tex",
+    type = "input"
+  )
+}
+
+```
+
