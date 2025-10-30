@@ -37,3 +37,5 @@ if (rlang::is_empty(karyotype)) {
 {{< include sections/blood/components/karyotype.qmd >}}
 
 {{< include sections/blood/components/apoe.qmd >}}
+
+{{< include sections/blood/components/lipidgluc.qmd >}}

@@ -31,6 +31,7 @@ if (getRversion() >= "2.15.1") {
 
 .subReports <- list(
   kuadrc_blood = c("karyotype", "ptau217"),
+  bold_blood = c("lipidgluc"),
   kuadrc_lifestyle = c("activity", "blood_pressure", "bmi", "dxa"),
   bold_lifestyle = c("activity", "bmi", "blood_pressure", "dxa", "veggiemeter"),
   kuadrc_cognition = c("dsmse", "mcrt", "ntgedsd"),

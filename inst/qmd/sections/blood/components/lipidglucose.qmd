@@ -1,0 +1,74 @@
+```{r display lipid and glucose table for the bold study, ft.align = "left"}
+#| echo: false
+#| results: asis
+#| fig-align: center
+#| eval: !expr params$bold_lipidglucose
+
+date_var <- "visitdt"
+hdl_var <- "hdl_mgdl"
+ldl_var <- "ldl_mgdl"
+chol_var <- "totchol_mgdl"
+trig_var <- "triglyc_mgdl"
+a1c_var <- "hba1c"
+gluc_var <- "glucose"
+
+visit_date <- data[[date_var]]
+hdl <- data[[hdl_var]]
+ldl <- data[[ldl_var]]
+total_chol <- data[[chol_var]]
+triglycerides <- data[[trig_var]]
+hba1c <- data[[a1c_var]]
+glucose <- data[[gluc_var]]
+
+hdl <- ifelse(hdl == -999, NA, hdl)
+ldl <- ifelse(ldl == -999, NA, ldl)
+total_chol <- ifelse(total_chol == -999, NA, total_chol)
+triglycerides <- ifelse(triglycerides == -999, NA, triglycerides)
+hba1c <- ifelse(hba1c == -999, NA, hba1c)
+glucose <- ifelse(glucose == -999, NA, glucose)
+
+lipidgluc <- data.frame(
+  Date = format(visit_date, "%m/%d/%Y"),
+  HDL = round(hdl, 1),
+  LDL = round(ldl, 1),
+  Total_Cholesterol = round(total_chol, 1),
+  Triglycerides = round(triglycerides, 1),
+  HbA1c = round(hba1c, 2),
+  Glucose = round(glucose, 1)
+)
+
+missing_lipidgluc <- apply(lipidgluc[, 2:ncol(lipidgluc)], 1, function(x) {
+  all(is.na(x))
+})
+
+if (!all(missing_lipidgluc)) {
+  BRIDGE21::format_quarto(
+    "sections/lifestyle/latex/lipidglucose.tex",
+    type = "input"
+  )
+
+  lipidgluc_labels <- c(
+    "Date",
+    "HDL",
+    "LDL",
+    "Total Cholesterol",
+    "Triglycerides",
+    "HbA1c (%)",
+    "Glucose"
+  )
+
+  ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
+
+  flextable::flextable(lipidgluc) |>
+    flextable::set_header_labels(values = lipidgluc_labels) |>
+    flextable::width(j = 1:ncol(lipidgluc), width = 1) |>
+    flextable::align(part = "all", align = "center") |>
+    flextable::bold(part = "header") |>
+    flextable::add_footer_row(
+      values = ft_footnote,
+      colwidths = ncol(lipidgluc)
+    )
+}
+
+BRIDGE21::format_quarto(type = "newpage")
+```
