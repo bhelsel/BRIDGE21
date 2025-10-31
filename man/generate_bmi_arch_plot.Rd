@@ -4,12 +4,14 @@
 \alias{generate_bmi_arch_plot}
 \title{generate_bmi_arch_plot}
 \usage{
-generate_bmi_arch_plot(wt, ht)
+generate_bmi_arch_plot(wt, ht, metric = TRUE)
 }
 \arguments{
-\item{wt}{Research participant's weight in pounds}
+\item{wt}{Research participant's weight in kilograms or pounds}
 
-\item{ht}{Research participant's height in inches}
+\item{ht}{Research participant's height in centimeters or inches}
+
+\item{metric}{A parameter to inform the function of using the metric units of kilograms and centimeters, Default: TRUE}
 }
 \value{
 An arch plot of the participants body mass index and its associated risk level.

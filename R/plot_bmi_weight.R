@@ -1,8 +1,9 @@
 #' @title generate_bmi_arch_plot
 #' @description Generates an arch plot of the participant's body mass index and
 #'     its associated risk level for cardiometabolic conditions.
-#' @param wt Research participant's weight in pounds
-#' @param ht Research participant's height in inches
+#' @param wt Research participant's weight in kilograms or pounds
+#' @param ht Research participant's height in centimeters or inches
+#' @param metric A parameter to inform the function of using the metric units of kilograms and centimeters, Default: TRUE
 #' @return An arch plot of the participants body mass index and its associated risk level.
 #' @details Generates an arch plot of the participant's body mass index and
 #'     its associated risk level for cardiometabolic conditions.
@@ -12,7 +13,7 @@
 #' @export
 #' @importFrom ggplot2 geom_polygon aes geom_text ggplot geom_rect annotate scale_x_continuous scale_y_continuous coord_radial theme_void
 
-generate_bmi_arch_plot <- function(wt, ht) {
+generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
   # Define internal BMI functions ----
 
   add_bmi_arrow <- function(bmi, curve = 0.75) {
@@ -58,8 +59,8 @@ generate_bmi_arch_plot <- function(wt, ht) {
 
   # Create BMI Plot ----
 
-  wt_kg <- wt / 2.205
-  ht_m <- (ht * 2.54) / 100
+  wt_kg <- ifelse(!metric, wt / 2.205, wt)
+  ht_m <- ifelse(!metric, (ht * 2.54) / 100, ht / 100)
   bmi <- wt_kg / ht_m^2
 
   if (bmi > 34) {
@@ -121,8 +122,9 @@ generate_bmi_arch_plot <- function(wt, ht) {
 #' @title generate_weight_bar_plot
 #' @description Generates a bar plot of the participant's weight and its
 #'     comparison to the weight at a healthy body mass index.
-#' @param wt Research participant's weight in pounds
-#' @param ht Research participant's height in inches
+#' @param wt Research participant's weight in kilograms or pounds
+#' @param ht Research participant's height in centimeters or inches
+#' @param metric A parameter to inform the function of using the metric units of kilograms and centimeters, Default: TRUE
 #' @return A bar plot of the participant's weight and its comparison to the weight at a healthy body mass index.
 #' @details Generates a bar plot of the participant's weight and its
 #'     comparison to the weight at a healthy body mass index.
@@ -132,11 +134,17 @@ generate_bmi_arch_plot <- function(wt, ht) {
 #' @export
 #' @importFrom ggplot2 geom_segment aes geom_point annotate ggplot geom_rect geom_hline geom_vline scale_x_continuous scale_y_continuous labs coord_fixed theme element_text margin element_blank element_line unit element_rect
 
-generate_weight_bar_plot <- function(wt, ht) {
+generate_weight_bar_plot <- function(wt, ht, metric = TRUE) {
   # Define internal weight functions ----
 
-  calculate_bmi_weight_ranges <- function(ht) {
-    ht_m <- (ht * 2.54) / 100
+  calculate_bmi_weight_ranges <- function(wt, ht, metric) {
+    if (metric) {
+      ht_m <- ht / 100
+      wt = round(wt * 2.205, 1)
+    } else {
+      ht_m <- (ht * 2.54) / 100
+    }
+
     bmi_cutoffs <- c(10, 18.5, 24.9, 29.9, 60)
     weight_cutoffs <- bmi_cutoffs * (ht_m^2) * 2.205
     plot_max_weight <- weight_cutoffs[5] + 70
@@ -203,7 +211,7 @@ generate_weight_bar_plot <- function(wt, ht) {
   }
 
   # Create weight plot ----
-  info <- calculate_bmi_weight_ranges(ht)
+  info <- calculate_bmi_weight_ranges(wt, ht, metric)
   category_fills <- c("#ADD8E6", "#90EE90", "#FDEE8C", "#F08080")
   ggplot2::ggplot() +
     ggplot2::geom_rect(
