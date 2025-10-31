@@ -9,7 +9,11 @@
 
 # Down Syndrome Mental Status Exam
 dsmse_variables <- c("dsmsett2", "dsvistt2", "dssmtot2", "dsmmtot2", "dslgtot2")
-dsmse_df <- BRIDGE21::get_database_values(!!!dsmse_variables, data = data)
+dsmse_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!dsmse_variables,
+  data = data
+)
 if (all(apply(dsmse_df[, dsmse_variables], 2, is.na))) {
   params$kuadrc_dsmse <- params$bold_dsmse <- FALSE
 }
@@ -17,17 +21,30 @@ if (all(apply(dsmse_df[, dsmse_variables], 2, is.na))) {
 
 # Modified Cued Recall Test
 mcrt_variables <- c("dscrttfr", "dsccttcr")
-mcrt_df <- BRIDGE21::get_database_values(!!!mcrt_variables, data = data)
-if (all(apply(mcrt_df[, mcrt_variables], 2, is.na))) {
+mcrt_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!mcrt_variables,
+  data = data
+)
+if (
+  all(apply(mcrt_df[, mcrt_variables], 2, is.na)) |
+    all(mcrt_df[, mcrt_variables] == 0)
+) {
   params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
 }
 
 # National Task Group - Early Detection and Screen for Dementia (NTG-EDSD)
-ntgedsd <- colnames(dplyr::select(data, dsadl1:dsother6))
-ntgedsd_df <- BRIDGE21::get_database_values(!!!ntgedsd, data = data)
+ntgedsd_names <- colnames(dplyr::select(data, dsadl1:dsother6))
+ntgedsd_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!ntgedsd_names,
+  data = data
+)
+
 if (rlang::is_empty(ntgedsd_df)) {
   params$kuadrc_ntgedsd <- params$bold_ntgedsd <- FALSE
 }
+
 
 # Vineland Adaptive Behavior Scale
 vineland_variables <- c(
@@ -36,9 +53,16 @@ vineland_variables <- c(
   "vnld_dlivss",
   "vnld_soclss"
 )
-vineland_df <- BRIDGE21::get_database_values(!!!vineland_variables, data = data)
-if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
-  params$bold_vineland <- FALSE
+
+if (params$bold_cognition) {
+  vineland_df <- BRIDGE21::get_database_values(
+    !!date,
+    !!!vineland_variables,
+    data = data
+  )
+  if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
+    params$bold_vineland <- FALSE
+  }
 }
 
 after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |

@@ -4,6 +4,7 @@
 #| eval: !expr (params$kuadrc_blood_pressure) | (params$bold_blood_pressure)
 
 blood_pressure <- blood_pressure %>%
+  BRIDGE21::format_date(!!date_expr) %>%
   dplyr::mutate(
     bpsys_cat = BRIDGE21:::classify_blood_pressure(bpsys, type = "systolic"),
     bpdias_cat = BRIDGE21:::classify_blood_pressure(bpdias, type = "diastolic"),
@@ -17,11 +18,10 @@ blood_pressure <- blood_pressure %>%
   )
 
 BRIDGE21::format_quarto("sections/lifestyle/latex/bp.tex", type = "input")
-blood_pressure$date_of_visit <- visit$formatted_date_of_visit
 
 bpft <-
   blood_pressure %>%
-  dplyr::select(date_of_visit, bpsys, bpdias, bp_cat) %>%
+  dplyr::select(Date, bpsys, bpdias, bp_cat) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(
     values = c("Date", "Systolic", "Diastolic", "Cateogry")

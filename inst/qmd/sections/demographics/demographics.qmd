@@ -18,27 +18,26 @@ intake$subject_birthdate <- as.Date(
   tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
 )
 
+date <- c("visitmo", "visitday", "visityr")
+date_expr <- rlang::expr(visitmo / visitday / visityr)
+
 visit <- BRIDGE21::get_database_values(
-  visitmo,
-  visitday,
-  visityr,
+  !!!date,
   sex,
   final_impression,
   data = data,
   event_name = redcap_event_name
 )
 
-visit$date_of_visit <- as.Date(
-  BRIDGE21::add_string(
-    visit$visityr + "/" + visit$visitmo + "/" + visit$visitday
-  )
-)
+visit <- BRIDGE21::format_date(visit, !!date_expr)
 
-visit$formatted_date_of_visit <- format(visit$date_of_visit, "%m/%d/%Y")
-
-visit$age_at_visit <- floor(
-  as.numeric(visit$date_of_visit - intake$subject_birthdate) / 365.25
-)
+visit$age_at_visit <-
+  visit$Date %>%
+  as.Date(format = "%m/%d/%Y") %>%
+  {
+    as.numeric((. - intake$subject_birthdate) / 365.25)
+  } %>%
+  floor()
 
 ```
 
@@ -65,8 +64,9 @@ name <- BRIDGE21::add_string(
   "Name: " + intake$subject_fname + " " + intake$subject_lname
 )
 lastvisit <- BRIDGE21::add_string(
-  "Last Visit: " + format(max(visit$date_of_visit), "%B %d, %Y")
+  "Last Visit: " + tail(visit$Date, 1)
 )
+
 age <- BRIDGE21::add_string("Age: " + max(visit$age_at_visit) + " Years")
 
 subjinfo_df <- data.frame(col1 = c(name, lastvisit), col2 = c(age, ""))
@@ -91,7 +91,7 @@ BRIDGE21::format_quarto(type = "newpage")
 
 ```{r extract person information from bold study used for other parts of the report}
 #| echo: false
-#| eval: !expr (any(params[grepl("bold, names(params))] == TRUE))
+#| eval: !expr (any(params[grepl("bold", names(params))] == TRUE))
 
 intake <- BRIDGE21::get_database_values(
   firstname,
@@ -107,13 +107,16 @@ intake$scrn_dob <- as.Date(
   tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
 )
 
+date <- date_expr <- "visitdt"
+
 visit <- BRIDGE21::get_database_values(
-  visitdt,
+  !!date,
   data = data,
   event_name = redcap_event_name
 )
 
-visit$formatted_date_of_visit <- format(visit$visitdt, "%m/%d/%Y")
+
+visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, visitdt)[["Date"]]
 
 visit$age_at_visit <- floor(
   as.numeric(visit$visitdt - intake$scrn_dob) / 365.25

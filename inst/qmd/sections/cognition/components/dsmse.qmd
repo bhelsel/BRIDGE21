@@ -13,11 +13,9 @@ BRIDGE21::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
 dsmse_labels <- c("Total Score", "Visual Spatial", "Memory", "Language")
 
 dsmse_df %>%
-  dplyr::mutate(
-    date_of_visit = visit$formatted_date_of_visit,
-    dsmemtot = dssmtot2 + dsmmtot2
-  ) %>%
-  dplyr::select(date_of_visit, dsmsett2, dsvistt2, dsmemtot, dslgtot2) %>%
+  BRIDGE21::format_date(!!date_expr) %>%
+  dplyr::mutate(dsmemtot = dssmtot2 + dsmmtot2) %>%
+  dplyr::select(Date, dsmsett2, dsvistt2, dsmemtot, dslgtot2) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", dsmse_labels)) %>%
   flextable::width(j = 1:5, width = 1.15) %>%

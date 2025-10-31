@@ -16,11 +16,9 @@ BRIDGE21::format_quarto(
 mcrt_labels <- c("Total Recall", "Free Recall", "Cued Recall")
 
 mcrt_df %>%
-  dplyr::mutate(
-    date_of_visit = visit$formatted_date_of_visit,
-    dscrttr = dscrttfr + dsccttcr
-  ) %>%
-  dplyr::select(date_of_visit, dscrttr, dplyr::all_of(mcrt_variables)) %>%
+  BRIDGE21::format_date(!!date_expr) %>%
+  dplyr::mutate(dscrttr = dscrttfr + dsccttcr) %>%
+  dplyr::select(Date, dscrttr, dplyr::all_of(mcrt_variables)) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", mcrt_labels)) %>%
   flextable::width(j = 1:4, width = 1.15) %>%

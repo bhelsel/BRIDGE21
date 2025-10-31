@@ -18,15 +18,21 @@ BRIDGE21::format_quarto(
   type = "strwrap"
 )
 
+# Blood Pressure
+
 blood_pressure <-
   BRIDGE21::get_database_values(
+    !!!date,
     bpsys,
     bpdias,
     data = data
   )
-if (rlang::is_empty(blood_pressure)) {
+
+if (nrow(blood_pressure) == 0) {
   params$kuadrc_blood_pressure <- params$bold_blood_pressure <- FALSE
 }
+
+# Physical Activity
 
 if (!is.null(params$accelres)) {
   accel_df <- tryCatch(
@@ -44,47 +50,45 @@ if (!is.null(params$accelres)) {
   params$kuadrc_activity <- params$bold_activity <- FALSE
 }
 
+# Body Mass Index
+
 if (params$kuadrc_bmi) {
-  anthro <- BRIDGE21::get_database_values(weight, height, data = data)
-  missing_bmi <- (length(anthro$weight) == 0 | length(anthro$height) == 0) |
-    length(anthro$weight) != length(anthro$height)
-} else if (params$bold_bmi) {
-  anthro <- BRIDGE21::get_database_values(
-    average_height,
-    average_weight,
-    bmi_calc,
-    data = data
-  )
-  missing_bmi <- (length(anthro$average_weight) == 0 |
-    length(anthro$average_height) == 0) |
-    length(anthro$average_weight) != length(anthro$average_height)
+  anthrovars <- c("weight", "height")
+} else {
+  anthrovars <- c("average_weight", "average_height")
 }
-if (rlang::is_empty(bmi)) {
+
+anthro <- BRIDGE21::get_database_values(!!!anthrovars, data = data)
+
+check_missing_wt_ht <- function(wt, ht) {
+  len <- c(wt = length(wt), ht = length(ht))
+  noWtHt <- (len[["wt"]] == 0 | len[["ht"]] == 0) | len[["wt"]] != len[["ht"]]
+  return(data.frame(lenWt = len[["wt"]], lenHt = len[["ht"]], noWtHt))
+}
+
+bmiCheck <- check_missing_wt_ht(anthro[[1]], anthro[[2]])
+
+if (bmiCheck[["noWtHt"]]) {
   params$kuadrc_bmi <- params$bold_bmi <- FALSE
 }
 
-if (params$kuadrc_dxa) {
-  dxa <- BRIDGE21::get_database_values(
-    fittest_date,
-    mass,
-    lean,
-    fat,
-    total_fat,
-    dxa_bmd_z,
-    data = data
-  )
-} else if (params$bold_dxa) {
-  dxa <- BRIDGE21::get_database_values(
-    visitdt,
-    dxa_total_kg,
-    dxa_lean_g,
-    dxa_fat_g,
-    fxa_fat_percent,
-    dxa_bmd_z,
-    data = data
+# DXA Scan
+
+dxaNames <- dxaVars <- c("mass", "lean", "fat", "total_fat", "dxa_bmd_z")
+
+if (params$bold_dxa) {
+  dxaVars <- c(
+    "dxa_total_kg",
+    "dxa_lean_g",
+    "dxa_fat_g",
+    "dxa_fat_percent",
+    "dxa_bmd_z"
   )
 }
-if (rlang::is_empty(dxa)) {
+
+dxa <- BRIDGE21::get_database_values(!!!date, !!!dxaVars, data = data)
+
+if (nrow(dxa) == 0) {
   params$kuadrc_dxa <- params$bold_dxa <- FALSE
 }
 

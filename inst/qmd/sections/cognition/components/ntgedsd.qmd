@@ -20,28 +20,31 @@ ntgedsd_domains <- list(
   other = "Significant Changes Observed by Others"
 )
 
-ntgedsd_df <- purrr::imap_dfc(
-  ntgedsd_domains,
-  ~ BRIDGE21::calculate_ntgedsd(
-    ntgedsd_df,
-    domain = .y,
-    label = .x
+ntgedsd_scores <-
+  purrr::imap_dfc(
+    ntgedsd_domains,
+    ~ BRIDGE21::calculate_ntgedsd(
+      ntgedsd_df[ntgedsd_names],
+      domain = .y,
+      label = .x
+    )
   )
-)
+
+ntgedsd_scores[date] <- ntgedsd_df[date]
 
 BRIDGE21::format_quarto(
   "sections/cognition/latex/ntgedsd.tex",
   type = "input"
 )
 
-ntgedsd_df %>%
-  dplyr::mutate(date_of_visit = visit$formatted_date_of_visit) %>%
+ntgedsd_scores %>%
+  BRIDGE21::format_date(!!date_expr) %>%
   tidyr::pivot_longer(
     cols = dplyr::all_of(unname(unlist(ntgedsd_domains))),
     names_to = "Category"
   ) %>%
   tidyr::pivot_wider(
-    names_from = date_of_visit,
+    names_from = Date,
     values_from = value
   ) %>%
   flextable::flextable() %>%
