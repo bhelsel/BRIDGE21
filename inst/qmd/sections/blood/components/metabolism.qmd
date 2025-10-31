@@ -1,0 +1,60 @@
+```{r display lipid and glucose table for the bold study, ft.align = "left"}
+#| echo: false
+#| results: asis
+#| fig-align: center
+#| eval: !expr params$bold_metabolism
+
+metabolism <- BRIDGE21::get_database_values(
+  hdl_mgdl,
+  ldl_mgdl,
+  totchol_mgdl,
+  triglyc_mgdl,
+  hba1c,
+  glucose,
+  data = data
+)
+
+metabolism <- purrr::modify(metabolism, ~ ifelse(.x == -999, NA, .x))
+
+missing_metabolism <- apply(metabolism, 1, function(x) {
+  all(is.na(x))
+})
+
+if (!all(missing_metabolism)) {
+  BRIDGE21::format_quarto(
+    "sections/blood/latex/metabolism.tex",
+    type = "input"
+  )
+
+  ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
+
+  metabolism %>%
+    dplyr::mutate(Date = visit$formatted_date_of_visit) %>%
+    dplyr::select(
+      Date,
+      HDL = hdl_mgdl,
+      LDL = ldl_mgdl,
+      `Total Cholesterol` = totchol_mgdl,
+      Triglycerides = triglyc_mgdl,
+      `HbA1c (%)` = hba1c,
+      Glucose = glucose
+    ) %>%
+    tidyr::pivot_longer(cols = HDL:Glucose, names_to = "Variable") %>%
+    tidyr::pivot_wider(names_from = Date, values_from = value) %>%
+    flextable::flextable() %>%
+    flextable::width(width = 1.5) %>%
+    flextable::align(
+      j = 2:(nrow(metabolism) + 1),
+      part = "all",
+      align = "center"
+    ) %>%
+    flextable::bold(part = "header") %>%
+    flextable::add_footer_row(
+      values = ft_footnote,
+      colwidths = nrow(metabolism) + 1
+    )
+}
+
+BRIDGE21::format_quarto(type = "newpage")
+
+```
