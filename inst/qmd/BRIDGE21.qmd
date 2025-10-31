@@ -45,22 +45,18 @@ data <- readr::read_csv(
   show_col_types = FALSE
 )
 
-data <- data[data$ptid == params$id, ]
+if (any(params[grepl("kuadrc", names(params))] == TRUE)) {
+  data <- data[data$ptid == params$id, ]
+}
+
+if (any(params[grepl("bold", names(params))] == TRUE)) {
+  id <- data[which(data$id == params$id), "record_id", drop = TRUE]
+  data <- data[data$record_id == id, ]
+}
 
 # For Testing
 # data <- readr::read_csv(system.file("extdata/example.csv", package = "BRIDGE21"))
-
-# BOLD data
-
-# ---Julianne's Computer---
-# path <- "p:/IRB_STUDY00150542_BOLD/Disclosure Reports/data for testing/BOLDRCT-12MonthDisclosureRep_DATA_2025-10-28_2138.csv"
-
-# ---Brian's Computer---
-# path <- '/Volumes/IRB_STUDY00150542_BOLD/Disclosure Reports/data for testing/BOLDRCT-12MonthDisclosureRep_DATA_2025-10-28_2138.csv'
-
-# data <- readr::read_csv(path, show_col_types = FALSE)
-# id <- data[which(data$id == 1005), "record_id", drop = TRUE]
-# data <- data[data$record_id == id, ]
+# params <- BRIDGE21:::generate_report_params("kuadrc")
 
 ```
 
