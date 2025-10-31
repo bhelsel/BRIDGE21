@@ -5,15 +5,17 @@
 \title{generate_report}
 \usage{
 generate_report(
+  ...,
   id,
   datafile,
   outputdir,
   acceldir = NULL,
-  reports = NULL,
   example_report = FALSE
 )
 }
 \arguments{
+\item{...}{A vector of unquoted or quoted reports to generate from .allReports}
+
 \item{id}{The patient id as represented in the study database}
 
 \item{datafile}{The path name of the file containing the data as a .csv file}
@@ -21,8 +23,6 @@ generate_report(
 \item{outputdir}{The path name of the directory containing the participant feedback reports}
 
 \item{acceldir}{The path name of the directory containing the raw .gt3x accelerometer files, Default = NULL}
-
-\item{reports}{A vector of reports to generate including cognition, mri, pet, blood, apoe, activity, and lifestyle, Default = NULL returns all available reports,}
 
 \item{example_report}{Used with outputdir to generate a sample report using example data, Default = FALSE}
 }
