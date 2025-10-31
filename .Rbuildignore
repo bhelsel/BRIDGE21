@@ -2,7 +2,6 @@
 ^LICENSE\.md$
 ^BRIDGE21\.Rproj$
 .vscode
-inst/images
-inst/extdata
+^inst/images/(?!(blood_pressure|axialImage|sagittalImage)\.png$)
 inst/qmd/sections/resources/TheSuperSix/BrainSuperSix.jpeg
 inst/qmd/sections/resources/TheSuperSix/TheSuperSix.ai
