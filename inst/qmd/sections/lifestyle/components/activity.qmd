@@ -2,7 +2,7 @@
 ```{r display text and plot for the accelerometer data for the kuadrc cohort}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_activity) | (params$bold)
+#| eval: !expr params$kuadrc_activity
 
 accel_df_subset <- BRIDGE21:::retrieve_accel_summary(data = accel_df)
 
