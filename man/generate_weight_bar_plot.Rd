@@ -4,12 +4,14 @@
 \alias{generate_weight_bar_plot}
 \title{generate_weight_bar_plot}
 \usage{
-generate_weight_bar_plot(wt, ht)
+generate_weight_bar_plot(wt, ht, metric = TRUE)
 }
 \arguments{
-\item{wt}{Research participant's weight in pounds}
+\item{wt}{Research participant's weight in kilograms or pounds}
 
-\item{ht}{Research participant's height in inches}
+\item{ht}{Research participant's height in centimeters or inches}
+
+\item{metric}{A parameter to inform the function of using the metric units of kilograms and centimeters, Default: TRUE}
 }
 \value{
 A bar plot of the participant's weight and its comparison to the weight at a healthy body mass index.

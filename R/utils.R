@@ -229,3 +229,149 @@ expand_reports <- function(reports, sub_reports = .subReports) {
 
   result
 }
+
+
+#' Calculate Body Mass Index (BMI)
+#'
+#' @description
+#' Calculates BMI from weight and height columns in a data frame. Handles both
+#' metric and imperial units with automatic conversion to metric for calculation.
+#'
+#' @param data A data frame containing weight and height columns
+#' @param weight Column name for weight (unquoted). Should be in kg for metric
+#'   or pounds for imperial units
+#' @param height Column name for height (unquoted). Should be in cm for metric
+#'   or inches for imperial units
+#' @param units Character string specifying the unit system. Either "metric"
+#'   (default) or "imperial"
+#'
+#' @return The input data frame with an additional `bmi` column containing
+#'   calculated BMI values
+#'
+#' @details
+#' BMI is calculated using the formula: weight (kg) / (height (m))^2
+#'
+#' For imperial units, the function converts:
+#' - Weight: pounds to kg (divide by 2.205)
+#' - Height: inches to cm (multiply by 2.54)
+#'
+#' @examples
+#' # Metric units (kg and cm)
+#' df_metric <- data.frame(weight_kg = c(70, 80), height_cm = c(170, 180))
+#' calculate_bmi(df_metric, weight_kg, height_cm, units = "metric")
+#'
+#' # Imperial units (pounds and inches)
+#' df_imperial <- data.frame(weight_lbs = c(154, 176), height_in = c(67, 71))
+#' calculate_bmi(df_imperial, weight_lbs, height_in, units = "imperial")
+#'
+#' @export
+
+calculate_bmi <- function(
+  data,
+  weight,
+  height,
+  units = c("metric", "imperial")
+) {
+  units <- match.arg(units)
+  expr <- rlang::expr(!!rlang::enquo(weight) / (!!rlang::enquo(height) / 100)^2)
+  wt <- rlang::ensym(weight)
+  ht <- rlang::ensym(height)
+
+  if (units == "imperial") {
+    data[[wt]] <- data[[wt]] / 2.205
+    data[[ht]] <- data[[ht]] * 2.54
+  }
+
+  data$bmi <- rlang::eval_tidy(expr, data = data)
+  return(data)
+}
+
+#' Format Date Columns
+#'
+#' @description
+#' Formats date information into a standardized "Date" column with mm/dd/yyyy
+#' format. Handles single date columns or composite dates built from separate
+#' month, day, and year columns using tidy evaluation.
+#'
+#' @param data A data frame containing date information
+#' @param date Date specification (unquoted). Can be:
+#'   - A single column name (e.g., `visitdt`)
+#'   - Composite date using `/` operator (e.g., `visitmo/visitday/visityr`)
+#'   - A `paste()` expression (e.g., `paste(visitmo, visitday, visityr, sep = "/")`)
+#'
+#' @return The input data frame with a "Date" column formatted as "mm/dd/yyyy".
+#'   For single column input, the original column is renamed to "Date". For
+#'   composite dates, the "Date" column is added while preserving original columns.
+#'
+#' @details
+#' The function uses rlang metaprogramming to accept unquoted column names.
+#'
+#' For composite dates using the `/` operator, the function:
+#' 1. Intercepts the expression before numeric division occurs
+#' 2. Converts it to a paste operation to create date strings
+#' 3. Parses the strings as dates using the "%m/%d/%Y" format
+#'
+#' For single date columns, the function attempts to parse using `as.Date()`
+#' which handles common date formats automatically.
+#'
+#' @examples
+#' # Single date column
+#' df1 <- data.frame(visitdt = c("2024-01-15", "2024-02-20"))
+#' format_date(df1, visitdt)
+#'
+#' # Composite date from separate columns using / operator
+#' df2 <- data.frame(
+#'   visitmo = c(1, 2),
+#'   visitday = c(15, 20),
+#'   visityr = c(2024, 2024)
+#' )
+#' format_date(df2, visitmo/visitday/visityr)
+#'
+#' # Composite date using paste()
+#' format_date(df2, paste(visitmo, visitday, visityr, sep = "/"))
+#'
+#' @export
+
+format_date <- function(data, date) {
+  # Capture the date expression without evaluating it
+
+  date <- rlang::enexpr(date)
+
+  # Check if it's a composite expression (e.g., visitmo/visitday/visityr)
+  if (rlang::is_call(date, "/")) {
+    extract_parts <- function(expr) {
+      if (rlang::is_call(expr, "/")) {
+        c(extract_parts(expr[[2]]), extract_parts(expr[[3]]))
+      } else {
+        list(expr)
+      }
+    }
+
+    parts <- extract_parts(date)
+    paste_expr <- rlang::expr(paste(!!!parts, sep = "/"))
+
+    # Evaluate the expression to create the date string
+    data <- data %>%
+      dplyr::mutate(Date = !!paste_expr, .before = 1) %>%
+      dplyr::mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>%
+      dplyr::select(-c(!!!parts))
+  } else if (rlang::is_call(date, "paste")) {
+    data <- data %>%
+      dplyr::mutate(Date = !!date, .before = 1) %>%
+      dplyr::mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
+  } else {
+    # Single column case - rename and format
+    col_name <- rlang::as_string(date)
+
+    data <- data %>%
+      dplyr::rename(Date = !!date) %>%
+      dplyr::relocate(Date, .before = 1) %>%
+      dplyr::mutate(Date = as.Date(Date))
+  }
+
+  # Format as character in month/day/year format
+  data <- data %>%
+    dplyr::mutate(Date = format(Date, "%m/%d/%Y"))
+
+  return(data)
+}

@@ -1,13 +1,11 @@
-
-```{r display body composition table and plot for the kuadrc cohort, ft.align = "left"}
+```{r display body composition table and plot for the kuadrc cohort or bold study, ft.align = "left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_dxa
+#| eval: !expr (params$kuadrc_dxa) | (params$bold_dxa)
 
-dxa$fittest_date <- as.Date(
-  dxa$fittest_date,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
-)
+dxa <- BRIDGE21::format_date(dxa, !!date_expr)
+
+colnames(dxa)[2:ncol(dxa)] <- dxaNames
 
 dxa[dxa == -999] <- NA
 
@@ -24,11 +22,23 @@ dxa <- dxa %>%
     dplyr::across(mass:fat, ~ round(.x * 2.205, 1))
   )
 
+sex <- ifelse(params$kuadrc_dxa, visit$sex, intake$sex)
+
+dob <- as.Date(
+  ifelse(
+    params$kuadrc_dxa,
+    intake$subject_birthdate,
+    intake$scrn_dob
+  )
+)
+
+dxa_date <- ifelse(params$kuadrc_dxa, visit$Date, visit$Date)
+
 body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
   total_fat = tail(na.omit(dxa$total_fat), 1),
-  subject_sex = visit$sex[1],
-  subject_birthdate = intake$subject_birthdate,
-  fittest_date = tail(na.omit(dxa$fittest_date), 1)
+  subject_sex = sex,
+  subject_birthdate = dob,
+  fittest_date = tail(dxa_date, 1)
 )
 
 # Adjust alignment on Quarto ouput
@@ -54,7 +64,6 @@ if ("dxa_bmd_z" %in% colnames(dxa)) {
 }
 
 dxa %>%
-  dplyr::mutate(fittest_date = format(fittest_date, "%m/%d/%Y")) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(
     values = dxa_labels
@@ -68,7 +77,7 @@ dxa %>%
   )
 
 
-paste("", "![](body_fat_percent_plot.png)", "") |>
+paste("", "![](body_fat_percent_plot.png)", "") %>%
   cat(sep = "\n")
 
 if ("dxa_bmd_z" %in% colnames(dxa)) {

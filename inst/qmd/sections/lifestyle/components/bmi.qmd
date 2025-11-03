@@ -1,31 +1,40 @@
-```{r display body mass index table and plot for the kuadrc cohort, ft.align = "left"}
+```{r display body mass index table and plot for the kuadrc cohort and bold study, ft.align = "left"}
 #| echo: false
 #| results: asis
 #| fig-align: center
-#| eval: !expr params$kuadrc_bmi
+#| eval: !expr (params$kuadrc_bmi) | (params$bold_bmi)
 
-weight_lbs_last = anthro$weight[length(anthro$weight)]
-height_in_last = anthro$height[length(anthro$height)]
-bmi_last <- round(
-  (weight_lbs_last / 2.205) / ((height_in_last * 2.54) / 100)^2,
-  1
-)
+if (params$kuadrc_bmi) {
+  anthro <- BRIDGE21::calculate_bmi(anthro, weight, height, units = "imperial")
+} else if (params$bold_bmi) {
+  anthro <- BRIDGE21::calculate_bmi(
+    anthro,
+    average_weight,
+    average_height,
+    units = "metric"
+  )
+}
+
 
 ltex <- paste(
   readLines("sections/lifestyle/latex/bmi.tex"),
   collapse = "\n"
 )
 
+
 ltex <- glue::glue(
   ltex,
-  bmiLast = bmi_last,
+  bmiLast = round(anthro[[bmiCheck$lenWt, "bmi"]], 1),
   .open = "{{",
   .close = "}}"
 )
 
 cat(paste0("", ltex, ""), sep = "\n")
 
-bmi_plot <- BRIDGE21::generate_bmi_arch_plot(weight_lbs_last, height_in_last)
+bmi_plot <- BRIDGE21::generate_bmi_arch_plot(
+  anthro[[bmiCheck$lenWt, 1]],
+  anthro[[bmiCheck$lenHt, 2]]
+)
 
 # Adjust alignment on Quarto ouput
 bmi_plot <- bmi_plot +
@@ -40,8 +49,8 @@ ggplot2::ggsave(
 )
 
 weight_plot <- BRIDGE21::generate_weight_bar_plot(
-  weight_lbs_last,
-  height_in_last
+  anthro[[bmiCheck$lenWt, 1]],
+  anthro[[bmiCheck$lenHt, 2]]
 )
 
 ggplot2::ggsave(
@@ -58,3 +67,4 @@ paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
 BRIDGE21::format_quarto(type = "newpage")
 
 ```
+

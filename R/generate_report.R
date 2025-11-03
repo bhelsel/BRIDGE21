@@ -4,7 +4,7 @@
 #' @param datafile The path name of the file containing the data as a .csv file
 #' @param outputdir The path name of the directory containing the participant feedback reports
 #' @param acceldir The path name of the directory containing the raw .gt3x accelerometer files, Default = NULL
-#' @param reports A vector of reports to generate including cognition, mri, pet, blood, apoe, activity, and lifestyle, Default = NULL returns all available reports,
+#' @param ... A vector of unquoted or quoted reports to generate from .allReports
 #' @param example_report Used with outputdir to generate a sample report using example data, Default = FALSE
 #' @return The location of the participant feedback report
 #' @details Generates a Quarto pdf report containing participant feedback from the study visit
@@ -20,11 +20,11 @@
 #' @importFrom quarto quarto_render
 
 generate_report <- function(
+  ...,
   id,
   datafile,
   outputdir,
   acceldir = NULL,
-  reports = NULL,
   example_report = FALSE
 ) {
   if (outputdir == getwd()) {
@@ -35,39 +35,40 @@ generate_report <- function(
     )
   }
 
-  allReports <- unname(unlist(purrr::imap(.allReports, ~ paste0(.y, "_", .x))))
-
-  if (is.null(reports)) {
-    reports <- allReports
-  } else if (length(reports) == 1 & any(reports %in% names(.allReports))) {
-    reports <- allReports[grepl(reports, allReports)]
-  } else if (any(reports %in% allReports)) {
-    reports <- allReports[allReports %in% reports]
-  } else {
-    stop("Could not match the reports.")
-  }
-
-  reports <- lapply(allReports, FUN = function(x) {
-    ifelse(x %in% reports, TRUE, FALSE)
-  })
-
-  names(reports) <- allReports
-
-  reports <- expand_reports(reports)
+  reports <- rlang::ensyms(...)
 
   if (example_report) {
+    reports <- reports[grepl("kuadrc", reports)]
     id = "test_jayhawk"
     datafile = system.file("extdata/example.csv", package = "BRIDGE21")
   }
 
-  data <- readr::read_csv(
-    datafile,
-    show_col_types = FALSE,
-    col_select = c(ptid, coenrol_studyid)
-  )
-  if (!id %in% unique(data$ptid)) {
-    stop(sprintf("We did not find patient ID %s in the dataset", id))
+  reports <- generate_report_params(reports)
+
+  prefix <- unique(sub("_.*", "", names(reports[reports == TRUE])))
+
+  if (prefix == "kuadrc") {
+    data <- readr::read_csv(
+      datafile,
+      show_col_types = FALSE,
+      col_select = c(ptid, coenrol_studyid)
+    )
+    if (!id %in% unique(data$ptid)) {
+      stop(sprintf("We did not find patient ID %s in the dataset", id))
+    }
   }
+
+  if (prefix == "bold") {
+    data <- readr::read_csv(
+      datafile,
+      show_col_types = FALSE,
+      col_select = c(record_id, id)
+    )
+    if (!id %in% unique(data$id)) {
+      stop(sprintf("We did not find patient ID %s in the dataset", id))
+    }
+  }
+
   # Create new directories
   persondir <- file.path(outputdir, id)
   if (!dir.exists(persondir)) {
@@ -87,7 +88,7 @@ generate_report <- function(
       from = mriFiles,
       to = file.path(imagedir, basename(mriFiles))
     ))
-  } else {
+  } else if (prefix == "kuadrc") {
     invisible(save_xnat_images(imagedir, data, id))
   }
 
@@ -108,12 +109,13 @@ generate_report <- function(
 
   # Copy the qmd file from the CohortT21Disclosure package to render locally
   qmdfolder <- system.file("qmd", package = "BRIDGE21")
-  if (!dir.exists(id)) {
-    dir.create(id)
+  if (!dir.exists(as.character(id))) {
+    dir.create(as.character(id))
   }
+
   invisible(file.copy(
     from = list.files(qmdfolder, full.names = TRUE),
-    to = id,
+    to = as.character(id),
     recursive = TRUE,
     overwrite = TRUE
   ))
@@ -151,15 +153,47 @@ generate_report <- function(
     overwrite = TRUE
   ))
 
-  invisible(file.copy(
-    from = file.path(getwd(), id, "_variables.yaml"),
-    to = file.path(persondir, "_variables.yaml"),
-    overwrite = TRUE
-  ))
-
   # Remove pdf file after it is copied to the output directory
   invisible(file.remove(pdffile))
   # Unlink the temporary folder to remove it
   invisible(unlink(id, recursive = TRUE))
   return(file.path(persondir, basename(pdffile)))
+}
+
+
+generate_report_params <- function(reports) {
+  # Extract prefixes (everything before the first underscore)
+  prefixes <- sub("_.*", "", reports)
+
+  # Check if there are multiple unique prefixes
+  unique_prefixes <- unique(prefixes)
+
+  if (length(unique_prefixes) > 1) {
+    cli::cli_abort(c(
+      "Reports must be from the same study.",
+      "x" = "You requested reports from {length(unique_prefixes)} different studies: {.val {unique_prefixes}}.",
+      "i" = "Please provide reports from only one study at a time."
+    ))
+  }
+
+  allReports <- unname(unlist(purrr::imap(.allReports, ~ paste0(.y, "_", .x))))
+
+  if (is.null(reports)) {
+    reports <- allReports
+  } else if (length(reports) == 1 & any(reports %in% names(.allReports))) {
+    reports <- allReports[grepl(reports, allReports)]
+  } else if (any(reports %in% allReports)) {
+    reports <- allReports[allReports %in% reports]
+  } else {
+    stop("Could not match the reports.")
+  }
+
+  reports <- lapply(allReports, FUN = function(x) {
+    ifelse(x %in% reports, TRUE, FALSE)
+  })
+
+  names(reports) <- allReports
+
+  reports <- expand_reports(reports)
+  return(reports)
 }

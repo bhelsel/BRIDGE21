@@ -3,7 +3,7 @@
 #' @param total_fat Participant's body fat percent
 #' @param subject_sex Participant's sex (1 = male, 0 = female)
 #' @param subject_birthdate Date of birth (YYYY-MM-DD)
-#' @param fittest_date Date of DXA scan (YYYY-MM-DD)
+#' @param fittest_date The date of a DXA scan in a %m/%d/%Y format
 #' @return A ggplot object
 #' @export
 #' @importFrom ggplot2 geom_segment aes geom_point annotate ggplot geom_rect geom_label geom_text scale_x_continuous scale_y_continuous labs coord_fixed theme element_text element_blank margin
@@ -15,7 +15,10 @@ generate_body_fat_plot <- function(
   fittest_date
 ) {
   age <-
-    as.numeric(as.Date(fittest_date) - as.Date(subject_birthdate)) %/% 365.25
+    as.numeric(
+      as.Date(fittest_date, "%m/%d/%Y") - as.Date(subject_birthdate)
+    ) %/%
+    365.25
 
   get_bfp_cat_norms <- function(subject_sex, age) {
     if (subject_sex == 1) {

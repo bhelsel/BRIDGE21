@@ -13,7 +13,7 @@ generate_body_fat_plot(total_fat, subject_sex, subject_birthdate, fittest_date)
 
 \item{subject_birthdate}{Date of birth (YYYY-MM-DD)}
 
-\item{fittest_date}{Date of DXA scan (YYYY-MM-DD)}
+\item{fittest_date}{The date of a DXA scan in a \%m/\%d/\%Y format}
 }
 \value{
 A ggplot object

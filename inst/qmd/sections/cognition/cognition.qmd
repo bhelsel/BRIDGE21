@@ -2,35 +2,78 @@
 
 
 
-```{r decide whether to show cognition based on available kuadrc data}
+```{r decide whether to show cognition based on available kuadrc or bold data}
 #| echo: false
-#| eval: !expr params$kuadrc_cognition
+#| eval: !expr (params$kuadrc_cognition) | (params$bold_cognition)
 #| results: asis
 
 # Down Syndrome Mental Status Exam
 dsmse_variables <- c("dsmsett2", "dsvistt2", "dssmtot2", "dsmmtot2", "dslgtot2")
-dsmse_df <- BRIDGE21::get_database_values(!!!dsmse_variables, data = data)
+dsmse_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!dsmse_variables,
+  data = data
+)
 if (all(apply(dsmse_df[, dsmse_variables], 2, is.na))) {
-  params$kuadrc_dsmse <- FALSE
+  params$kuadrc_dsmse <- params$bold_dsmse <- FALSE
 }
 
 
 # Modified Cued Recall Test
 mcrt_variables <- c("dscrttfr", "dsccttcr")
-mcrt_df <- BRIDGE21::get_database_values(!!!mcrt_variables, data = data)
-if (all(apply(mcrt_df[, mcrt_variables], 2, is.na))) {
-  params$kuadrc_mcrt <- FALSE
+mcrt_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!mcrt_variables,
+  data = data
+)
+if (
+  all(apply(mcrt_df[, mcrt_variables], 2, is.na)) |
+    all(mcrt_df[, mcrt_variables] == 0)
+) {
+  params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
 }
-
 
 # National Task Group - Early Detection and Screen for Dementia (NTG-EDSD)
-ntgedsd <- colnames(dplyr::select(data, dsadl1:dsother6))
-ntgedsd_df <- BRIDGE21::get_database_values(!!!ntgedsd, data = data)
+ntgedsd_names <- colnames(dplyr::select(data, dsadl1:dsother6))
+ntgedsd_df <- BRIDGE21::get_database_values(
+  !!!date,
+  !!!ntgedsd_names,
+  data = data
+)
+
 if (rlang::is_empty(ntgedsd_df)) {
-  params$kuadrc_ntgedsd <- FALSE
+  params$kuadrc_ntgedsd <- params$bold_ntgedsd <- FALSE
 }
 
-if (params$kuadrc_dsmse | params$kuadrc_mcrt | params$kuadrc_ntgedsd) {
+
+# Vineland Adaptive Behavior Scale
+vineland_variables <- c(
+  "vnld_abcss",
+  "vnld_commss",
+  "vnld_dlivss",
+  "vnld_soclss"
+)
+
+if (params$bold_cognition) {
+  vineland_df <- BRIDGE21::get_database_values(
+    !!date,
+    !!!vineland_variables,
+    data = data
+  )
+  if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
+    params$bold_vineland <- FALSE
+  }
+}
+
+after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
+  (params$bold_dsmse & !params$bold_mcrt)
+
+kuadrc_cognition <- paste0("kuadrc_", c("dsmse", "mcrt", "ntgedsd"))
+bold_cognition <- paste0("bold_", c("dsmse", "mcrt", "ntgedsd", "vineland"))
+
+if (
+  any(unlist(params[kuadrc_cognition])) | any(unlist(params[bold_cognition]))
+) {
   BRIDGE21::format_quarto(
     "MEMORY AND THINKING TEST SCORES",
     type = "section"
@@ -38,15 +81,6 @@ if (params$kuadrc_dsmse | params$kuadrc_mcrt | params$kuadrc_ntgedsd) {
 }
 
 ```
-
-```{r decide whether to show cognition based on available bold data}
-#| echo: false
-#| eval: !expr params$bold_cognition
-
-# Add bold checks here...
-
-```
-
 
 <!--- Down Syndrom Mental Status Exam --->
 
@@ -59,3 +93,7 @@ if (params$kuadrc_dsmse | params$kuadrc_mcrt | params$kuadrc_ntgedsd) {
 <!--- National Task Group - Early Detection and Screen for Dementia (NTG-EDSD) --->
 
 {{< include sections/cognition/components/ntgedsd.qmd >}}
+
+<!--- Vineland Adaptive Behavior Scale --->
+
+{{< include sections/cognition/components/vineland.qmd >}}

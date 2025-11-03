@@ -3,10 +3,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r display mcrt calculated scores from the kuadrc cohort, ft.align="left"}
+```{r display mcrt calculated scores from the kuadrc cohort or bold study, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_mcrt
+#| eval: !expr (params$kuadrc_mcrt) | (params$bold_mcrt)
 
 BRIDGE21::format_quarto(
   "sections/cognition/latex/cued-recall.tex",
@@ -16,11 +16,9 @@ BRIDGE21::format_quarto(
 mcrt_labels <- c("Total Recall", "Free Recall", "Cued Recall")
 
 mcrt_df %>%
-  dplyr::mutate(
-    date_of_visit = visit$formatted_date_of_visit,
-    dscrttr = dscrttfr + dsccttcr
-  ) %>%
-  dplyr::select(date_of_visit, dscrttr, dplyr::all_of(mcrt_variables)) %>%
+  BRIDGE21::format_date(!!date_expr) %>%
+  dplyr::mutate(dscrttr = dscrttfr + dsccttcr) %>%
+  dplyr::select(Date, dscrttr, dplyr::all_of(mcrt_variables)) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", mcrt_labels)) %>%
   flextable::width(j = 1:4, width = 1.15) %>%
@@ -29,11 +27,7 @@ mcrt_df %>%
   flextable::add_footer_row(values = "Max Score: 36", colwidths = 4)
 
 
-if (
-  !params$kuadrc_dsmse &
-    params$kuadrc_mcrt |
-    params$kuadrc_dsmse & params$kuadrc_mcrt
-) {
+if (!after_memory_section) {
   BRIDGE21::format_quarto(
     "sections/cognition/latex/after-memory.tex",
     type = "input"
@@ -42,11 +36,3 @@ if (
 
 ```
 
-```{r display mcrt calculated scores from the bold study, ft.align="left"}
-#| echo: false
-#| results: asis
-#| eval: !expr params$bold_mcrt
-
-# Add bold mcrt here...
-
-```

@@ -22,13 +22,19 @@ if (getRversion() >= "2.15.1") {
     "pet"
   ),
   bold = c(
+    "apoe",
+    "blood",
     "demographics",
-    "cognition"
+    "cognition",
+    "lifestyle"
   )
 )
 
 .subReports <- list(
   kuadrc_blood = c("karyotype", "ptau217"),
+  bold_blood = c("karyotype", "ptau217", "metabolism"),
   kuadrc_lifestyle = c("activity", "blood_pressure", "bmi", "dxa"),
-  kuadrc_cognition = c("dsmse", "mcrt", "ntgedsd")
+  bold_lifestyle = c("activity", "blood_pressure", "bmi", "dxa", "veggiemeter"),
+  kuadrc_cognition = c("dsmse", "mcrt", "ntgedsd"),
+  bold_cognition = c("dsmse", "mcrt", "ntgedsd", "vineland")
 )

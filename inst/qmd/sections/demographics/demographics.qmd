@@ -1,4 +1,6 @@
 
+<!-- KU ADRC DS COHORT -->
+
 ```{r extract person information from kuadrc cohort used for other parts of the report}
 #| echo: false
 #| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE))
@@ -13,32 +15,32 @@ intake <- BRIDGE21::get_database_values(
 
 intake$subject_birthdate <- as.Date(
   intake$subject_birthdate,
-  tryFormats = c("%m/%d/%y", "%m/%d/%Y")
+  tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
 )
 
+date <- c("visitmo", "visitday", "visityr")
+date_expr <- rlang::expr(visitmo / visitday / visityr)
+
 visit <- BRIDGE21::get_database_values(
-  visitmo,
-  visitday,
-  visityr,
+  !!!date,
   sex,
   final_impression,
   data = data,
   event_name = redcap_event_name
 )
 
-visit$date_of_visit <- as.Date(
-  BRIDGE21::add_string(
-    visit$visityr + "/" + visit$visitmo + "/" + visit$visitday
-  )
-)
+visit <- BRIDGE21::format_date(visit, !!date_expr)
 
-visit$formatted_date_of_visit <- format(visit$date_of_visit, "%m/%d/%Y")
-
-visit$age_at_visit <- floor(
-  as.numeric(visit$date_of_visit - intake$subject_birthdate) / 365.25
-)
+visit$age_at_visit <-
+  visit$Date %>%
+  as.Date(format = "%m/%d/%Y") %>%
+  {
+    as.numeric((. - intake$subject_birthdate) / 365.25)
+  } %>%
+  floor()
 
 ```
+
 
 ```{r display person information in a table format for kuadrc cohort}
 #| echo: false
@@ -62,8 +64,9 @@ name <- BRIDGE21::add_string(
   "Name: " + intake$subject_fname + " " + intake$subject_lname
 )
 lastvisit <- BRIDGE21::add_string(
-  "Last Visit: " + format(max(visit$date_of_visit), "%B %d, %Y")
+  "Last Visit: " + tail(visit$Date, 1)
 )
+
 age <- BRIDGE21::add_string("Age: " + max(visit$age_at_visit) + " Years")
 
 subjinfo_df <- data.frame(col1 = c(name, lastvisit), col2 = c(age, ""))
@@ -84,11 +87,39 @@ BRIDGE21::format_quarto(type = "newpage")
 ```
 
 
+<!-- BOLD STUDY -->
 
-```{r add person information from the bold study}
+```{r extract person information from bold study used for other parts of the report}
 #| echo: false
-#| eval: !expr params$bold_demographics
+#| eval: !expr (any(params[grepl("bold", names(params))] == TRUE))
 
-# Add bold demographics here...
+intake <- BRIDGE21::get_database_values(
+  firstname,
+  lastname,
+  scrn_dob,
+  sex,
+  data = data,
+  event_name = redcap_event_name
+)
+
+intake$scrn_dob <- as.Date(
+  intake$scrn_dob,
+  tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
+)
+
+date <- date_expr <- "visitdt"
+
+visit <- BRIDGE21::get_database_values(
+  !!date,
+  data = data,
+  event_name = redcap_event_name
+)
+
+
+visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, visitdt)[["Date"]]
+
+visit$age_at_visit <- floor(
+  as.numeric(visit$visitdt - intake$scrn_dob) / 365.25
+)
 
 ```

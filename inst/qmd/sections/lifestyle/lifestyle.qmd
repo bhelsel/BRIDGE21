@@ -3,10 +3,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r controller to determine what lifestyle sections would have data for the kuadrc cohort}
+```{r controller to determine what lifestyle sections would have data for the kuadrc cohort or bold study}
 #| echo: false
 #| results: asis
-#| eval: !expr params$kuadrc_lifestyle
+#| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle)
 
 BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
 
@@ -18,16 +18,21 @@ BRIDGE21::format_quarto(
   type = "strwrap"
 )
 
+# Blood Pressure
+
 blood_pressure <-
   BRIDGE21::get_database_values(
+    !!!date,
     bpsys,
     bpdias,
     data = data
   )
 
-if (rlang::is_empty(blood_pressure)) {
-  params$kuadrc_blood_pressure <- FALSE
+if (nrow(blood_pressure) == 0) {
+  params$kuadrc_blood_pressure <- params$bold_blood_pressure <- FALSE
 }
+
+# Physical Activity
 
 if (!is.null(params$accelres)) {
   accel_df <- tryCatch(
@@ -38,42 +43,57 @@ if (!is.null(params$accelres)) {
       readr::read_csv(dayMMFile, show_col_types = FALSE)
     },
     error = function(e) {
-      params$kuadrc_activity <- FALSE
+      params$kuadrc_activity <- params$bold_activity <- FALSE
     }
   )
 } else {
-  params$kuadrc_activity <- FALSE
+  params$kuadrc_activity <- params$bold_activity <- FALSE
 }
 
-anthro <- BRIDGE21::get_database_values(
-  weight,
-  height,
-  data = data
-)
+# Body Mass Index
 
-missing_bmi <- (length(anthro$weight) == 0 | length(anthro$height) == 0) &
-  length((anthro$weight) != length(anthro$height))
-
-if (missing_bmi) {
-  params$kuadrc_bmi <- FALSE
+if (params$kuadrc_bmi) {
+  anthrovars <- c("weight", "height")
+} else {
+  anthrovars <- c("average_weight", "average_height")
 }
 
-dxa <-
-  BRIDGE21::get_database_values(
-    fittest_date,
-    mass,
-    lean,
-    fat,
-    total_fat,
-    dxa_bmd_z,
-    data = data
+anthro <- BRIDGE21::get_database_values(!!!anthrovars, data = data)
+
+check_missing_wt_ht <- function(wt, ht) {
+  len <- c(wt = length(wt), ht = length(ht))
+  noWtHt <- (len[["wt"]] == 0 | len[["ht"]] == 0) | len[["wt"]] != len[["ht"]]
+  return(data.frame(lenWt = len[["wt"]], lenHt = len[["ht"]], noWtHt))
+}
+
+bmiCheck <- check_missing_wt_ht(anthro[[1]], anthro[[2]])
+
+if (bmiCheck[["noWtHt"]]) {
+  params$kuadrc_bmi <- params$bold_bmi <- FALSE
+}
+
+# DXA Scan
+
+dxaNames <- dxaVars <- c("mass", "lean", "fat", "total_fat", "dxa_bmd_z")
+
+if (params$bold_dxa) {
+  dxaVars <- c(
+    "dxa_total_kg",
+    "dxa_lean_g",
+    "dxa_fat_g",
+    "dxa_fat_percent",
+    "dxa_bmd_z"
   )
+}
+
+dxa <- BRIDGE21::get_database_values(!!!date, !!!dxaVars, data = data)
 
 if (nrow(dxa) == 0) {
-  params$kuadrc_dxa <- FALSE
+  params$kuadrc_dxa <- params$bold_dxa <- FALSE
 }
 
 ```
+
 
 {{< include sections/lifestyle/components/bp.qmd >}}
 
@@ -82,4 +102,6 @@ if (nrow(dxa) == 0) {
 {{< include sections/lifestyle/components/bmi.qmd >}}
 
 {{< include sections/lifestyle/components/dxa.qmd >}}
+
+{{< include sections/lifestyle/components/veggiemeter.qmd >}}
 
