@@ -1,3 +1,16 @@
+# BRIDGE21 0.8.0
+- Added new calculate_bmi and format_date functions to improve flexibility in the Quarto report framework
+- Made minor updates to plotting functions to align with updated Quarto formatting and styling
+- Removed the need to specify the `reports` argument in the `generate_report` function; reports can now be passed as unquoted arguments. 
+- Added Vineland Adaptive Behavior Scale to the cognition section
+- Added VeggieMeter score to the lifestyle section 
+- Added metabolism (lipid and glucose) blood panels to blood section 
+- Incresed flexiblity of all quarto documents to be compatible with more Down syndrome studies 
+- Updated .Rbuildignore and internal file handling to reflect new Quarto structure
+
+# BRIDGE21 0.7.0
+- Added new variables to the csv file stored in extdata to accomodate additional Down syndrome studies 
+
 # BRIDGE21 0.6.0
 
 - Create new helper functions to format Quarto, get values from the database, and join strings, calculate NTG-EDSD scores, and assist in report selection
