@@ -8,27 +8,37 @@
 #| results: asis
 
 # Down Syndrome Mental Status Exam
-dsmse_variables <- c("dsmsett2", "dsvistt2", "dssmtot2", "dsmmtot2", "dslgtot2")
+dsmse_variables <- c(
+  "dsmsett|dsmsett2",
+  "dsvistt|dsvistt2",
+  "dssmtot|dssmtot2",
+  "dsmmtot|dsmmtot2",
+  "dslgtot|dslgtot2"
+)
+
 dsmse_df <- BRIDGE21::get_database_values(
   !!!date,
   !!!dsmse_variables,
   data = data
 )
-if (all(apply(dsmse_df[, dsmse_variables], 2, is.na))) {
+
+if (all(apply(dsmse_df[setdiff(colnames(dsmse_df), date)], 2, is.na))) {
   params$kuadrc_dsmse <- params$bold_dsmse <- FALSE
 }
 
 
 # Modified Cued Recall Test
-mcrt_variables <- c("dscrttfr", "dsccttcr")
+mcrt_variables <- c("dscrttfr", "dscrttcr|dsccttcr")
 mcrt_df <- BRIDGE21::get_database_values(
   !!!date,
   !!!mcrt_variables,
   data = data
 )
+
+
 if (
-  all(apply(mcrt_df[, mcrt_variables], 2, is.na)) |
-    all(mcrt_df[, mcrt_variables] == 0)
+  all(apply(mcrt_df[setdiff(colnames(mcrt_df), date)], 2, is.na)) |
+    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0)
 ) {
   params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
 }
