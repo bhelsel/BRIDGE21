@@ -25,7 +25,6 @@ vineland_df %>%
   flextable::bold(j = 1:5, part = "header") %>%
   flextable::add_footer_row(values = "Mean Score: 100", colwidths = 5)
 
-
 BRIDGE21::format_quarto(type = "newpage")
 
 ```

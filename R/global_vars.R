@@ -22,7 +22,6 @@ if (getRversion() >= "2.15.1") {
     "pet"
   ),
   bold = c(
-    "apoe",
     "blood",
     "demographics",
     "cognition",

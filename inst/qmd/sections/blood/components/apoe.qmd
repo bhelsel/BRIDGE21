@@ -1,7 +1,7 @@
 ```{r display apoe status from the kuadrc cohort or bold study}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_apoe) | (params$bold_apoe)
+#| eval: !expr params$kuadrc_apoe
 
 if (params$kuadrc_apoe) {
   apoe <- BRIDGE21::get_database_values(ku_apoe1, ku_apoe2, data = data)

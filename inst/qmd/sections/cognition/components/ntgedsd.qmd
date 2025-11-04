@@ -57,7 +57,6 @@ ntgedsd_scores %>%
     align = "center"
   )
 
-
 BRIDGE21::format_quarto(type = "newpage")
 
 ```
