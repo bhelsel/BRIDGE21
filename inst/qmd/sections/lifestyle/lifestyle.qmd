@@ -23,8 +23,8 @@ BRIDGE21::format_quarto(
 blood_pressure <-
   BRIDGE21::get_database_values(
     !!!date,
-    bpsys,
-    bpdias,
+    "bpsys|bpsysl1",
+    "bpdias|bpdiasl1",
     data = data
   )
 

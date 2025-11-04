@@ -15,7 +15,7 @@ intake <- BRIDGE21::get_database_values(
 
 intake$subject_birthdate <- as.Date(
   intake$subject_birthdate,
-  tryFormats = c("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y")
+  tryFormats = c("%m/%d/%Y", "%m/%d/%y")
 )
 
 date <- c("visitmo", "visitday", "visityr")

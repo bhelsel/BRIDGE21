@@ -85,18 +85,38 @@ pet_amyloid_description <- function(
 #' }
 #'
 #' @export
-#' @importFrom tidyr drop_na
 #' @importFrom rlang ensym ensyms
 
 get_database_values <- function(..., data, event_name = NULL) {
   event_name <- try(as.character(rlang::ensym(event_name)), silent = TRUE)
-  variable <- as.character(rlang::ensyms(...))
+  variables <- rlang::ensyms(...)
+  variables <- gsub("`", "", as.character(variables))
+  renamed <- character() # will store all preferred names
+
+  for (v in variables) {
+    opts <- unlist(strsplit(v, "\\|"))
+    preferred <- opts[1]
+    existing <- intersect(opts, names(data))
+
+    if (length(existing) == 0) {
+      next
+    }
+    if (!(preferred %in% names(data)) && length(existing) > 0) {
+      data <- dplyr::rename(data, !!preferred := !!rlang::sym(existing[1]))
+    }
+    renamed <- c(renamed, preferred)
+  }
+
+  indx <- which(apply(data[, renamed], 1, function(x) {
+    !all(is.na(x))
+  }))
   if (!inherits(event_name, "try-error")) {
-    tidyr::drop_na(data[, c(event_name, variable)])
+    data[indx, c(event_name, renamed)]
   } else {
-    tidyr::drop_na(data[, variable])
+    data[indx, renamed]
   }
 }
+
 
 #' Concatenate Strings Using the `+` Operator
 #'

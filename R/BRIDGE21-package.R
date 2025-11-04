@@ -15,9 +15,11 @@
 #' @import grid
 #' @import gridExtra
 #' @import abcds
+#' @import magrittr
 #' @importFrom patchwork inset_element
 #' @importFrom purrr imap_dfc imap
 #' @importFrom yaml read_yaml
+#' @importFrom tidyr pivot_longer pivot_wider
 #'
 #'
 #' @name BRIDGE21

@@ -17,8 +17,7 @@ mcrt_labels <- c("Total Recall", "Free Recall", "Cued Recall")
 
 mcrt_df %>%
   BRIDGE21::format_date(!!date_expr) %>%
-  dplyr::mutate(dscrttr = dscrttfr + dsccttcr) %>%
-  dplyr::select(Date, dscrttr, dplyr::all_of(mcrt_variables)) %>%
+  dplyr::mutate(dscrttr = dscrttfr + dscrttcr, .after = 1) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", mcrt_labels)) %>%
   flextable::width(j = 1:4, width = 1.15) %>%

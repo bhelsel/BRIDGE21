@@ -18,6 +18,7 @@
 #' @importFrom readr read_csv
 #' @importFrom yaml write_yaml
 #' @importFrom quarto quarto_render
+#' @importFrom cli cli_abort
 
 generate_report <- function(
   ...,

@@ -11,7 +11,7 @@ if (params$kuadrc_apoe) {
   apoeCarrierStatus <- as.character(apoe)
 }
 
-if (all(!is.na(apoe))) {
+if (all(!is.na(apoe)) & nrow(apoe) != 0) {
   BRIDGE21::format_quarto("sections/blood/latex/apoe.tex", type = "input")
   cat("\\textbf{YOUR APOE RESULT}: ", apoeCarrierStatus)
   BRIDGE21::format_quarto(type = "newpage")
