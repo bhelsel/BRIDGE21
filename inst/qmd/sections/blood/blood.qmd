@@ -15,7 +15,7 @@ ptau <- BRIDGE21::get_database_values(
   data = data
 )
 
-if (rlang::is_empty(ptau)) {
+if (nrow(ptau) == 0) {
   params$kuadrc_ptau217 <- FALSE
 }
 
@@ -25,7 +25,7 @@ karyotype <- BRIDGE21::get_database_values(
   data = data
 )
 
-if (rlang::is_empty(karyotype)) {
+if (nrow(karyotype) == 0) {
   params$kuadrc_karyotype <- FALSE
 }
 
