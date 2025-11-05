@@ -1,5 +1,6 @@
 retrieve_accel_summary <- function(data) {
   accel_df <- cbind(
+    filename = data$filename,
     date = data$calendar_date,
     dur_spt_min = data$dur_spt_min,
     data[, grep("total.*min", colnames(data))]
@@ -12,16 +13,17 @@ retrieve_accel_summary <- function(data) {
 
   accel_df_per <-
     data.frame(
+      filename = accel_df$filename,
       date = accel_df$date,
       apply(
-        accel_df[, 2:5],
+        accel_df[, 3:6],
         2,
-        FUN = function(x) x / rowSums(accel_df[, 2:5])
+        FUN = function(x) x / rowSums(accel_df[, 3:6])
       ) *
         100
     )
 
-  accel_df[, 2:5] <- round(accel_df[, 2:5])
+  accel_df[, 3:6] <- round(accel_df[, 3:6])
   accel_df$date <- format(accel_df$date, "%m/%d/%Y")
 
   return(accel_df)
@@ -184,6 +186,7 @@ format_quarto <- function(x = NULL, type, width = 100) {
     cat(glue::glue("\\input{{{x}}}"), sep = "\n")
   } else if (type == "strwrap") {
     cat(strwrap(x, width = width), fill = TRUE)
+    cat("\n\n")
   }
 }
 
@@ -394,4 +397,66 @@ format_date <- function(data, date) {
     dplyr::mutate(Date = format(Date, "%m/%d/%Y"))
 
   return(data)
+}
+
+
+#' Check if data contains only missing or placeholder values
+#'
+#' Determines whether all non-date columns in a dataset contain only missing
+#' values (NA) or specified placeholder values (e.g., 0, -999). Returns TRUE
+#' if no valid data exists, FALSE if any valid data is present.
+#'
+#' @param data A data frame to check for missing values
+#' @param date Character vector of column name(s) to exclude from the check
+#'   (typically date columns). Can be a single string or vector of strings.
+#' @param missing_values Numeric vector of values to treat as missing data.
+#'   Default is `c(0, -999)`. NA values are always considered missing.
+#'
+#' @return Logical. Returns `TRUE` if all non-date columns contain only NA
+#'   or values in `missing_values`. Returns `FALSE` if any valid data exists.
+#'   Also returns `TRUE` for empty datasets or datasets with no data columns.
+#'
+#' @examples
+#' # Example with all missing data
+#' df1 <- data.frame(
+#'   visitdt = c("2024-01-01", "2024-01-02"),
+#'   value1 = c(0, -999),
+#'   value2 = c(NA, 0)
+#' )
+#' check_missing_values(df1, "visitdt")  # TRUE
+#'
+#' # Example with valid data
+#' df2 <- data.frame(
+#'   visitdt = c("2024-01-01", "2024-01-02"),
+#'   value1 = c(0, 5)
+#' )
+#' check_missing_values(df2, "visitdt")  # FALSE
+#'
+#' # Example with multiple date columns
+#' df3 <- data.frame(
+#'   visitmo = c(1, 2),
+#'   visitday = c(15, 20),
+#'   visityr = c(2024, 2024),
+#'   value = c(NA, NA)
+#' )
+#' check_missing_values(df3, c("visitmo", "visitday", "visityr"))  # TRUE
+#'
+#' @export
+
+check_missing_values <- function(data, date, missing_values = c(0, -999)) {
+  data_cols <- setdiff(colnames(data), date)
+
+  if (length(data_cols) == 0 || nrow(data) == 0) {
+    return(TRUE)
+  }
+
+  data_subset <- data[data_cols]
+
+  all_missing <- all(
+    apply(data_subset, 2, function(col) {
+      all(is.na(col) | col %in% missing_values)
+    })
+  )
+
+  return(all_missing)
 }

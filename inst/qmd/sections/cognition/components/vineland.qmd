@@ -12,7 +12,7 @@ BRIDGE21::format_quarto("sections/cognition/latex/vineland.tex", type = "input")
 vineland_labels <- c(
   "Total Score",
   "Communication",
-  "Daily Living Skills",
+  "Daily Living",
   "Socialization"
 )
 
@@ -20,7 +20,7 @@ vineland_df %>%
   BRIDGE21::format_date(!!date_expr) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", vineland_labels)) %>%
-  flextable::width(j = 1:5, width = 1.15) %>%
+  flextable::width(j = 1:5, width = 1.3) %>%
   flextable::align(j = 1:5, align = "center", part = "all") %>%
   flextable::bold(j = 1:5, part = "header") %>%
   flextable::add_footer_row(values = "Mean Score: 100", colwidths = 5)

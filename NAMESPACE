@@ -3,6 +3,7 @@
 export(add_string)
 export(calculate_bmi)
 export(calculate_ntgedsd)
+export(check_missing_values)
 export(expand_reports)
 export(format_date)
 export(format_quarto)

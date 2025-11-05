@@ -39,7 +39,7 @@ mcrt_df <- BRIDGE21::get_database_values(
 
 if (
   all(apply(mcrt_df[setdiff(colnames(mcrt_df), date)], 2, is.na)) |
-    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0)
+    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0, na.rm = TRUE)
 ) {
   params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
 }
