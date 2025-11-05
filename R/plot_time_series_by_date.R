@@ -1,6 +1,6 @@
 #' @title plot_time_series_by_date
 #' @description Plot a line graph of the time series acceleration by date
-#' @param IMP The IMP object from GGIR Part 2
+#' @param IMP The the path to the file containing the IMP object from GGIR Part 2
 #' @param summary_data A data frame with date and min/day of sleep, inactivity, light, and moderate-to-vigorous physical activity
 #' @return A ggplot2 object
 #' @details Plot a line graph of the time series acceleration by date
@@ -14,6 +14,17 @@
 #' @importFrom scales date_format
 
 plot_time_series_by_date <- function(IMP, summary_data) {
+  load(IMP)
+
+  IMPdates <- unique(as.Date(IMP$metashort$timestamp))
+  IMPremove <- IMPdates[
+    !IMPdates %in% as.Date(summary_data$date, "%m/%d/%Y")
+  ]
+
+  IMP$metashort <- IMP$metashort[
+    !as.Date(IMP$metashort$timestamp) %in% IMPremove,
+  ]
+
   data <- IMP$metashort
 
   data$timestamp <-
@@ -40,7 +51,7 @@ plot_time_series_by_date <- function(IMP, summary_data) {
     ) |>
     dplyr::arrange(timestamp)
 
-  intcat <- unique(data2plot$category)
+  intcat <- sort(unique(data2plot$category))
   n_colors <- length(intcat)
   colors <- c("#a9a9a9", "#0051ba", "#e8000d", "#ffc82d")
   date_labels <- format(unique(as.Date(data$timestamp)), "%A, %B %d, %Y")

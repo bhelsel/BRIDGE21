@@ -28,7 +28,7 @@ blood_pressure <-
     data = data
   )
 
-if (nrow(blood_pressure) == 0) {
+if (BRIDGE21::check_missing_values(blood_pressure, date)) {
   params$kuadrc_blood_pressure <- params$bold_blood_pressure <- FALSE
 }
 
@@ -40,7 +40,12 @@ if (!is.null(params$accelres)) {
       accelMetaDir <- file.path(params$accelres, "output_data", "meta")
       accelResDir <- file.path(params$accelres, "output_data", "results")
       dayMMFile <- list.files(accelResDir, "day.*MM", full.names = TRUE)
-      readr::read_csv(dayMMFile, show_col_types = FALSE)
+      BRIDGE21:::retrieve_accel_summary(
+        readr::read_csv(
+          dayMMFile,
+          show_col_types = FALSE
+        )
+      )
     },
     error = function(e) {
       params$kuadrc_activity <- params$bold_activity <- FALSE
@@ -88,7 +93,7 @@ if (params$bold_dxa) {
 
 dxa <- BRIDGE21::get_database_values(!!!date, !!!dxaVars, data = data)
 
-if (nrow(dxa) == 0) {
+if (BRIDGE21::check_missing_values(dxa, date)) {
   params$kuadrc_dxa <- params$bold_dxa <- FALSE
 }
 

@@ -3,170 +3,58 @@
 #| results: asis
 #| eval: !expr (params$kuadrc_activity) | (params$bold_activity)
 
-identify_timepoints <- function(dates, gap_days = 7) {
-  dates <- sort(as.Date(dates, "%m/%d/%Y"))
-  gaps <- diff(dates)
+BRIDGE21::format_quarto("sections/lifestyle/latex/activity.tex", type = "input")
 
-  timepoint_breaks <- which(gaps > gap_days)
-
-  timepoints <- rep(1, length(dates))
-  if (length(timepoint_breaks) > 0) {
-    current_tp <- 1
-    for (i in seq_along(timepoints)) {
-      if (i > 1 && (i - 1) %in% timepoint_breaks) {
-        current_tp <- current_tp + 1
-      }
-      timepoints[i] <- current_tp
-    }
-  }
-
-  data.frame(
-    date = dates,
-    timepoint = timepoints
-  )
-}
-
-accel_df$date_clean <- as.Date(accel_df$calendar_date, "%m/%d/%Y")
-timepoint_map <- identify_timepoints(accel_df$date_clean, gap_days = 7)
-
-accel_df <- merge(
-  accel_df,
-  timepoint_map,
-  by.x = "date_clean",
-  by.y = "date",
-  all.x = TRUE
-)
-
-accel_df_subset <- BRIDGE21:::retrieve_accel_summary(data = accel_df)
-accel_df_subset$date_clean <- as.Date(accel_df_subset$date, "%m/%d/%Y")
-accel_df_subset <- merge(
-  accel_df_subset,
-  timepoint_map,
-  by.x = "date_clean",
-  by.y = "date",
-  all.x = TRUE
-)
-
-imp_files <- list.files(
+IMPFiles <- list.files(
   file.path(accelMetaDir, "ms2.out"),
   recursive = TRUE,
   full.names = TRUE,
   pattern = "\\.RData$"
 )
 
-if (length(imp_files) == 0) {
-  stop("No IMP data files found in ms2.out directory")
-}
+for (IMP in IMPFiles) {
+  baseIMP <- gsub(".RData$", "", basename(IMP))
+  accel_df_subset <- accel_df[accel_df$filename == baseIMP, ]
+  accelDates <- as.Date(accel_df_subset$date, format = "%m/%d/%Y")
+  minDate <- format(min(accelDates), "%B %d, %Y")
+  maxDate <- format(max(accelDates), "%B %d, %Y")
 
-IMP_list <- list()
-for (imp_file in imp_files) {
-  load(imp_file)
-  IMP_list[[length(IMP_list) + 1]] <- IMP
-}
-
-if (length(IMP_list) > 1) {
-  IMP_original <- IMP_list[[1]]
-  for (i in 2:length(IMP_list)) {
-    IMP_original$metashort <- rbind(
-      IMP_original$metashort,
-      IMP_list[[i]]$metashort
-    )
-  }
-} else {
-  IMP_original <- IMP_list[[1]]
-}
-
-unique_timepoints <- sort(unique(accel_df_subset$timepoint))
-n_timepoints <- length(unique_timepoints)
-
-ltexPA <- paste(
-  readLines("sections/lifestyle/latex/activity.tex"),
-  collapse = "\n"
-)
-cat(paste0("", ltexPA, ""), sep = "\n")
-cat("\n\n")
-
-for (tp in unique_timepoints) {
-  tp_data <- accel_df_subset[accel_df_subset$timepoint == tp, ]
-  tp_accel_full <- accel_df[accel_df$timepoint == tp, ]
-
-  paSleepSuccess <- sum(
-    tp_data$dur_spt_min >= 480 &
-      tp_data$dur_day_total_MVPA_min >= 30,
-    na.rm = TRUE
+  BRIDGE21::format_quarto(
+    sprintf("Activity Data from %s to %s", minDate, maxDate),
+    type = "subsection"
   )
 
-  date_range <- paste(
-    format(min(tp_data$date_clean), "%m/%d/%Y"),
-    "to",
-    format(max(tp_data$date_clean), "%m/%d/%Y")
+  success <- sum(
+    accel_df_subset$dur_spt_min >= 480 &
+      accel_df_subset$dur_day_total_MVPA_min >= 30
   )
 
-  if (tp > 1) {
-    BRIDGE21::format_quarto(type = "newpage")
-    cat("\n\n")
-  }
-  cat("## Visit ", tp, " (", date_range, ")\n\n", sep = "")
-
-  cat(sprintf(
-    "During this visit, the participant met both sleep and physical activity goals on **%d out of %d days** monitored.\n\n",
-    paSleepSuccess,
-    nrow(tp_accel_full)
-  ))
-
-  tp_dates <- unique(as.Date(tp_data$date, "%m/%d/%Y"))
-  IMP_tp <- IMP_original
-  IMP_tp$metashort <- IMP_original$metashort[
-    as.Date(IMP_original$metashort$timestamp) %in% tp_dates,
-  ]
-
-  if (nrow(IMP_tp$metashort) == 0) {
-    cat("\n*No detailed accelerometer data available for this visit.*\n\n")
-    next
-  }
-
-  IMPdates <- unique(as.Date(IMP_tp$metashort$timestamp))
-  IMPremove <- IMPdates[!IMPdates %in% tp_dates]
-
-  if (length(IMPremove) > 0) {
-    IMP_tp$metashort <- IMP_tp$metashort[
-      !as.Date(IMP_tp$metashort$timestamp) %in% IMPremove,
-    ]
-  }
-
-  if (nrow(IMP_tp$metashort) == 0) {
-    cat("\n*No matching accelerometer data available for this visit.*\n\n")
-    next
-  }
-
-  accel_plot <- tryCatch(
-    {
-      BRIDGE21::plot_time_series_by_date(
-        IMP_tp,
-        summary_data = tp_data
-      )
-    },
-    error = function(e) {
-      cat(sprintf("\n*Error creating plot: %s*\n\n", e$message))
-      return(NULL)
-    }
+  BRIDGE21::format_quarto(
+    sprintf(
+      "You met the sleep and physical activity goals on **%d out of %d days**\n\n",
+      success,
+      nrow(accel_df_subset)
+    ),
+    type = "strwrap"
   )
 
-  if (!is.null(accel_plot)) {
-    plot_filename <- paste0("accelerometer_plot_tp", tp, ".png")
-    ggplot2::ggsave(
-      filename = plot_filename,
-      accel_plot,
-      width = 11,
-      height = 8,
-      dpi = 300
-    )
-    paste("", paste0("![](", plot_filename, ")"), "") |>
-      cat(sep = "\n")
-  }
+  accel_plot <- BRIDGE21::plot_time_series_by_date(
+    IMP,
+    summary_data = accel_df_subset
+  )
+
+  ggplot2::ggsave(
+    filename = "accelerometer_plot.png",
+    accel_plot,
+    width = 11,
+    height = 8,
+    dpi = 300
+  )
+
+  paste("", "![](accelerometer_plot.png)", "") |>
+    cat(sep = "\n")
+
+  BRIDGE21::format_quarto(type = "newpage")
 }
-
-
-BRIDGE21::format_quarto(type = "newpage")
 
 ```
