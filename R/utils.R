@@ -321,6 +321,8 @@ calculate_bmi <- function(
 #'   - A single column name (e.g., `visitdt`)
 #'   - Composite date using `/` operator (e.g., `visitmo/visitday/visityr`)
 #'   - A `paste()` expression (e.g., `paste(visitmo, visitday, visityr, sep = "/")`)
+#' @param desc Display the date in descending order
+#' @param display Customize how the dates are displayed, Default: %m/%d/%Y
 #'
 #' @return The input data frame with a "Date" column formatted as "mm/dd/yyyy".
 #'   For single column input, the original column is renamed to "Date". For
@@ -355,7 +357,7 @@ calculate_bmi <- function(
 #'
 #' @export
 
-format_date <- function(data, date) {
+format_date <- function(data, date, desc = FALSE, display = "%m/%d/%Y") {
   # Capture the date expression without evaluating it
 
   date <- rlang::enexpr(date)
@@ -392,9 +394,16 @@ format_date <- function(data, date) {
       dplyr::mutate(Date = as.Date(Date))
   }
 
-  # Format as character in month/day/year format
+  # Arrange in ascending or descending order
+  if (desc) {
+    data <- dplyr::arrange(data, dplyr::desc(Date))
+  } else {
+    data <- dplyr::arrange(data, Date)
+  }
+
+  # Display as character in customized format (default: month/day/year)
   data <- data %>%
-    dplyr::mutate(Date = format(Date, "%m/%d/%Y"))
+    dplyr::mutate(Date = format(Date, display))
 
   return(data)
 }
@@ -459,4 +468,86 @@ check_missing_values <- function(data, date, missing_values = c(0, -999)) {
   )
 
   return(all_missing)
+}
+
+#' Interpret percent change in a continuous score
+#'
+#' Computes and interprets the percent change of a numeric measure relative to
+#' its first (baseline) value. This function provides a short, readable message
+#' describing whether the measure increased, decreased, or stayed about the same
+#' based on customizable thresholds.
+#'
+#' @param x A numeric vector of scores, ordered by time or visit, where the
+#'   first element represents the baseline value.
+#' @param type A character string specifying the name of the score or measure
+#'   (e.g., `"fruit and vegetable"`, `"sleep"`, `"activity"`). This term is
+#'   inserted dynamically into the interpretation message.
+#' @param thresholds A numeric vector of two values indicating the lower and
+#'   upper bounds (in percent) for what is considered "about the same".
+#'   Defaults to `c(-5, 5)`, meaning less than –5% is a decrease, between –5%
+#'   and +5% is the same, and greater than +5% is an increase.
+#'
+#' @details
+#' The function treats the first value of `x` as the baseline score.
+#' Percent change is computed as:
+#' \deqn{((x - baseline) / baseline) * 100}
+#'
+#' Change categories are determined using \code{\link[base]{cut}} with
+#' boundaries \code{c(-Inf, thresholds, Inf)}. The first observation is always
+#' labeled `"baseline"`.
+#'
+#' The returned messages include:
+#' \itemize{
+#'   \item \strong{"Baseline measurement"}
+#'   \item \strong{"Nice job! You increased your [type] score by X%"}
+#'   \item \strong{"Your [type] score decreased by X%"}
+#'   \item \strong{"Your [type] score stayed about the same"}
+#' }
+#'
+#' @return A character vector of the same length as `x`, with a human-readable
+#'   interpretation for each value.
+#'
+#' @examples
+#' # Default thresholds
+#' interpret_percent_change(c(400, 420, 395, 410), type = "fruit and vegetable")
+#'
+#' # Custom thresholds for a stricter definition of "same"
+#' interpret_percent_change(c(100, 104, 110), type = "activity", thresholds = c(-3, 3))
+#'
+#' @seealso [cut()], [dplyr::case_match()]
+#'
+#' @export
+
+interpret_percent_change <- function(x, type, thresholds = c(-5, 5)) {
+  if (length(x) == 1) {
+    return("Baseline measurement")
+  }
+
+  baseline <- x[1]
+  pct_change <- ((x - baseline) / baseline) * 100
+
+  change_type <- as.character(
+    cut(
+      pct_change,
+      breaks = c(-Inf, thresholds, Inf),
+      labels = c("decrease", "same", "increase"),
+      right = TRUE
+    )
+  )
+
+  change_type[1] <- "baseline"
+
+  base_message <- list(
+    increase = sprintf("Nice job! You increased your %s score by", type),
+    decrease = sprintf("Your %s score decreased by", type),
+    same = sprintf("Your %s score stayed about the same", type)
+  )
+
+  dplyr::case_match(
+    change_type,
+    "baseline" ~ "Baseline measurement",
+    "increase" ~ sprintf("%s %.1f%%", base_message$increase, abs(pct_change)),
+    "decrease" ~ sprintf("%s %.1f%%", base_message$decrease, abs(pct_change)),
+    "same" ~ base_message$same
+  )
 }
