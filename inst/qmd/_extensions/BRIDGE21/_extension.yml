@@ -8,6 +8,8 @@ contributes:
         - "title.tex"
       include-in-header:
         - "mytemplate.tex"
+      filters:
+        - logo-inject.lua
       date: last-modified
       date-format: long
       mainfont: Times New Roman

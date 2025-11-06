@@ -48,6 +48,12 @@ generate_report <- function(
 
   prefix <- unique(sub("_.*", "", names(reports[reports == TRUE])))
 
+  logo_path <- switch(
+    prefix,
+    kuadrc = "_extensions/BRIDGE21/logos/kuadrc.png",
+    bold = "_extensions/BRIDGE21/logos/bold.jpg"
+  )
+
   if (prefix == "kuadrc") {
     data <- readr::read_csv(
       datafile,
@@ -140,7 +146,8 @@ generate_report <- function(
   # Render the quarto document
   quarto::quarto_render(
     input = sprintf("%s/BRIDGE21.qmd", id),
-    output_file = pdffile
+    output_file = pdffile,
+    metadata = list(logo = logo_path)
   )
 
   # Adjust pdffile location if it is added to the id folder
