@@ -7,6 +7,7 @@
 #| eval: !expr (params$kuadrc_cognition) | (params$bold_cognition)
 #| results: asis
 
+BRIDGE21::format_quarto(type = "newpage")
 # Down Syndrome Mental Status Exam
 dsmse_variables <- c(
   "dsmsett|dsmsett2",
@@ -38,7 +39,7 @@ mcrt_df <- BRIDGE21::get_database_values(
 
 if (
   all(apply(mcrt_df[setdiff(colnames(mcrt_df), date)], 2, is.na)) |
-    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0)
+    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0, na.rm = TRUE)
 ) {
   params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
 }
@@ -76,7 +77,8 @@ if (params$bold_cognition) {
 }
 
 after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
-  (params$bold_dsmse & !params$bold_mcrt)
+  (params$bold_dsmse &
+    !params$bold_mcrt)
 
 kuadrc_cognition <- paste0("kuadrc_", c("dsmse", "mcrt", "ntgedsd"))
 bold_cognition <- paste0("bold_", c("dsmse", "mcrt", "ntgedsd", "vineland"))
