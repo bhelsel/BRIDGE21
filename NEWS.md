@@ -1,6 +1,7 @@
 # BRIDGE 0.8.2
 
 - Update activity.qmd file to be able to handle and output multiple timepoints of activity data
+- Add lua filter to hanldle multiple study logos
 
 # BRIDGE 0.8.1
 
