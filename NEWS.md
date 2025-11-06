@@ -1,3 +1,7 @@
+# BRIDGE 0.8.2
+
+- Update activity.qmd file to be able to handle and output multiple timepoints of activity data
+
 # BRIDGE 0.8.1
 
 - Add magrittr and cli as imports

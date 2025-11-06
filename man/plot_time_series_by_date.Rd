@@ -7,7 +7,7 @@
 plot_time_series_by_date(IMP, summary_data)
 }
 \arguments{
-\item{IMP}{The IMP object from GGIR Part 2}
+\item{IMP}{The the path to the file containing the IMP object from GGIR Part 2}
 
 \item{summary_data}{A data frame with date and min/day of sleep, inactivity, light, and moderate-to-vigorous physical activity}
 }
