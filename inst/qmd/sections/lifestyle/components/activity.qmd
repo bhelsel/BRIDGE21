@@ -43,15 +43,17 @@ for (IMP in IMPFiles) {
     summary_data = accel_df_subset
   )
 
+  accelerometer_file_name <- sprintf("%s.png", baseIMP)
+
   ggplot2::ggsave(
-    filename = "accelerometer_plot.png",
+    filename = accelerometer_file_name,
     accel_plot,
     width = 11,
     height = 8,
     dpi = 300
   )
 
-  paste("", "![](accelerometer_plot.png)", "") |>
+  paste0("", "![](", accelerometer_file_name, ")", "") |>
     cat(sep = "\n")
 
   BRIDGE21::format_quarto(type = "newpage")
