@@ -1,10 +1,7 @@
-```{r display VeggieMeter Score tabl for the bold study, ft.align = "left"}
+```{r display VeggieMeter Score change from baseline for the bold study, ft.align = "left"}
 #| echo: false
 #| results: asis
 #| eval: !expr params$bold_veggiemeter
-
-date_var <- data$visitdt
-vm_score <- data$veggiemeter
 
 vmdf <-
   BRIDGE21::get_database_values(
@@ -21,37 +18,40 @@ if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
     type = "input"
   )
 
-  interpretation_labels <- c(
-    "Your fruit and vegetable intake is low — try adding more into your diet.",
-    "Your fruit and vegetable intake is good — keep it up!",
-    "Your fruit and vegetable intake is excellent! Keep up the good work!"
-  )
-  vmdf %>%
-    BRIDGE21::format_date(!!date_expr) %>%
+  vmdf <- vmdf %>%
+    dplyr::arrange(!!date) %>%
     dplyr::mutate(
-      # < 400 “Low”; ≥ 400 to < 600  “Good"; ≥ 600 “Excellent"
-      Category = cut(
-        Score,
-        breaks = c(-Inf, 400, 600, Inf),
-        labels = c("Low", "Good", "Excellent"),
-        right = FALSE
+      baseline_score = dplyr::first(Score),
+      percent_change = ((Score - baseline_score) / baseline_score) * 100,
+      Interpretation = dplyr::case_when(
+        is.na(percent_change) | percent_change == 0 ~ "Baseline measurement",
+        percent_change > 5 ~ paste0(
+          "Nice job! You increased your fruit and vegetable intake by ",
+          round(abs(percent_change), 1),
+          "%"
+        ),
+        percent_change < -5 ~ paste0(
+          "Your fruit and vegetable intake decreased by ",
+          round(abs(percent_change), 1),
+          "%"
+        ),
+        TRUE ~ "Your fruit and vegetable intake stayed about the same"
       ),
-      Interpretation = factor(
-        Category,
-        levels = c("Low", "Good", "Excellent"),
-        interpretation_labels
-      )
+      Date = visit$formatted_date_of_visit
     ) %>%
+    dplyr::select(Date, Score, Interpretation)
+
+  vmdf %>%
     flextable::flextable() %>%
-    flextable::width(j = 1:2, width = 0.75) %>%
-    flextable::width(j = 3, width = 1) %>%
-    flextable::width(j = 4, width = 4) %>%
-    flextable::align(j = 1:4, part = "all", align = "center") %>%
+    flextable::width(j = 1, width = 0.75) %>%
+    flextable::width(j = 2, width = 0.75) %>%
+    flextable::width(j = 3, width = 4.5) %>%
+    flextable::align(j = 1:3, part = "all", align = "center") %>%
     flextable::add_footer_row(
-      values = "VeggieMeter Scores range from 0–800",
-      colwidths = 4
+      values = "VeggieMeter Scores range from 0–800. Percent change calculated relative to baseline (first) measurement.",
+      colwidths = 3
     ) %>%
-    flextable::align(i = 1, part = "head", align = "left")
+    flextable::align(i = 1, part = "footer", align = "left")
 }
 
 BRIDGE21::format_quarto(type = "newpage")
