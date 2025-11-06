@@ -2,6 +2,7 @@
 
 - Update activity.qmd file to be able to handle and output multiple timepoints of activity data
 - Add lua filter to hanldle multiple study logos
+- Update interpretation for the VeggieMeter results from the BOLD study
 
 # BRIDGE 0.8.1
 
