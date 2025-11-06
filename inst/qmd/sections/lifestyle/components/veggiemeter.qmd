@@ -3,6 +3,8 @@
 #| results: asis
 #| eval: !expr params$bold_veggiemeter
 
+# stop("Stop for Veggie Meter Scoring")
+
 vmdf <-
   BRIDGE21::get_database_values(
     !!date,
@@ -18,30 +20,14 @@ if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
     type = "input"
   )
 
-  vmdf <- vmdf %>%
-    dplyr::arrange(!!date) %>%
-    dplyr::mutate(
-      baseline_score = dplyr::first(Score),
-      percent_change = ((Score - baseline_score) / baseline_score) * 100,
-      Interpretation = dplyr::case_when(
-        is.na(percent_change) | percent_change == 0 ~ "Baseline measurement",
-        percent_change > 5 ~ paste0(
-          "Nice job! You increased your fruit and vegetable intake by ",
-          round(abs(percent_change), 1),
-          "%"
-        ),
-        percent_change < -5 ~ paste0(
-          "Your fruit and vegetable intake decreased by ",
-          round(abs(percent_change), 1),
-          "%"
-        ),
-        TRUE ~ "Your fruit and vegetable intake stayed about the same"
-      ),
-      Date = visit$formatted_date_of_visit
-    ) %>%
-    dplyr::select(Date, Score, Interpretation)
-
   vmdf %>%
+    BRIDGE21::format_date(!!date) %>%
+    dplyr::mutate(
+      Interpretation = BRIDGE21::interpret_percent_change(
+        Score,
+        type = "fruit and vegetable"
+      )
+    ) %>%
     flextable::flextable() %>%
     flextable::width(j = 1, width = 0.75) %>%
     flextable::width(j = 2, width = 0.75) %>%
@@ -55,4 +41,5 @@ if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
 }
 
 BRIDGE21::format_quarto(type = "newpage")
+
 ```
