@@ -1,10 +1,9 @@
-```{r display VeggieMeter Score tabl for the bold study, ft.align = "left"}
+```{r display VeggieMeter Score change from baseline for the bold study, ft.align = "left"}
 #| echo: false
 #| results: asis
 #| eval: !expr params$bold_veggiemeter
 
-date_var <- data$visitdt
-vm_score <- data$veggiemeter
+# stop("Stop for Veggie Meter Scoring")
 
 vmdf <-
   BRIDGE21::get_database_values(
@@ -21,38 +20,26 @@ if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
     type = "input"
   )
 
-  interpretation_labels <- c(
-    "Your fruit and vegetable intake is low — try adding more into your diet.",
-    "Your fruit and vegetable intake is good — keep it up!",
-    "Your fruit and vegetable intake is excellent! Keep up the good work!"
-  )
   vmdf %>%
-    BRIDGE21::format_date(!!date_expr) %>%
+    BRIDGE21::format_date(!!date) %>%
     dplyr::mutate(
-      # < 400 “Low”; ≥ 400 to < 600  “Good"; ≥ 600 “Excellent"
-      Category = cut(
+      Interpretation = BRIDGE21::interpret_percent_change(
         Score,
-        breaks = c(-Inf, 400, 600, Inf),
-        labels = c("Low", "Good", "Excellent"),
-        right = FALSE
-      ),
-      Interpretation = factor(
-        Category,
-        levels = c("Low", "Good", "Excellent"),
-        interpretation_labels
+        type = "fruit and vegetable"
       )
     ) %>%
     flextable::flextable() %>%
-    flextable::width(j = 1:2, width = 0.75) %>%
-    flextable::width(j = 3, width = 1) %>%
-    flextable::width(j = 4, width = 4) %>%
-    flextable::align(j = 1:4, part = "all", align = "center") %>%
+    flextable::width(j = 1, width = 0.75) %>%
+    flextable::width(j = 2, width = 0.75) %>%
+    flextable::width(j = 3, width = 4.5) %>%
+    flextable::align(j = 1:3, part = "all", align = "center") %>%
     flextable::add_footer_row(
-      values = "VeggieMeter Scores range from 0–800",
-      colwidths = 4
+      values = "VeggieMeter Scores range from 0–800. Percent change calculated relative to baseline (first) measurement.",
+      colwidths = 3
     ) %>%
-    flextable::align(i = 1, part = "head", align = "left")
+    flextable::align(i = 1, part = "footer", align = "left")
 }
 
 BRIDGE21::format_quarto(type = "newpage")
+
 ```

@@ -4,7 +4,7 @@
 \alias{format_date}
 \title{Format Date Columns}
 \usage{
-format_date(data, date)
+format_date(data, date, desc = FALSE, display = "\%m/\%d/\%Y")
 }
 \arguments{
 \item{data}{A data frame containing date information}
@@ -15,6 +15,10 @@ format_date(data, date)
 \item Composite date using \code{/} operator (e.g., \code{visitmo/visitday/visityr})
 \item A \code{paste()} expression (e.g., \code{paste(visitmo, visitday, visityr, sep = "/")})
 }}
+
+\item{desc}{Display the date in descending order}
+
+\item{display}{Customize how the dates are displayed, Default: \%m/\%d/\%Y}
 }
 \value{
 The input data frame with a "Date" column formatted as "mm/dd/yyyy".
