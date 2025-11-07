@@ -1,9 +1,38 @@
-```{r controller to decide whether to display an imaging section}
+```{r controller to decide whether to display the kuadrc imaging sections}
 #| echo: false
 #| eval: !expr (params$kuadrc_mri) | (params$kuadrc_pet)
 #| results: asis
 
-BRIDGE21::format_quarto("IMAGING SCANS", type = "section")
+params$kuadrc_pet <- FALSE
+
+imageFiles <- list.files(
+  params$imagedir,
+  pattern = ".png$",
+  recursive = TRUE,
+  full.names = TRUE
+)
+
+imaging <- BRIDGE21::get_database_values(
+  redcap_repeat_instrument,
+  scan_date,
+  radiology_read,
+  data = data,
+  event_name = redcap_event_name
+)
+
+if (
+  rlang::is_empty(imageFiles) |
+    BRIDGE21::check_missing_values(imaging, "scan_date")
+) {
+  params$kuadrc_mri <- FALSE
+} else {
+  axialImage <- paste0("{", imageFiles[grep("axial", imageFiles)], "}")
+  sagittalImage <- paste0("{", imageFiles[grep("sagittal", imageFiles)], "}")
+}
+
+if (params$kuadrc_mri | params$kuadrc_pet) {
+  BRIDGE21::format_quarto("IMAGING SCANS", type = "section")
+}
 
 ```
 
