@@ -3,24 +3,6 @@
 #| results: asis
 #| eval: !expr params$kuadrc_mri
 
-imageFiles <- list.files(
-  params$imagedir,
-  pattern = ".png$",
-  recursive = TRUE,
-  full.names = TRUE
-)
-axialImage <- paste0("{", imageFiles[grep("axial", imageFiles)], "}")
-sagittalImage <- paste0("{", imageFiles[grep("sagittal", imageFiles)], "}")
-
-imaging <- BRIDGE21::get_database_values(
-  redcap_repeat_instrument,
-  scan_date,
-  radiology_read,
-  data = data,
-  event_name = redcap_event_name
-)
-
-
 scanDate <- format(
   as.Date(imaging$scan_date, tryFormats = c("%m/%d/%y", "%m/%d/%Y")),
   "%B %d, %Y"
