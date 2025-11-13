@@ -63,7 +63,7 @@ if (params$kuadrc_bmi) {
   anthrovars <- c("average_weight", "average_height")
 }
 
-anthro <- BRIDGE21::get_database_values(!!!anthrovars, data = data)
+anthro <- BRIDGE21::get_database_values(!!date, !!!anthrovars, data = data)
 
 check_missing_wt_ht <- function(wt, ht) {
   len <- c(wt = length(wt), ht = length(ht))

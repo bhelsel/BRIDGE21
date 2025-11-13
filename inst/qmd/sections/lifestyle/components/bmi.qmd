@@ -32,8 +32,8 @@ ltex <- glue::glue(
 cat(paste0("", ltex, ""), sep = "\n")
 
 bmi_plot <- BRIDGE21::generate_bmi_arch_plot(
-  anthro[[bmiCheck$lenWt, 1]],
-  anthro[[bmiCheck$lenHt, 2]]
+  anthro[[bmiCheck$lenWt, 2]],
+  anthro[[bmiCheck$lenHt, 3]]
 )
 
 # Adjust alignment on Quarto ouput
@@ -49,8 +49,8 @@ ggplot2::ggsave(
 )
 
 weight_plot <- BRIDGE21::generate_weight_bar_plot(
-  anthro[[bmiCheck$lenWt, 1]],
-  anthro[[bmiCheck$lenHt, 2]]
+  anthro[[bmiCheck$lenWt, 2]],
+  anthro[[bmiCheck$lenHt, 3]]
 )
 
 ggplot2::ggsave(
@@ -64,7 +64,37 @@ ggplot2::ggsave(
 paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
   cat(sep = "\n")
 
+# Add weight history table
+if (nrow(anthro) > 0) {
+  weight_col <- if (params$kuadrc_bmi) "weight" else "average_weight"
+
+  anthro %>%
+    BRIDGE21::format_date(!!date) %>%
+    dplyr::mutate(
+      weight_lbs = if (params$bold_bmi) {
+        round(!!rlang::sym(weight_col) * 2.205, 1)
+      } else {
+        round(!!rlang::sym(weight_col), 1)
+      },
+      bmi = round(bmi, 1)
+    ) %>%
+    dplyr::select(Date, weight_lbs, bmi) %>%
+    flextable::flextable() %>%
+    flextable::set_header_labels(
+      Date = "Date",
+      weight_lbs = "Weight (lbs)",
+      bmi = "BMI (kg/m²)"
+    ) %>%
+    flextable::add_header_row(values = "Weight History", colwidths = 3) %>%
+    flextable::bold(i = 1, part = "header") %>%
+    flextable::width(j = 1:3, width = 1.5) %>%
+    flextable::align(j = 1:3, part = "all", align = "center") %>%
+    flextable::add_footer_row(
+      values = "BMI: Body Mass Index calculated from weight and height measurements.",
+      colwidths = 3
+    ) %>%
+    flextable::align(i = 1, part = "footer", align = "left")
+}
+
 BRIDGE21::format_quarto(type = "newpage")
-
 ```
-

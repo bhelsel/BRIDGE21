@@ -63,19 +63,7 @@ if ("dxa_bmd_z" %in% colnames(dxa)) {
   )
 }
 
-dxa %>%
-  flextable::flextable() %>%
-  flextable::set_header_labels(
-    values = dxa_labels
-  ) %>%
-  flextable::width(j = 1:ncol(dxa), width = 1) %>%
-  flextable::align(part = "all", align = "center") %>%
-  flextable::bold(part = "header") %>%
-  flextable::add_footer_row(
-    values = ft_footnote,
-    colwidths = ncol(dxa)
-  )
-
+d
 
 paste("", "![](body_fat_percent_plot.png)", "") %>%
   cat(sep = "\n")
