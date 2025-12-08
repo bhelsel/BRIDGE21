@@ -6,7 +6,7 @@ function Meta(meta)
     \AddToShipoutPicture*{%
          % Logo
         \AtPageLowerLeft{%
-            \put(\LenToUnit{\dimexpr\paperwidth-168mm}, 24.2cm){%
+            \put(\LenToUnit{\dimexpr\paperwidth-168mm}, 23.2cm){%
             \includegraphics[width=5in]{]] .. logo_path .. [[}
             }%
         }%

@@ -1,3 +1,8 @@
+# BRIDGE 0.8.3
+
+- Add weight history table under the most recent BMI and Weight plot for longitudinal studies
+- Update accelerometer output to show a summary table of all available observations and plot of the most recent data
+
 # BRIDGE 0.8.2
 
 - Update activity.qmd file to be able to handle and output multiple timepoints of activity data

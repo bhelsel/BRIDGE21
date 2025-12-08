@@ -1,9 +1,41 @@
 ``` {r display text and plot for the accelerometer data for the kuadrc cohort and bold study}
 #| echo: false
 #| results: asis
+#| ft.align: left
 #| eval: !expr (params$kuadrc_activity) | (params$bold_activity)
 
 BRIDGE21::format_quarto("sections/lifestyle/latex/activity.tex", type = "input")
+
+# Accelerometer Summary Table for All Observations
+
+accel_tbl_names <- c("Dates", "Sleep", "Inactivity", "Light Activity", "MVPA")
+
+accel_df %>%
+  dplyr::group_by(filename) %>%
+  dplyr::summarise(
+    date = paste0(min(date), " - ", max(date)),
+    dplyr::across(dur_spt_min:dur_day_total_MVPA_min, ~ round(mean(.x))),
+    .groups = "drop"
+  ) %>%
+  dplyr::select(-filename) %>%
+  `colnames<-`(accel_tbl_names) %>%
+  flextable::flextable() %>%
+  flextable::width(j = 1, width = 2) %>%
+  flextable::width(j = 2:5, width = 1.1) %>%
+  flextable::align(part = "all", align = "center") %>%
+  flextable::bold(i = 1, part = "header") %>%
+  flextable::add_footer_row(
+    values = "MVPA: Moderate-to-Vigrous Physical Activity",
+    colwidths = 5
+  ) %>%
+  flextable::add_footer_row(
+    values = "Average Minutes Per Day of Sleep and Physical Activity",
+    colwidths = 5
+  )
+
+BRIDGE21::format_quarto(type = "newpage")
+
+# Accelerometer Plot for Most Recent Observation
 
 IMPFiles <- list.files(
   file.path(accelMetaDir, "ms2.out"),
@@ -12,51 +44,49 @@ IMPFiles <- list.files(
   pattern = "\\.RData$"
 )
 
-for (IMP in IMPFiles) {
-  baseIMP <- gsub(".RData$", "", basename(IMP))
-  accel_df_subset <- accel_df[accel_df$filename == baseIMP, ]
-  accelDates <- as.Date(accel_df_subset$date, format = "%m/%d/%Y")
-  minDate <- format(min(accelDates), "%B %d, %Y")
-  maxDate <- format(max(accelDates), "%B %d, %Y")
+baseIMP <- gsub(".RData$", "", basename(IMPFiles[length(IMPFiles)]))
+accel_df_subset <- accel_df[accel_df$filename == baseIMP, ]
+accelDates <- as.Date(accel_df_subset$date, format = "%m/%d/%Y")
+minDate <- format(min(accelDates), "%B %d, %Y")
+maxDate <- format(max(accelDates), "%B %d, %Y")
 
-  BRIDGE21::format_quarto(
-    sprintf("Activity Data from %s to %s", minDate, maxDate),
-    type = "subsection"
-  )
+BRIDGE21::format_quarto(
+  sprintf("Recent Activity Data from %s to %s", minDate, maxDate),
+  type = "subsection"
+)
 
-  success <- sum(
-    accel_df_subset$dur_spt_min >= 480 &
-      accel_df_subset$dur_day_total_MVPA_min >= 30
-  )
+success <- sum(
+  accel_df_subset$dur_spt_min >= 480 &
+    accel_df_subset$dur_day_total_MVPA_min >= 30
+)
 
-  BRIDGE21::format_quarto(
-    sprintf(
-      "You met the sleep and physical activity goals on **%d out of %d days**\n\n",
-      success,
-      nrow(accel_df_subset)
-    ),
-    type = "strwrap"
-  )
+BRIDGE21::format_quarto(
+  sprintf(
+    "You met the sleep and physical activity goals on **%d out of %d days**.\n\n\n",
+    success,
+    nrow(accel_df_subset)
+  ),
+  type = "strwrap"
+)
 
-  accel_plot <- BRIDGE21::plot_time_series_by_date(
-    IMP,
-    summary_data = accel_df_subset
-  )
+accel_plot <- BRIDGE21::plot_time_series_by_date(
+  IMPFiles[length(IMPFiles)],
+  summary_data = accel_df_subset
+)
 
-  accelerometer_file_name <- sprintf("%s.png", baseIMP)
+accelerometer_file_name <- sprintf("%s.png", baseIMP)
 
-  ggplot2::ggsave(
-    filename = accelerometer_file_name,
-    accel_plot,
-    width = 11,
-    height = 8,
-    dpi = 300
-  )
+ggplot2::ggsave(
+  filename = accelerometer_file_name,
+  accel_plot,
+  width = 11,
+  height = 8,
+  dpi = 300
+)
 
-  paste0("", "![](", accelerometer_file_name, ")", "") |>
-    cat(sep = "\n")
+paste0("", "![](", accelerometer_file_name, ")", "") |>
+  cat(sep = "\n")
 
-  BRIDGE21::format_quarto(type = "newpage")
-}
+BRIDGE21::format_quarto(type = "newpage")
 
 ```

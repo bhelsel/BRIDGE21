@@ -29,7 +29,10 @@ if (!all(missing_metabolism)) {
   ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
 
   metabolism %>%
-    dplyr::mutate(Date = visit$formatted_date_of_visit) %>%
+    dplyr::mutate(
+      Date = visit$formatted_date_of_visit,
+      dplyr::across(hdl_mgdl:glucose, ~ round(.x, 1))
+    ) %>%
     dplyr::select(
       Date,
       HDL = hdl_mgdl,

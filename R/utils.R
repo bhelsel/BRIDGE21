@@ -267,6 +267,7 @@ expand_reports <- function(reports, sub_reports = .subReports) {
 #'   or inches for imperial units
 #' @param units Character string specifying the unit system. Either "metric"
 #'   (default) or "imperial"
+#' @param digits The number of decimal points for which to round the BMI value
 #'
 #' @return The input data frame with an additional `bmi` column containing
 #'   calculated BMI values
@@ -293,10 +294,14 @@ calculate_bmi <- function(
   data,
   weight,
   height,
-  units = c("metric", "imperial")
+  units = c("metric", "imperial"),
+  digits = 1
 ) {
   units <- match.arg(units)
-  expr <- rlang::expr(!!rlang::enquo(weight) / (!!rlang::enquo(height) / 100)^2)
+  expr <- rlang::expr(round(
+    !!rlang::enquo(weight) / (!!rlang::enquo(height) / 100)^2,
+    digits
+  ))
   wt <- rlang::ensym(weight)
   ht <- rlang::ensym(height)
 
