@@ -4,7 +4,13 @@
 \alias{calculate_bmi}
 \title{Calculate Body Mass Index (BMI)}
 \usage{
-calculate_bmi(data, weight, height, units = c("metric", "imperial"))
+calculate_bmi(
+  data,
+  weight,
+  height,
+  units = c("metric", "imperial"),
+  digits = 1
+)
 }
 \arguments{
 \item{data}{A data frame containing weight and height columns}
@@ -17,6 +23,8 @@ or inches for imperial units}
 
 \item{units}{Character string specifying the unit system. Either "metric"
 (default) or "imperial"}
+
+\item{digits}{The number of decimal points for which to round the BMI value}
 }
 \value{
 The input data frame with an additional \code{bmi} column containing

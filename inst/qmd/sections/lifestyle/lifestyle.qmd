@@ -57,13 +57,16 @@ if (!is.null(params$accelres)) {
 
 # Body Mass Index
 
-if (params$kuadrc_bmi) {
-  anthrovars <- c("weight", "height")
-} else {
-  anthrovars <- c("average_weight", "average_height")
-}
+anthrovars <- c(
+  "weight|average_weight",
+  "height|average_height"
+)
 
-anthro <- BRIDGE21::get_database_values(!!date, !!!anthrovars, data = data)
+anthro <- BRIDGE21::get_database_values(
+  !!date,
+  !!!anthrovars,
+  data = data
+)
 
 check_missing_wt_ht <- function(wt, ht) {
   len <- c(wt = length(wt), ht = length(ht))
@@ -71,7 +74,10 @@ check_missing_wt_ht <- function(wt, ht) {
   return(data.frame(lenWt = len[["wt"]], lenHt = len[["ht"]], noWtHt))
 }
 
-bmiCheck <- check_missing_wt_ht(anthro[[1]], anthro[[2]])
+bmiCheck <- check_missing_wt_ht(
+  wt = anthro[["weight"]],
+  ht = anthro[["height"]]
+)
 
 if (bmiCheck[["noWtHt"]]) {
   params$kuadrc_bmi <- params$bold_bmi <- FALSE
