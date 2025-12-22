@@ -11,6 +11,7 @@ metabolism <- BRIDGE21::get_database_values(
   triglyc_mgdl,
   hba1c,
   glucose,
+  date = date,
   data = data
 )
 
@@ -29,8 +30,8 @@ if (!all(missing_metabolism)) {
   ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
 
   metabolism %>%
+    BRIDGE21::format_date(!!date_expr) %>%
     dplyr::mutate(
-      Date = visit$formatted_date_of_visit,
       dplyr::across(hdl_mgdl:glucose, ~ round(.x, 1))
     ) %>%
     dplyr::select(

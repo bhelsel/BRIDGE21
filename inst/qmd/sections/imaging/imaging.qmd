@@ -14,9 +14,9 @@ imageFiles <- list.files(
 
 imaging <- BRIDGE21::get_database_values(
   redcap_repeat_instrument,
-  scan_date,
   radiology_read,
   data = data,
+  date = "scan_date",
   event_name = redcap_event_name
 )
 

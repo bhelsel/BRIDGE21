@@ -7,8 +7,8 @@
 
 vmdf <-
   BRIDGE21::get_database_values(
-    !!date,
     veggiemeter,
+    date = date,
     data = data
   )
 

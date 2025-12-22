@@ -69,6 +69,7 @@ pet_amyloid_description <- function(
 #' Extracts specified columns (and optionally an event column) from a dataset and drops any rows containing missing values.
 #'
 #' @param ... One or more unquoted column names to extract.
+#' @param date A character vector consisting of the columns that are used to idenfity the dates in the data set
 #' @param data A data frame or tibble containing the variables of interest.
 #' @param event_name (Optional) A variable name representing an event column, used to subset data along with the specified variables.
 #'
@@ -82,14 +83,14 @@ pet_amyloid_description <- function(
 #'
 #' @examples
 #' \dontrun{
-#' get_database_values(age, sex, data = mydata)
+#' get_database_values(age, sex, date = date, data = mydata)
 #' get_database_values(age, bmi, data = mydata, event_name = redcap_event_name)
 #' }
 #'
 #' @export
 #' @importFrom rlang ensym ensyms
 
-get_database_values <- function(..., data, event_name = NULL) {
+get_database_values <- function(..., date = NULL, data, event_name = NULL) {
   event_name <- try(as.character(rlang::ensym(event_name)), silent = TRUE)
   variables <- rlang::ensyms(...)
   variables <- gsub("`", "", as.character(variables))
@@ -109,9 +110,15 @@ get_database_values <- function(..., data, event_name = NULL) {
     renamed <- c(renamed, preferred)
   }
 
+  # Filter out rows where all renamed variables are missing
   indx <- which(apply(data[, renamed], 1, function(x) {
     !all(is.na(x))
   }))
+
+  if (!is.null(date)) {
+    renamed <- c(date, renamed)
+  }
+
   if (!inherits(event_name, "try-error")) {
     data[indx, c(event_name, renamed)]
   } else {

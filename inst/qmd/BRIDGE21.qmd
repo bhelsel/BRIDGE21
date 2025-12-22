@@ -6,10 +6,9 @@ editor_options:
   chunk_output_type: console
 ---
 
-Thank you for participating in the KU ADRC Brain Health and Down Syndrome Program. You are helping to advance our understanding and treatment of Alzheimer's disease and related dementias in people with Down syndrome, offering hope to so many.
+Thank you for participating in the **{{< meta study >}}**. You are helping to advance our understanding and treatment of Alzheimer's disease and related dementias in people with Down syndrome, offering hope to so many.
 
 As part of our study, you get feedback from experts on the research tests and measures we perform. This brain health report, created for you, puts this information back in your hands.
-
 
 ## UNDERSTANDING YOUR REPORT
 
@@ -24,41 +23,6 @@ Consider your family's feelings before revealing any risk information, as it mig
 ## UNDERSTANDING THE LIMITATIONS OF THESE RESULTS
 
 These results come from tests that may still be in the research stage and may not yet be approved for general medical use. This means that sometimes the results might show higher or lower levels of the markers than a true result. It’s important to remember that these tests cannot, on their own, diagnose any condition. They should always be discussed with your research team, who can help interpret what they may mean in the context of your overall health.
-
-
-```{r load variable yaml file}
-#| echo: false
-#| message: false
-
-`%>%` <- magrittr::`%>%`
-
-params <- yaml::read_yaml("_variables.yaml")
-
-```
-
-```{r read data file stored locally and subset by id, ft.align="left"}
-#| echo: false
-#| message: false
-
-data <- readr::read_csv(
-  params$datafile,
-  show_col_types = FALSE
-)
-
-if (any(params[grepl("kuadrc", names(params))] == TRUE)) {
-  data <- data[data$ptid == params$id, ]
-}
-
-if (any(params[grepl("bold", names(params))] == TRUE)) {
-  id <- data[which(data$id == params$id), "record_id", drop = TRUE]
-  data <- data[data$record_id == id, ]
-}
-
-# For Testing
-# data <- readr::read_csv(system.file("extdata/example.csv", package = "BRIDGE21"))
-# params <- BRIDGE21:::generate_report_params("kuadrc")
-
-```
 
 {{< include sections/demographics/demographics.qmd >}}
 

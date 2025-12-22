@@ -80,7 +80,7 @@ ggplot2::ggsave(
   filename = accelerometer_file_name,
   accel_plot,
   width = 11,
-  height = 8,
+  height = 11,
   dpi = 300
 )
 

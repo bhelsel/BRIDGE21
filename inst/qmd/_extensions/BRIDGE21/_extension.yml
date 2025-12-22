@@ -15,3 +15,6 @@ contributes:
       mainfont: Times New Roman
       monofont: Times New Roman
       embed-resources: true
+      execute:
+        echo: true
+        warning: false

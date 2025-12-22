@@ -50,40 +50,70 @@ generate_report <- function(
 
   logo_path <- switch(
     prefix,
+    abcds = "_extensions/BRIDGE21/logos/abcds.png",
+    bold = "_extensions/BRIDGE21/logos/bold.jpg",
     kuadrc = "_extensions/BRIDGE21/logos/kuadrc.png",
-    bold = "_extensions/BRIDGE21/logos/bold.jpg"
+    trcds = "_extensions/BRIDGE21/logos/abcds.png"
   )
+
+  logo_position <- switch(
+    prefix,
+    abcds = "24.2",
+    bold = "23.2",
+    kuadrc = "24.2",
+    trcds = "24.2"
+  )
+
+  study_name <- switch(
+    prefix,
+    abcds = "Alzheimer\u0027s Biomarker Consortium \u2013 Down syndrome Study",
+    bold = "Brain Outcomes and Lifestyle in Down syndrome Study",
+    kuadrc = "KU ADRC Brain Health and Down Syndrome Program",
+    trcds = "Trial Ready Cohort - Down syndrome Study"
+  )
+
+  # Create new directories
+  if (!dir.exists(as.character(id))) {
+    dir.create(as.character(id))
+  }
+
+  persondir <- file.path(outputdir, id)
+  if (!dir.exists(persondir)) {
+    dir.create(persondir)
+  }
 
   if (prefix == "kuadrc") {
     data <- readr::read_csv(
       datafile,
-      show_col_types = FALSE,
-      col_select = c(ptid, coenrol_studyid)
+      show_col_types = FALSE
     )
     if (!id %in% unique(data$ptid)) {
       stop(sprintf("We did not find patient ID %s in the dataset", id))
     }
+    data <- data[data$ptid == id, ]
+    readr::write_csv(data, file = sprintf("%s/data.csv", id))
   }
 
   if (prefix == "bold") {
     data <- readr::read_csv(
       datafile,
-      show_col_types = FALSE,
-      col_select = c(record_id, id)
+      show_col_types = FALSE
     )
     if (!id %in% unique(data$id)) {
       stop(sprintf("We did not find patient ID %s in the dataset", id))
     }
+    identifier <- data[which(data$id == id), "record_id", drop = TRUE]
+    data <- data[data$record_id == identifier, ]
+    readr::write_csv(data, file = sprintf("%s/data.csv", id))
   }
 
-  # Create new directories
-  persondir <- file.path(outputdir, id)
-  if (!dir.exists(persondir)) {
-    dir.create(persondir)
-  }
-  imagedir <- file.path(persondir, "imaging")
-  if (!dir.exists(imagedir)) {
-    dir.create(imagedir)
+  if (prefix == "abcds" | prefix == "trcds") {
+    data <- readr::read_csv(datafile, show_col_types = FALSE)
+    if (!id %in% unique(data$subject_label)) {
+      stop(sprintf("We did not find patient ID %s in the dataset", id))
+    }
+    data <- data[data$subject_label == id, ]
+    readr::write_csv(data, file = sprintf("%s/data.csv", id))
   }
 
   if (example_report) {
@@ -91,12 +121,25 @@ generate_report <- function(
       c("images/axialImage.png", "images/sagittalImage.png"),
       package = "BRIDGE21"
     )
+
+    imagedir <- file.path(persondir, "imaging")
+    if (!dir.exists(imagedir)) {
+      dir.create(imagedir)
+    }
+
     invisible(file.copy(
       from = mriFiles,
       to = file.path(imagedir, basename(mriFiles))
     ))
   } else if (prefix == "kuadrc") {
+    imagedir <- file.path(persondir, "imaging")
+    if (!dir.exists(imagedir)) {
+      dir.create(imagedir)
+    }
+
     invisible(save_xnat_images(imagedir, data, id))
+  } else {
+    imagedir <- NULL
   }
 
   # Process accelerometer data
@@ -114,11 +157,7 @@ generate_report <- function(
     accelres <- NULL
   }
 
-  # Copy the qmd file from the CohortT21Disclosure package to render locally
   qmdfolder <- system.file("qmd", package = "BRIDGE21")
-  if (!dir.exists(as.character(id))) {
-    dir.create(as.character(id))
-  }
 
   invisible(file.copy(
     from = list.files(qmdfolder, full.names = TRUE),
@@ -128,11 +167,11 @@ generate_report <- function(
   ))
 
   # Saves a yaml file to pass the id and directory information to the quarto document
+
   yaml::write_yaml(
     c(
       list(
         id = id,
-        datafile = datafile,
         outputdir = outputdir,
         imagedir = imagedir,
         accelres = accelres
@@ -141,13 +180,18 @@ generate_report <- function(
     ),
     file = sprintf("%s/_variables.yaml", id)
   )
+
   # Name the report using the participant id
   pdffile <- sprintf("%s_Report.pdf", id)
   # Render the quarto document
   quarto::quarto_render(
     input = sprintf("%s/BRIDGE21.qmd", id),
     output_file = pdffile,
-    metadata = list(logo = logo_path)
+    metadata = list(
+      logo = logo_path,
+      position = logo_position,
+      study = study_name
+    )
   )
 
   # Adjust pdffile location if it is added to the id folder

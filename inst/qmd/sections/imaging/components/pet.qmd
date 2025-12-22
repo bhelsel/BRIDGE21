@@ -7,7 +7,7 @@ cognitiveDecline <- TRUE
 
 abeta_df <- BRIDGE21::get_database_values(
   centiloid_apet,
-  img_scan_date_apet,
+  date = img_scan_date_apet,
   data = data,
   event_name = redcap_event_name
 )

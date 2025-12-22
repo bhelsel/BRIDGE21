@@ -4,10 +4,12 @@
 \alias{get_database_values}
 \title{Retrieve Non-Missing Values from a Dataset}
 \usage{
-get_database_values(..., data, event_name = NULL)
+get_database_values(..., date = NULL, data, event_name = NULL)
 }
 \arguments{
 \item{...}{One or more unquoted column names to extract.}
+
+\item{date}{A character vector consisting of the columns that are used to idenfity the dates in the data set}
 
 \item{data}{A data frame or tibble containing the variables of interest.}
 
@@ -26,7 +28,7 @@ removes rows with missing data across all selected variables. If not, only the s
 }
 \examples{
 \dontrun{
-get_database_values(age, sex, data = mydata)
+get_database_values(age, sex, date = date, data = mydata)
 get_database_values(age, bmi, data = mydata, event_name = redcap_event_name)
 }
 

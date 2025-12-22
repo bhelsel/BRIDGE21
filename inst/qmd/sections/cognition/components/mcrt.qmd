@@ -6,7 +6,7 @@ editor_options:
 ```{r display mcrt calculated scores from the kuadrc cohort or bold study, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_mcrt) | (params$bold_mcrt)
+#| eval: !expr (params$kuadrc_mcrt) | (params$bold_mcrt) | (params$abcds_mcrt) | (params$trcds_mcrt)
 
 BRIDGE21::format_quarto(
   "sections/cognition/latex/cued-recall.tex",
@@ -20,7 +20,7 @@ mcrt_df %>%
   dplyr::mutate(dscrttr = dscrttfr + dscrttcr, .after = 1) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", mcrt_labels)) %>%
-  flextable::width(j = 1:4, width = 1.15) %>%
+  flextable::width(j = 1:4, width = 1.6) %>%
   flextable::align(j = 1:4, align = "center", part = "all") %>%
   flextable::bold(j = 1:4, part = "header") %>%
   flextable::add_footer_row(values = "Max Score: 36", colwidths = 4)

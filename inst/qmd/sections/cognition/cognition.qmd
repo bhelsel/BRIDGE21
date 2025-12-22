@@ -4,35 +4,35 @@
 
 ```{r decide whether to show cognition based on available kuadrc or bold data}
 #| echo: false
-#| eval: !expr (params$kuadrc_cognition) | (params$bold_cognition)
+#| eval: !expr (params$kuadrc_cognition) | (params$bold_cognition) | (params$abcds_cognition) | (params$trcds_cognition)
 #| results: asis
 
 BRIDGE21::format_quarto(type = "newpage")
 # Down Syndrome Mental Status Exam
 dsmse_variables <- c(
-  "dsmsett|dsmsett2",
-  "dsvistt|dsvistt2",
-  "dssmtot|dssmtot2",
-  "dsmmtot|dsmmtot2",
-  "dslgtot|dslgtot2"
+  "dsmsett|dsmsett2|dsto2",
+  "dsvistt|dsvistt2|dsvs1",
+  "dssmtot|dssmtot2|colshbx",
+  "dsmmtot|dsmmtot2|dsme1",
+  "dslgtot|dslgtot2|dsla2"
 )
 
 dsmse_df <- BRIDGE21::get_database_values(
-  !!!date,
   !!!dsmse_variables,
+  date = date,
   data = data
 )
 
 if (all(apply(dsmse_df[setdiff(colnames(dsmse_df), date)], 2, is.na))) {
-  params$kuadrc_dsmse <- params$bold_dsmse <- FALSE
+  params$kuadrc_dsmse <- params$bold_dsmse <- params$abcds_dsmse <- FALSE
 }
 
 
 # Modified Cued Recall Test
-mcrt_variables <- c("dscrttfr", "dscrttcr|dsccttcr")
+mcrt_variables <- c("dscrttfr|frss", "dscrttcr|dsccttcr|crss")
 mcrt_df <- BRIDGE21::get_database_values(
-  !!!date,
   !!!mcrt_variables,
+  date = date,
   data = data
 )
 
@@ -45,15 +45,29 @@ if (
 }
 
 # National Task Group - Early Detection and Screen for Dementia (NTG-EDSD)
-ntgedsd_names <- colnames(dplyr::select(data, dsadl1:dsother6))
+if (params$kuadrc_ntgedsd | params$bold_ntgedsd) {
+  ntgedsd_names <- colnames(dplyr::select(data, dsadl1:dsother6))
+} else if (params$abcds_ntgedsd | params$trcds_ntgedsd) {
+  ntgedsd_names <- c(
+    "adl|adltot",
+    "lang|ntlctot",
+    "sleep|ntswtot",
+    "amb|ntambtot",
+    "mem|ntmemtot",
+    "beh|ntbehtot",
+    "self|ntsrptot",
+    "other|ntootot"
+  )
+}
+
 ntgedsd_df <- BRIDGE21::get_database_values(
-  !!!date,
   !!!ntgedsd_names,
+  date = date,
   data = data
 )
 
 if (rlang::is_empty(ntgedsd_df)) {
-  params$kuadrc_ntgedsd <- params$bold_ntgedsd <- FALSE
+  params$kuadrc_ntgedsd <- params$bold_ntgedsd <- params$abcds_ntgedsd <- params$trcds_ntgedsd <- FALSE
 }
 
 
@@ -67,8 +81,8 @@ vineland_variables <- c(
 
 if (params$bold_cognition) {
   vineland_df <- BRIDGE21::get_database_values(
-    !!date,
     !!!vineland_variables,
+    date = date,
     data = data
   )
   if (all(apply(vineland_df[, vineland_variables], 2, is.na))) {
@@ -76,15 +90,22 @@ if (params$bold_cognition) {
   }
 }
 
-after_memory_section <- (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
-  (params$bold_dsmse &
-    !params$bold_mcrt)
+after_memory_section <-
+  (params$kuadrc_dsmse & !params$kuadrc_mcrt) |
+  (params$bold_dsmse & !params$bold_mcrt) |
+  (params$abcds_dsmse & !params$abcds_mcrt) |
+  (params$trcds_dsmse & !params$trcds_mcrt)
 
 kuadrc_cognition <- paste0("kuadrc_", c("dsmse", "mcrt", "ntgedsd"))
 bold_cognition <- paste0("bold_", c("dsmse", "mcrt", "ntgedsd", "vineland"))
+abcds_cognition <- paste0("abcds_", c("dsmse", "mcrt", "ntgedsd"))
+trcds_cognition <- paste0("trcds_", c("dsmse", "mcrt", "ntgedsd"))
 
 if (
-  any(unlist(params[kuadrc_cognition])) | any(unlist(params[bold_cognition]))
+  any(unlist(params[kuadrc_cognition])) |
+    any(unlist(params[bold_cognition])) |
+    any(unlist(params[abcds_cognition])) |
+    any(unlist(params[trcds_cognition]))
 ) {
   BRIDGE21::format_quarto(
     "MEMORY AND THINKING TEST SCORES",

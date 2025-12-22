@@ -4,10 +4,15 @@
 #| eval: !expr params$kuadrc_apoe
 
 if (params$kuadrc_apoe) {
-  apoe <- BRIDGE21::get_database_values(ku_apoe1, ku_apoe2, data = data)
+  apoe <- BRIDGE21::get_database_values(
+    ku_apoe1,
+    ku_apoe2,
+    date = date,
+    data = data
+  )
   apoeCarrierStatus <- sprintf("E%s/E%s", apoe[1], apoe[2])
 } else if (params$bold_apoe) {
-  apoe <- BRIDGE21::get_database_values(apoe, data = data)
+  apoe <- BRIDGE21::get_database_values(apoe, date = date, data = data)
   apoeCarrierStatus <- as.character(apoe)
 }
 

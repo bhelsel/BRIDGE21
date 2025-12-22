@@ -1,7 +1,7 @@
 ```{r display the blood pressure plot and table for the kuadrc cohort}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_blood_pressure) | (params$bold_blood_pressure)
+#| eval: !expr (params$kuadrc_blood_pressure) | (params$bold_blood_pressure) | (params$abcds_blood_pressure) | (params$trcds_blood_pressure)
 
 blood_pressure <- blood_pressure %>%
   BRIDGE21::format_date(!!date_expr) %>%

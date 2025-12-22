@@ -6,7 +6,7 @@ editor_options:
 ```{r display ntgedsd calculated scores from the kuadrc cohort, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_ntgedsd) | (params$bold_ntgedsd)
+#| eval: !expr (params$kuadrc_ntgedsd) | (params$bold_ntgedsd) | (params$abcds_ntgedsd) | (params$trcds_ntgedsd)
 
 ntgedsd_domains <- list(
   all = "Total Score",
@@ -24,7 +24,7 @@ ntgedsd_scores <-
   purrr::imap_dfc(
     ntgedsd_domains,
     ~ BRIDGE21::calculate_ntgedsd(
-      ntgedsd_df[ntgedsd_names],
+      ntgedsd_df[, -which(colnames(ntgedsd_df) %in% date)],
       domain = .y,
       label = .x
     )

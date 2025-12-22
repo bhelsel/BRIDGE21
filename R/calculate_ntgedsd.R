@@ -52,16 +52,19 @@ calculate_ntgedsd <- function(data, domain, label) {
     cols <- grep(domain, names(data))
   }
 
-  score <-
-    dplyr::mutate(
-      data[, cols, drop = FALSE],
-      dplyr::across(
-        dplyr::everything(),
-        ~ as.integer(.x %in% c(1, 2))
+  if (all(data <= 3, na.rm = TRUE)) {
+    score <-
+      dplyr::mutate(
+        data[, cols, drop = FALSE],
+        dplyr::across(
+          dplyr::everything(),
+          ~ ifelse(!is.na(.x), as.integer(.x %in% c(1, 2)), NA)
+        )
       )
-    )
-
-  score <- rowSums(score, na.rm = TRUE)
+    score <- rowSums(score)
+  } else {
+    score <- rowSums(data[, cols, drop = FALSE])
+  }
 
   tibble::tibble(!!label := score)
 }

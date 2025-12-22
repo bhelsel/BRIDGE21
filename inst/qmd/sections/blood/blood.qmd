@@ -10,8 +10,8 @@ BRIDGE21::format_quarto(
 )
 
 ptau <- BRIDGE21::get_database_values(
-  ptau217_date,
   ptau217_pgml,
+  date = "ptau217_date",
   data = data
 )
 
@@ -21,9 +21,11 @@ if (nrow(ptau) == 0) {
 
 karyotype <- BRIDGE21::get_database_values(
   dschrom,
-  chromsm_source,
+  date = date,
   data = data
 )
+
+karyotype <- karyotype[karyotype$dschrom != 9, ]
 
 if (nrow(karyotype) == 0) {
   params$kuadrc_karyotype <- FALSE

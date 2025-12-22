@@ -1,24 +1,25 @@
 bold,kucohort,trcds,abcds,label,domain,assessment
-id,ptid,,,Patient Identifier,,
+id,ptid,,subject_label,Patient Identifier,,
 ,coenrol_studyid,,,Patient Identifier for the ABC-DS Study,,
-redcap_event_name,redcap_event_name,,,Participant visit label,,
+redcap_event_name,redcap_event_name,,event_code,Participant visit label,,
 redcap_repeat_instrument,redcap_repeat_instrument,,,Name of repeated form,,
-visitdt,,,,Date of Visit (m/d/y),,
+visitdt,,,de_eval_date,Date of Visit (m/d/y),,
 ,visitmo,,,Visit Month,,Clinical
 ,visitday,,,Visit Day,,Clinical
 ,visityr,,,Visit Year,,Clinical
 scrn_dob,subject_birthdate,,,Patient's birth date,,Clinical
+,,,age_at_visit,Patient's age in years,,Clinical
 firstname,subject_fname,,,Patient's first name,,Clinical
 lastname,subject_lname,,,Patient's last name,,Clinical
-sex,sex,,,Patient's biological sex,,Clinical
+sex,sex,,de_gender,Patient's biological sex,,Clinical
 ,final_impression,,,Clinical summary and recommendations,,Clinical
-dsmsett2,dsmsett2,,,Total Score,,Down Syndrome Mental Status Exam
-dslgtot2,dslgtot2,,,Language Score,,Down Syndrome Mental Status Exam
-,dssmtot2,,,Shoebox Memory,,Down Syndrome Mental Status Exam
-dsmmtot2,dsmmtot2,,,Memory Score - Down Syndrome Mental Status Exam,,Down Syndrome Mental Status Exam
-dsvistt2,dsvistt2,,,Visuospatial Score,,Down Syndrome Mental Status Exam
-dscrttfr,dscrttfr,,,Free Recall,,Modified Cued Recall Test
-dsccttcr,dsccttcr,,,Cued Recall,,Modified Cued Recall Test
+dsmsett2,dsmsett,,dsto2,Total Score,,Down Syndrome Mental Status Exam
+dslgtot2,dslgtot,,dsla2,Language Score,,Down Syndrome Mental Status Exam
+dssmtot2,dssmtot,,colshbx,Shoebox Memory,,Down Syndrome Mental Status Exam
+dsmmtot2,dsmmtot,,dsme1,Memory Score - Down Syndrome Mental Status Exam,,Down Syndrome Mental Status Exam
+dsvistt2,dsvistt,,dsvs1,Visuospatial Score,,Down Syndrome Mental Status Exam
+dscrttfr,dscrttfr,,frssa/frssb,Free Recall,,Modified Cued Recall Test
+dsccttcr,dsccttcr,,crssa/crssb,Cued Recall,,Modified Cued Recall Test
 dsadl1,dsadl1,,,Needs help washing or bathing,Activities of Daily Living,NTG-EDSD
 dsadl2,dsadl2,,,Needs help with dressing,Activities of Daily Living,NTG-EDSD
 dsadl3,dsadl3,,,Dresses inappropriately,Activities of Daily Living,NTG-EDSD
@@ -26,12 +27,14 @@ dsadl4,dsadl4,,,Undresses inappropriately,Activities of Daily Living,NTG-EDSD
 dsadl5,dsadl5,,,Needs help eating,Activities of Daily Living,NTG-EDSD
 dsadl6,dsadl6,,,Needs help using the bathroom,Activities of Daily Living,NTG-EDSD
 dsadl7,dsadl7,,,Incontinent,Activities of Daily Living,NTG-EDSD
+,,,adltot,NTG-EDSD ADL Score,Activities of Daily Living,NTG-EDSD
 dslang1,dslang1,,,Does not initiate conversation,Language and Communication,NTG-EDSD
 dslang2,dslang2,,,Does not find words,Language and Communication,NTG-EDSD
 dslang3,dslang3,,,Does not follow simple instructions,Language and Communication,NTG-EDSD
 dslang4,dslang4,,,Appears to get lost in middle of conversation,Language and Communication,NTG-EDSD
 dslang5,dslang5,,,Does not read,Language and Communication,NTG-EDSD
 dslang6,dslang6,,,Does not write,Language and Communication,NTG-EDSD
+,,,ntlctot,NTG-EDSD Language Score,Language and Communication,NTG-EDSD
 dssleep1,dssleep1,,,Excessive sleep,Sleep-Wake Change Patterns,NTG-EDSD
 dssleep2,dssleep2,,,Inadequate sleep,Sleep-Wake Change Patterns,NTG-EDSD
 dssleep3,dssleep3,,,Wakes frequently at night,Sleep-Wake Change Patterns,NTG-EDSD
@@ -40,10 +43,12 @@ dssleep5,dssleep5,,,Sleeps during the day more than usual,Sleep-Wake Change Patt
 dssleep6,dssleep6,,,Wanders at night,Sleep-Wake Change Patterns,NTG-EDSD
 dssleep7,dssleep7,,,Wakes earlier than usual,Sleep-Wake Change Patterns,NTG-EDSD
 dssleep8,dssleep8,,,Sleeps later than usual,Sleep-Wake Change Patterns,NTG-EDSD
+,,,ntswtot,NTG-EDSD Sleep Score,Sleep-Wake Change Patterns,NTG-EDSD
 dsamb1,dsamb1,,,Not confident walking,Ambulation,NTG-EDSD
 dsamb2,dsamb2,,,Unsteady walk or loses balance,Ambulation,NTG-EDSD
 dsamb3,dsamb3,,,Falls,Ambulation,NTG-EDSD
 dsamb4,dsamb4,,,Requires aids to walk,Ambulation,NTG-EDSD
+,,,ntambtot,NTG-EDSD Ambulation Score,Ambulation,NTG-EDSD
 dsmem1,dsmem1,,,Does not recognize familiar persons,Memory,NTG-EDSD
 dsmem2,dsmem2,,,Does not remember names of familiar people,Memory,NTG-EDSD
 dsmem3,dsmem3,,,Does not remember recent events,Memory,NTG-EDSD
@@ -53,6 +58,7 @@ dsmem6,dsmem6,,,Loses or misplaces objects,Memory,NTG-EDSD
 dsmem7,dsmem7,,,Puts familiar things in wrong places,Memory,NTG-EDSD
 dsmem8,dsmem8,,,Problems with printing or signing own name,Memory,NTG-EDSD
 dsmem9,dsmem9,,,Problems with learning new tasks or names,Memory,NTG-EDSD
+,,,ntmemtot,NTG-EDSD Memory Score,Memory,NTG-EDSD
 dsbeh1,dsbeh1,,,Wanders,Behavior and Affect,NTG-EDSD
 dsbeh2,dsbeh2,,,Withdraws from social activities,Behavior and Affect,NTG-EDSD
 dsbeh3,dsbeh3,,,Withdraws from people,Behavior and Affect,NTG-EDSD
@@ -70,18 +76,21 @@ dsbeh14,dsbeh14,,,Shows physical aggression,Behavior and Affect,NTG-EDSD
 dsbeh15,dsbeh15,,,"Temper tantrums, uncontrollable crying, or shouting",Behavior and Affect,NTG-EDSD
 dsbeh16,dsbeh16,,,Shows lethargy or listlessness,Behavior and Affect,NTG-EDSD
 dsbeh17,dsbeh17,,,Talks to self,Behavior and Affect,NTG-EDSD
+,,,ntbehtot,NTG-EDSD Behavior Score,Behavior and Affect,NTG-EDSD
 dsself1,dsself1,,,Changes in ability to do things,Adult's Self-Reported Problems,NTG-EDSD
 dsself2,dsself2,,,Hearing things,Adult's Self-Reported Problems,NTG-EDSD
 dsself3,dsself3,,,Seeing things,Adult's Self-Reported Problems,NTG-EDSD
 dsself4,dsself4,,,Changes in thinking,Adult's Self-Reported Problems,NTG-EDSD
 dsself5,dsself5,,,Changes in interests,Adult's Self-Reported Problems,NTG-EDSD
 dsself6,dsself6,,,Changes in memory,Adult's Self-Reported Problems,NTG-EDSD
+,,,ntsrptot,NTG-EDSD Self-reported Score,Adult's Self-Reported Problems,NTG-EDSD
 dsother1,dsother1,,,Changes in gait,Significant Changes Observed by Others,NTG-EDSD
 dsother2,dsother2,,,Changes in personality,Significant Changes Observed by Others,NTG-EDSD
 dsother3,dsother3,,,Changes in friendliness,Significant Changes Observed by Others,NTG-EDSD
 dsother4,dsother4,,,Changes in attentiveness,Significant Changes Observed by Others,NTG-EDSD
 dsother5,dsother5,,,Changes in weight,Significant Changes Observed by Others,NTG-EDSD
 dsother6,dsother6,,,Changes in abnormal voluntary movements,Significant Changes Observed by Others,NTG-EDSD
+,,,ntootot,NTG-EDSD Others Reported Score,Significant Changes Observed by Others,NTG-EDSD
 ,scan_date,,,Scan Date,,Imaging
 ,radiology_read,,,Radiology Read,,Imaging
 ,centiloid_apet,,,Centiloid Value,,Imaging
@@ -100,10 +109,18 @@ triglyc_mgdl,,,,Triglycerides (mg/dL),,Blood Draw
 hba1c,,,,HbA1c (%),,Blood Draw
 glucose,,,,Fasting Glucose (mg/dL),,Blood Draw
 ptau181_pgml,,,,pTau-181 (pg/mL),,Blood Draw
-bpsys,bpsys,,,Systolic Blood Pressure (mmHg),,Lifestyle
-bpdias,bpdias,,,Diastolic Blood Pressure (mmHg),,Lifestyle
+bpsys,bpsys,,bpsys,Systolic Blood Pressure (mmHg),,Lifestyle
+bpdias,bpdias,,bpdia,Diastolic Blood Pressure (mmHg),,Lifestyle
 ,height,,,Height (inches),,Lifestyle
 ,weight,,,Weight (pounds),,Lifestyle
+average_height,,,,Height (cm),,Lifestyle
+average_weight,,,,Weight (kg),,Lifestyle
+,,,htu,Height,,Lifestyle
+,,,htu,Height (unit of measure),,Lifestyle
+,,,wt,Weight,,Lifestyle
+,,,wtu,Weight (unit of measure),,Lifestyle
+bmi_calc,,,,BMI,,Lifestyle
+circ_waist1,,,,Waist Circumference,,Lifestyle
 ,fittest_date,,,Date of the Fitness Assessment,,Lifestyle
 dxa_total_kg,mass,,,Total Mass (kilograms),,Lifestyle
 dxa_lean_g,lean,,,Total Lean Mass (grams),,Lifestyle
@@ -111,11 +128,6 @@ dxa_fat_g,fat,,,Total Fat Mass (grams),,Lifestyle
 dxa_fat_percent,total_fat,,,Total Body Fat Percentage,,Lifestyle
 dxa_bmd_z,dxa_bmd_z,,,Bone Mineral Density (z-score),,Lifestyle
 veggiemeter,,,,VeggieMeter Score,,Lifestyle
-circ_waist1,,,,Waist Circumference,,Lifestyle
-bmi_calc,,,,BMI,,Lifestyle
-average_height,,,,Height (cm),,Lifestyle
-average_weight,,,,Weight (kg),,Lifestyle
-dsdldtotal,,,,Total DLD Score Social + Cognitive ,,Dementia Questionnaire for People with Learning Disabilities
 vnld_abcss,,,,Vineland Aadaptive Behavoir Composite Standard Score,,Vineland
 vnld_abcci,,,,Vineland Adaptive Behavior Composite Confidence Interval,,Vineland
 vnld_abcpct,,,,Vineland Adaptive Behavoir Composite Percentile,,Vineland

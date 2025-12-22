@@ -3,7 +3,7 @@
 #| results: asis
 #| fig-align: center
 #| ft.align: center
-#| eval: !expr (params$kuadrc_bmi) | (params$bold_bmi)
+#| eval: !expr (params$kuadrc_bmi) | (params$bold_bmi) | (params$abcds_bmi) | (params$trcds_bmi)
 
 anthro_units <- ifelse(params$kuadrc_bmi, "imperial", "metric")
 
@@ -25,8 +25,8 @@ ltex <- glue::glue(
 cat(paste0("", ltex, ""), sep = "\n")
 
 bmi_plot <- BRIDGE21::generate_bmi_arch_plot(
-  anthro[[bmiCheck$lenWt, 2]],
-  anthro[[bmiCheck$lenHt, 3]]
+  anthro[[bmiCheck$lenWt, "weight"]],
+  anthro[[bmiCheck$lenHt, "height"]]
 )
 
 # Adjust alignment on Quarto ouput
@@ -42,8 +42,8 @@ ggplot2::ggsave(
 )
 
 weight_plot <- BRIDGE21::generate_weight_bar_plot(
-  anthro[[bmiCheck$lenWt, 2]],
-  anthro[[bmiCheck$lenHt, 3]]
+  anthro[[bmiCheck$lenWt, "weight"]],
+  anthro[[bmiCheck$lenHt, "height"]]
 )
 
 ggplot2::ggsave(
@@ -59,8 +59,9 @@ paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
 
 # Add weight history table
 anthro %>%
-  BRIDGE21::format_date(!!date) %>%
+  BRIDGE21::format_date(!!date_expr) %>%
   dplyr::select(Date, weight, bmi) %>%
+  dplyr::mutate(weight = round(weight * 2.205, 1)) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(
     Date = "Date",

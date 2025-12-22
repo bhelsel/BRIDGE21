@@ -6,7 +6,7 @@ editor_options:
 ```{r controller to determine what lifestyle sections would have data for the kuadrc cohort or bold study}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle)
+#| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle) | (params$abcds_lifestyle) | (params$trcds_lifestyle)
 
 BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
 
@@ -22,14 +22,14 @@ BRIDGE21::format_quarto(
 
 blood_pressure <-
   BRIDGE21::get_database_values(
-    !!!date,
-    "bpsys|bpsysl1",
-    "bpdias|bpdiasl1",
+    "bpsys|bpsysl1|vsbpsys",
+    "bpdias|bpdiasl1|bpdia|vsbpdia",
+    date = date,
     data = data
   )
 
 if (BRIDGE21::check_missing_values(blood_pressure, date)) {
-  params$kuadrc_blood_pressure <- params$bold_blood_pressure <- FALSE
+  params$kuadrc_blood_pressure <- params$bold_blood_pressure <- params$abcds_blood_pressure <- params$trcds_blood_pressure <- FALSE
 }
 
 # Physical Activity
@@ -48,28 +48,33 @@ if (!is.null(params$accelres)) {
       )
     },
     error = function(e) {
-      params$kuadrc_activity <- params$bold_activity <- FALSE
+      params$kuadrc_activity <<- params$bold_activity <<- params$abcds_activity <<- FALSE
+      return(NULL)
     }
   )
 } else {
-  params$kuadrc_activity <- params$bold_activity <- FALSE
+  params$kuadrc_activity <- params$bold_activity <- params$abcds_activity <- FALSE
 }
 
 # Body Mass Index
 
 anthrovars <- c(
-  "weight|average_weight",
-  "height|average_height"
+  "weight|average_weight|wt|vsweight",
+  "height|average_height|ht|vsheight"
 )
 
 anthro <- BRIDGE21::get_database_values(
-  !!date,
   !!!anthrovars,
+  date = date,
   data = data
 )
 
 check_missing_wt_ht <- function(wt, ht) {
-  len <- c(wt = length(wt), ht = length(ht))
+  len <- c(wt = sum(!is.na(wt)), ht = sum(!is.na(ht)))
+  if (len[["wt"]] > len[["ht"]] & len[["ht"]] == 1) {
+    anthro[["height"]] <<- anthro[!is.na(anthro$height), "height", drop = TRUE]
+    len[["ht"]] <- len["wt"]
+  }
   noWtHt <- (len[["wt"]] == 0 | len[["ht"]] == 0) | len[["wt"]] != len[["ht"]]
   return(data.frame(lenWt = len[["wt"]], lenHt = len[["ht"]], noWtHt))
 }
@@ -80,27 +85,31 @@ bmiCheck <- check_missing_wt_ht(
 )
 
 if (bmiCheck[["noWtHt"]]) {
-  params$kuadrc_bmi <- params$bold_bmi <- FALSE
+  params$kuadrc_bmi <- params$bold_bmi <- params$abcds_bmi <- params$trcds_bmi <- FALSE
 }
 
 # DXA Scan
 
-dxaNames <- dxaVars <- c("mass", "lean", "fat", "total_fat", "dxa_bmd_z")
+if (params$kuadrc_dxa | params$bold_dxa) {
+  dxaNames <- dxaVars <- c("mass", "lean", "fat", "total_fat", "dxa_bmd_z")
 
-if (params$bold_dxa) {
-  dxaVars <- c(
-    "dxa_total_kg",
-    "dxa_lean_g",
-    "dxa_fat_g",
-    "dxa_fat_percent",
-    "dxa_bmd_z"
-  )
-}
+  if (params$bold_dxa) {
+    dxaVars <- c(
+      "dxa_total_kg",
+      "dxa_lean_g",
+      "dxa_fat_g",
+      "dxa_fat_percent",
+      "dxa_bmd_z"
+    )
+  }
 
-dxa <- BRIDGE21::get_database_values(!!!date, !!!dxaVars, data = data)
+  dxa <- BRIDGE21::get_database_values(!!!dxaVars, date = date, data = data)
 
-if (BRIDGE21::check_missing_values(dxa, date)) {
-  params$kuadrc_dxa <- params$bold_dxa <- FALSE
+  dxa <- dxa[apply(dxa[dxaVars], 1, FUN = function(x) all(!is.na(x))), ]
+
+  if (BRIDGE21::check_missing_values(dxa, date)) {
+    params$kuadrc_dxa <- params$bold_dxa <- FALSE
+  }
 }
 
 ```

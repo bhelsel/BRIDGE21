@@ -1,3 +1,16 @@
+```{r load data and variable yaml file}
+#| echo: false
+#| message: false
+
+`%>%` <- magrittr::`%>%`
+params <- yaml::read_yaml("_variables.yaml")
+data <- readr::read_csv("data.csv", show_col_types = FALSE)
+
+# params <- yaml::read_yaml("RED_15044/_variables.yaml")
+# data <- readr::read_csv("RED_15044/data.csv", show_col_types = FALSE)
+
+```
+
 
 <!-- KU ADRC DS COHORT -->
 
@@ -9,9 +22,12 @@ intake <- BRIDGE21::get_database_values(
   subject_fname,
   subject_lname,
   subject_birthdate,
+  date = NULL,
   data = data,
   event_name = redcap_event_name
 )
+
+intake <- intake[!duplicated(intake[2:4]), ]
 
 intake$subject_birthdate <- as.Date(
   intake$subject_birthdate,
@@ -21,10 +37,21 @@ intake$subject_birthdate <- as.Date(
 date <- c("visitmo", "visitday", "visityr")
 date_expr <- rlang::expr(visitmo / visitday / visityr)
 
+data$sex <- ifelse(is.na(data$sex), data$birthsex, data$sex)
+
+data$frmdatea1 <- as.Date(data$frmdatea1, "%m/%d/%Y")
+
+date_adjust <- !is.na(data$frmdatea1)
+if (any(date_adjust)) {
+  data$visityr[date_adjust] <- format(data$frmdatea1[date_adjust], "%Y")
+  data$visitmo[date_adjust] <- format(data$frmdatea1[date_adjust], "%m")
+  data$visitday[date_adjust] <- format(data$frmdatea1[date_adjust], "%d")
+}
+
 visit <- BRIDGE21::get_database_values(
-  !!!date,
   sex,
   final_impression,
+  date = date,
   data = data,
   event_name = redcap_event_name
 )
@@ -110,8 +137,8 @@ intake$scrn_dob <- as.Date(
 date <- date_expr <- "visitdt"
 
 visit <- BRIDGE21::get_database_values(
-  !!date,
   data = data,
+  date = date,
   event_name = redcap_event_name
 )
 
@@ -121,5 +148,47 @@ visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, visitdt)[["Date"]]
 visit$age_at_visit <- floor(
   as.numeric(visit$visitdt - intake$scrn_dob) / 365.25
 )
+
+```
+
+<!-- ABCDS STUDY -->
+
+```{r extract the person information from the abcds study used for other parts of the report}
+#| echo: false
+#| eval: !expr (any(params[grepl("abcds", names(params))] == TRUE))
+
+date <- date_expr <- "de_eval_date"
+
+visit <- BRIDGE21::get_database_values(
+  data = data,
+  date = date,
+  event_name = event_code
+)
+
+visit$formatted_date_of_visit <-
+  BRIDGE21::format_date(visit, de_eval_date)[[
+    "Date"
+  ]]
+
+```
+
+<!-- TRCDS STUDY -->
+
+```{r extract the person information from the trcds study used for other parts of the report}
+#| echo: false
+#| eval: !expr (any(params[grepl("trcds", names(params))] == TRUE))
+
+date <- date_expr <- "examdate"
+
+visit <- BRIDGE21::get_database_values(
+  data = data,
+  date = date,
+  event_name = event_code
+)
+
+visit$formatted_date_of_visit <-
+  BRIDGE21::format_date(visit, examdate)[[
+    "Date"
+  ]]
 
 ```

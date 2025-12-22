@@ -6,7 +6,7 @@ editor_options:
 ```{r display dsmse calculated scores from the kuadrc cohort and bold study, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr (params$kuadrc_dsmse) | (params$bold_dsmse)
+#| eval: !expr (params$kuadrc_dsmse) | (params$bold_dsmse) | (params$abcds_dsmse) | (params$trcds_dsmse)
 
 BRIDGE21::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
 
@@ -26,7 +26,9 @@ dsmse_df %>%
 
 if (
   all(unlist(params[c("kuadrc_dsmse", "kuadrc_mcrt")])) |
-    all(unlist(params[c("bold_dsmse", "bold_mcrt")]))
+    all(unlist(params[c("bold_dsmse", "bold_mcrt")])) |
+    all(unlist(params[c("abcds_dsmse", "abcds_mcrt")])) |
+    all(unlist(params[c("trcds_dsmse", "trcds_mcrt")]))
 ) {
   BRIDGE21::format_quarto(type = "newpage")
 }

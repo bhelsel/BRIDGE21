@@ -1,3 +1,7 @@
+# BRIDGE 0.9.0
+
+- Adjust the BRIDGE21 Report to work with data from the ABC-DS and TRC-DS studies
+
 # BRIDGE 0.8.3
 
 - Add weight history table under the most recent BMI and Weight plot for longitudinal studies

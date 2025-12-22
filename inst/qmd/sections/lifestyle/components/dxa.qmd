@@ -18,8 +18,8 @@ if (all(is.na(dxa$dxa_bmd_z))) {
 
 dxa <- dxa %>%
   dplyr::mutate(
-    dplyr::across(lean:fat, ~ .x / 1000),
-    dplyr::across(mass:fat, ~ round(.x * 2.205, 1))
+    dplyr::across(lean:fat, ~ as.numeric(.x) / 1000),
+    dplyr::across(mass:fat, ~ round(as.numeric(.x) * 2.205, 1))
   )
 
 sex <- ifelse(params$kuadrc_dxa, visit$sex, intake$sex)

@@ -68,7 +68,7 @@ save_xnat_images <- function(imagedir, data, id) {
         project_no_abcds <- kuadrc.xnat::get_projects(name = project)
         subject_no_abcds <- kuadrc.xnat::get_subjects(
           project = project_no_abcds,
-          subject = coenrol_studyid
+          subject = unique(coenrol_studyid)
         )
         experiments <- tryCatch(
           {
