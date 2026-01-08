@@ -10,10 +10,21 @@ editor_options:
 
 BRIDGE21::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
 
+dsmse_df <- BRIDGE21::format_date(dsmse_df, !!date_expr)
+
+if (nrow(dsmse_df) == 1) {
+  dsmse_decline <- FALSE
+} else {
+  dsmseMaxDateIndex <- find_max_date(dsmse_df)
+  recentDSMSE <- dsmse_df[dsmseMaxDateIndex, "dsmsett", drop = TRUE]
+  previousDSMSE <- dsmse_df[dsmseMaxDateIndex - 1, "dsmsett", drop = TRUE]
+  percentDiffDSMSE <- ((recentDSMSE - previousDSMSE) / previousDSMSE) * 100
+  dsmse_decline <- percentDiffDSMSE < -10
+}
+
 dsmse_labels <- c("Total Score", "Visual Spatial", "Memory", "Language")
 
 dsmse_df %>%
-  BRIDGE21::format_date(!!date_expr) %>%
   dplyr::mutate(dsmemtot = dssmtot + dsmmtot) %>%
   dplyr::select(Date, dsmsett, dsvistt, dsmemtot, dslgtot) %>%
   flextable::flextable() %>%

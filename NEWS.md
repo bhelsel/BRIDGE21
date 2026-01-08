@@ -1,3 +1,8 @@
+# BRIDGE 0.9.1
+
+- Update anthro and cognition sections to improve the detection of the most recent value
+- Adjust PET section to work with the TRC-DS study and add cognitive decline detection
+
 # BRIDGE 0.9.0
 
 - Adjust the BRIDGE21 Report to work with data from the ABC-DS and TRC-DS studies

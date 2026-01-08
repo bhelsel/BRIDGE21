@@ -36,6 +36,32 @@ if (params$kuadrc_mri | params$kuadrc_pet) {
 
 ```
 
+```{r controller to decide whether to display the pet imaging sections}
+#| echo: false
+#| eval: !expr (params$kuadrc_pet) | (params$trcds_pet)
+#| results: asis
+
+abeta_df <- BRIDGE21::get_database_values(
+  "centiloid|centiloid_apet",
+  date = date,
+  data = data
+)
+
+if (
+  all(apply(abeta_df[setdiff(colnames(abeta_df), date)], 2, is.na)) |
+    all(abeta_df[setdiff(colnames(abeta_df), date)] == 0, na.rm = TRUE) |
+    nrow(abeta_df) == 0
+) {
+  params$kuadrc_pet <- params$trcds_pet <- FALSE
+}
+
+# abeta_df$img_scan_date_apet <- format(
+#   as.Date(abeta_df$img_scan_date_apet, tryFormats = c("%m/%d/%y", "%m/%d/%Y")),
+#   "%B %d, %Y"
+# )
+
+```
+
 <!--- MRI Imaging --->
 
 {{< include sections/imaging/components/mri.qmd >}}

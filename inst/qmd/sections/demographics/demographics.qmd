@@ -6,8 +6,15 @@
 params <- yaml::read_yaml("_variables.yaml")
 data <- readr::read_csv("data.csv", show_col_types = FALSE)
 
-# params <- yaml::read_yaml("RED_15044/_variables.yaml")
-# data <- readr::read_csv("RED_15044/data.csv", show_col_types = FALSE)
+find_max_date <- function(data) {
+  data$Date = as.Date(data$Date, "%m/%d/%Y")
+  MaxIndex <- which(data[["Date"]] == max(data[["Date"]]))
+  return(MaxIndex)
+}
+
+
+# params <- yaml::read_yaml("DST0370005/_variables.yaml")
+# data <- readr::read_csv("DST0370005/data.csv", show_col_types = FALSE)
 
 ```
 
@@ -181,6 +188,7 @@ visit$formatted_date_of_visit <-
 date <- date_expr <- "examdate"
 
 visit <- BRIDGE21::get_database_values(
+  event_label,
   data = data,
   date = date,
   event_name = event_code

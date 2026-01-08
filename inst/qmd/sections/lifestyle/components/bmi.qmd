@@ -7,26 +7,30 @@
 
 anthro_units <- ifelse(params$kuadrc_bmi, "imperial", "metric")
 
-anthro <- BRIDGE21::calculate_bmi(anthro, weight, height, units = anthro_units)
+anthro <- anthro %>%
+  BRIDGE21::format_date(!!date_expr) %>%
+  BRIDGE21::calculate_bmi(weight, height, units = anthro_units)
 
 ltex <- paste(
   readLines("sections/lifestyle/latex/bmi.tex"),
   collapse = "\n"
 )
 
+anthroMaxIndex <- find_max_date(anthro)
 
 ltex <- glue::glue(
   ltex,
-  bmiLast = round(anthro[[bmiCheck$lenWt, "bmi"]], 1),
+  bmiLast = round(anthro[[anthroMaxIndex, "bmi"]], 1),
   .open = "{{",
   .close = "}}"
 )
 
 cat(paste0("", ltex, ""), sep = "\n")
 
+
 bmi_plot <- BRIDGE21::generate_bmi_arch_plot(
-  anthro[[bmiCheck$lenWt, "weight"]],
-  anthro[[bmiCheck$lenHt, "height"]]
+  anthro[[anthroMaxIndex, "weight"]],
+  anthro[[anthroMaxIndex, "height"]]
 )
 
 # Adjust alignment on Quarto ouput
@@ -42,8 +46,8 @@ ggplot2::ggsave(
 )
 
 weight_plot <- BRIDGE21::generate_weight_bar_plot(
-  anthro[[bmiCheck$lenWt, "weight"]],
-  anthro[[bmiCheck$lenHt, "height"]]
+  anthro[[anthroMaxIndex, "weight"]],
+  anthro[[anthroMaxIndex, "height"]]
 )
 
 ggplot2::ggsave(
@@ -59,7 +63,6 @@ paste("", "![](bmi_plot.png)", "\n\n", "![](weight_plot.png)") |>
 
 # Add weight history table
 anthro %>%
-  BRIDGE21::format_date(!!date_expr) %>%
   dplyr::select(Date, weight, bmi) %>%
   dplyr::mutate(weight = round(weight * 2.205, 1)) %>%
   flextable::flextable() %>%

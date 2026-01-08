@@ -18,7 +18,7 @@ if (getRversion() >= "2.15.1") {
   kuadrc = c("apoe", "blood", "cognition", "demographics", "lifestyle", "mri", "pet"),
   bold = c("blood", "demographics", "cognition", "lifestyle"),
   abcds = c("cognition", "demographics", "lifestyle"),
-  trcds = c("cognition", "demographics", "lifestyle")
+  trcds = c("cognition", "demographics", "lifestyle", "pet")
 )
 
 .subReports <- list(

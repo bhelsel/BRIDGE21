@@ -39,9 +39,10 @@ mcrt_df <- BRIDGE21::get_database_values(
 
 if (
   all(apply(mcrt_df[setdiff(colnames(mcrt_df), date)], 2, is.na)) |
-    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0, na.rm = TRUE)
+    all(mcrt_df[setdiff(colnames(mcrt_df), date)] == 0, na.rm = TRUE) |
+    nrow(mcrt_df) == 0
 ) {
-  params$kuadrc_mcrt <- params$bold_mcrt <- FALSE
+  params$kuadrc_mcrt <- params$bold_mcrt <- params$abcds_mcrt <- params$trcds_mcrt <- FALSE
 }
 
 # National Task Group - Early Detection and Screen for Dementia (NTG-EDSD)
@@ -66,7 +67,11 @@ ntgedsd_df <- BRIDGE21::get_database_values(
   data = data
 )
 
-if (rlang::is_empty(ntgedsd_df)) {
+if (
+  all(apply(ntgedsd_df[setdiff(colnames(ntgedsd_df), date)], 2, is.na)) |
+    all(ntgedsd_df[setdiff(colnames(ntgedsd_df), date)] == 0, na.rm = TRUE) |
+    nrow(ntgedsd_df) == 0
+) {
   params$kuadrc_ntgedsd <- params$bold_ntgedsd <- params$abcds_ntgedsd <- params$trcds_ntgedsd <- FALSE
 }
 
