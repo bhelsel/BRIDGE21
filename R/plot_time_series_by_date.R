@@ -142,8 +142,9 @@ plot_time_series_by_date <- function(IMP, summary_data) {
         size = 18,
         margin = ggplot2::margin(b = 15)
       ),
-      legend.position = c(0.8, -0.1), # deprecated in ggplot2 3.5.0; use legend.position.inside
       legend.direction = "horizontal",
+      legend.position = "bottom",
+      legend.justification = 1,
       legend.title = ggplot2::element_blank(),
       legend.text = ggplot2::element_text(size = 12),
       plot.margin = ggplot2::margin(b = 20),

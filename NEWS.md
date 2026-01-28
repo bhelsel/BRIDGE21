@@ -1,3 +1,7 @@
+# BRIDGE 0.9.2
+
+- Adjust legend positioning for the accelerometer plot as it was getting clipped from the png image
+
 # BRIDGE 0.9.1
 
 - Update anthro and cognition sections to improve the detection of the most recent value
