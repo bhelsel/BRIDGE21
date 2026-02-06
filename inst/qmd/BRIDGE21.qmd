@@ -12,7 +12,7 @@ As part of our study, you get feedback from experts on the research tests and me
 
 ## UNDERSTANDING YOUR REPORT
 
-The results in this report were obtained for research purposes for the Brain Health and Down Syndrome Cohort study. Although these research tests alone don't give a full view of your brain health, they are helping us to understand more about the brain. Remember, we're still piecing together the puzzle of brain science, and your role is essential in this. Some research findings may indicate a higher dementia risk. If you have cognitive symptoms, this information may be helpful in understanding and managing them.
+The results in this report were obtained for research purposes for the **{{< meta study >}}**. Although these research tests alone don't give a full view of your brain health, they are helping us to understand more about the brain. Remember, we're still piecing together the puzzle of brain science, and your role is essential in this. Some research findings may indicate a higher dementia risk. If you have cognitive symptoms, this information may be helpful in understanding and managing them.
 
 ## SHARING YOUR RESULTS
 
@@ -36,8 +36,14 @@ These results come from tests that may still be in the research stage and may no
 
 ![](sections/resources/TheSuperSix/TheSuperSix.png)
 
-\newpage
+```{r add kumc resources if kuadrc or bold studies}
+#| echo: false
+#| eval: !expr (any(params[grepl("kuadrc", names(params))])) | (any(params[grepl("bold", names(params))]))
+#| results: asis
 
-# ADDITIONAL RESOURCES
+BRIDGE21::format_quarto(
+  "sections/resources/latex/resources.tex",
+  type = "input"
+)
 
-\input{sections/resources/latex/resources.tex}
+```
