@@ -1,14 +1,16 @@
 function Meta(meta)
   if meta.logo then
     local logo_path = pandoc.utils.stringify(meta.logo)
-    local logo_position = pandoc.utils.stringify(meta.position)
+    local logo_x = pandoc.utils.stringify(meta.logo_x)
+    local logo_y = pandoc.utils.stringify(meta.logo_y)
+    local logo_width = pandoc.utils.stringify(meta.width)
     local header = [[
 \AtBeginDocument{%
     \AddToShipoutPicture*{%
          % Logo
         \AtPageLowerLeft{%
-            \put(\LenToUnit{\dimexpr\paperwidth-168mm}, ]] .. logo_position..[[cm){%
-            \includegraphics[width=5in]{]] .. logo_path .. [[}
+            \put(\LenToUnit{\dimexpr\paperwidth-]] .. logo_x .. [[}, ]] .. logo_y ..[[){%
+            \includegraphics[width=]] .. logo_width .. [[]{]] .. logo_path .. [[}
             }%
         }%
     }

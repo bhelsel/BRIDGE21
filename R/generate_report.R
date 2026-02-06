@@ -53,15 +53,31 @@ generate_report <- function(
     abcds = "_extensions/BRIDGE21/logos/abcds.png",
     bold = "_extensions/BRIDGE21/logos/bold.jpg",
     kuadrc = "_extensions/BRIDGE21/logos/kuadrc.png",
-    trcds = "_extensions/BRIDGE21/logos/abcds.png"
+    trcds = "_extensions/BRIDGE21/logos/trcds.png"
   )
 
-  logo_position <- switch(
+  logo_y <- switch(
     prefix,
-    abcds = "24.2",
-    bold = "23.2",
-    kuadrc = "24.2",
-    trcds = "24.2"
+    abcds = "24.2cm",
+    bold = "23.2cm",
+    kuadrc = "24.2cm",
+    trcds = "24.5cm"
+  )
+
+  logo_width <- switch(
+    prefix,
+    abcds = "5in",
+    bold = "5in",
+    kuadrc = "5in",
+    trcds = "8in"
+  )
+
+  logo_x <- switch(
+    prefix,
+    abcds = "168mm",
+    bold = "168mm",
+    kuadrc = "168mm",
+    trcds = "203mm"
   )
 
   study_name <- switch(
@@ -189,7 +205,9 @@ generate_report <- function(
     output_file = pdffile,
     metadata = list(
       logo = logo_path,
-      position = logo_position,
+      logo_x = logo_x,
+      logo_y = logo_y,
+      width = logo_width,
       study = study_name
     )
   )
