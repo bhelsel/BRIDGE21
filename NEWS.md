@@ -1,6 +1,9 @@
 # BRIDGE 0.9.2
 
 - Adjust legend positioning for the accelerometer plot as it was getting clipped from the png image
+- Add logo for the TRC-DS Study
+- Adjust the resources.tex file to only be included in the KUMC studies
+- Add more flexible logo positioning for the different studies inside the logo-inject.lua file
 
 # BRIDGE 0.9.1
 
