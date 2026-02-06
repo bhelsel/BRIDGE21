@@ -5,7 +5,11 @@
 #| ft.align: center
 #| eval: !expr (params$kuadrc_bmi) | (params$bold_bmi) | (params$abcds_bmi) | (params$trcds_bmi)
 
-anthro_units <- ifelse(params$kuadrc_bmi, "imperial", "metric")
+anthro_units <- ifelse(
+  params$kuadrc_bmi | params$id == "test_jayhawk",
+  "imperial",
+  "metric"
+)
 
 anthro <- anthro %>%
   BRIDGE21::format_date(!!date_expr) %>%

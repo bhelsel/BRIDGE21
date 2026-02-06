@@ -38,13 +38,13 @@ generate_report <- function(
 
   reports <- rlang::ensyms(...)
 
+  reports <- generate_report_params(reports)
+
   if (example_report) {
-    reports <- reports[grepl("kuadrc", reports)]
+    # reports <- reports[grepl("kuadrc", reports)]
     id = "test_jayhawk"
     datafile = system.file("extdata/example.csv", package = "BRIDGE21")
   }
-
-  reports <- generate_report_params(reports)
 
   prefix <- unique(sub("_.*", "", names(reports[reports == TRUE])))
 
@@ -115,24 +115,28 @@ generate_report <- function(
       datafile,
       show_col_types = FALSE
     )
-    if (!id %in% unique(data$id)) {
-      stop(sprintf("We did not find patient ID %s in the dataset", id))
+    if (!example_report) {
+      if (!id %in% unique(data$id)) {
+        stop(sprintf("We did not find patient ID %s in the dataset", id))
+      }
+      identifier <- data[which(data$id == id), "record_id", drop = TRUE]
+      data <- data[data$record_id == identifier, ]
     }
-    identifier <- data[which(data$id == id), "record_id", drop = TRUE]
-    data <- data[data$record_id == identifier, ]
     readr::write_csv(data, file = sprintf("%s/data.csv", id))
   }
 
   if (prefix == "abcds" | prefix == "trcds") {
     data <- readr::read_csv(datafile, show_col_types = FALSE)
-    if (!id %in% unique(data$subject_label)) {
-      stop(sprintf("We did not find patient ID %s in the dataset", id))
+    if (!example_report) {
+      if (!id %in% unique(data$subject_label)) {
+        stop(sprintf("We did not find patient ID %s in the dataset", id))
+      }
+      data <- data[data$subject_label == id, ]
     }
-    data <- data[data$subject_label == id, ]
     readr::write_csv(data, file = sprintf("%s/data.csv", id))
   }
 
-  if (example_report) {
+  if (example_report & prefix == "kuadrc") {
     mriFiles <- system.file(
       c("images/axialImage.png", "images/sagittalImage.png"),
       package = "BRIDGE21"
@@ -159,7 +163,7 @@ generate_report <- function(
   }
 
   # Process accelerometer data
-  if (example_report) {
+  if (example_report & prefix == "kuadrc") {
     accelFolder <- system.file("extdata/accelerometer", package = "BRIDGE21")
     file.copy(
       from = accelFolder,

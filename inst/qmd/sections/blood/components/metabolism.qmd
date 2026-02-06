@@ -2,7 +2,12 @@
 #| echo: false
 #| results: asis
 #| fig-align: center
-#| eval: !expr params$bold_metabolism
+#| eval: !expr (params$bold_metabolism) & (params$id != "test_jayhawk")
+
+BRIDGE21::format_quarto(
+  "BLOOD TESTS",
+  type = "section"
+)
 
 metabolism <- BRIDGE21::get_database_values(
   hdl_mgdl,

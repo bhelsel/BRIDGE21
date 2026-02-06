@@ -5,7 +5,7 @@ editor_options:
 ```{r display vineland calculated scores for the bold study, ft.align="left"}
 #| echo: false
 #| results: asis
-#| eval: !expr params$bold_vineland
+#| eval: !expr (params$bold_vineland) & (params$id != "test_jayhawk")
 
 BRIDGE21::format_quarto("sections/cognition/latex/vineland.tex", type = "input")
 

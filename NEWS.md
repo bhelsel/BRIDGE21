@@ -1,3 +1,7 @@
+# BRIDGE 0.9.3
+
+- Update Quarto sections to be able to handle example report for any study
+
 # BRIDGE 0.9.2
 
 - Adjust legend positioning for the accelerometer plot as it was getting clipped from the png image

@@ -91,21 +91,17 @@ if (bmiCheck[["noWtHt"]]) {
 # DXA Scan
 
 if (params$kuadrc_dxa | params$bold_dxa) {
-  dxaNames <- dxaVars <- c("mass", "lean", "fat", "total_fat", "dxa_bmd_z")
-
-  if (params$bold_dxa) {
-    dxaVars <- c(
-      "dxa_total_kg",
-      "dxa_lean_g",
-      "dxa_fat_g",
-      "dxa_fat_percent",
-      "dxa_bmd_z"
-    )
-  }
+  dxaVars <- c(
+    "mass|dxa_total_kg",
+    "lean|dxa_lean_g",
+    "fat|dxa_fat_g",
+    "total_fat|dxa_fat_percent",
+    "dxa_bmd_z"
+  )
 
   dxa <- BRIDGE21::get_database_values(!!!dxaVars, date = date, data = data)
 
-  dxa <- dxa[apply(dxa[dxaVars], 1, FUN = function(x) all(!is.na(x))), ]
+  dxa <- dxa[complete.cases(dxa[setdiff(names(dxa), date)]), ]
 
   if (BRIDGE21::check_missing_values(dxa, date)) {
     params$kuadrc_dxa <- params$bold_dxa <- FALSE

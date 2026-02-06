@@ -5,8 +5,6 @@
 
 dxa <- BRIDGE21::format_date(dxa, !!date_expr)
 
-colnames(dxa)[2:ncol(dxa)] <- dxaNames
-
 dxa[dxa == -999] <- NA
 
 dxa_labels <- c("Date", "Weight", "Lean Tissue", "Fat Tissue", "Fat (%)", "BMD")
@@ -22,23 +20,17 @@ dxa <- dxa %>%
     dplyr::across(mass:fat, ~ round(as.numeric(.x) * 2.205, 1))
   )
 
-sex <- ifelse(params$kuadrc_dxa, visit$sex, intake$sex)
-
-dob <- as.Date(
-  ifelse(
-    params$kuadrc_dxa,
-    intake$subject_birthdate,
-    intake$scrn_dob
-  )
+sex <- ifelse(
+  params$kuadrc_dxa,
+  visit$sex,
+  intake[!is.na(intake$sex), "sex", drop = TRUE]
 )
-
-dxa_date <- ifelse(params$kuadrc_dxa, visit$Date, visit$Date)
 
 body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
   total_fat = tail(na.omit(dxa$total_fat), 1),
   subject_sex = sex,
   subject_birthdate = dob,
-  fittest_date = tail(dxa_date, 1)
+  fittest_date = tail(dxa$Date, 1)
 )
 
 # Adjust alignment on Quarto ouput

@@ -46,7 +46,7 @@ if (
 }
 
 # National Task Group - Early Detection and Screen for Dementia (NTG-EDSD)
-if (params$kuadrc_ntgedsd | params$bold_ntgedsd) {
+if (params$kuadrc_ntgedsd | params$bold_ntgedsd | params$id == "test_jayhawk") {
   ntgedsd_names <- colnames(dplyr::select(data, dsadl1:dsother6))
 } else if (params$abcds_ntgedsd | params$trcds_ntgedsd) {
   ntgedsd_names <- c(
@@ -84,7 +84,7 @@ vineland_variables <- c(
   "vnld_soclss"
 )
 
-if (params$bold_cognition) {
+if (params$bold_cognition & params$id != "test_jayhawk") {
   vineland_df <- BRIDGE21::get_database_values(
     !!!vineland_variables,
     date = date,

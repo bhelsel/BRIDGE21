@@ -38,7 +38,7 @@ These results come from tests that may still be in the research stage and may no
 
 ```{r add kumc resources if kuadrc or bold studies}
 #| echo: false
-#| eval: !expr (any(params[grepl("kuadrc", names(params))])) | (any(params[grepl("bold", names(params))]))
+#| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE)) | (any(params[grepl("bold", names(params))] == TRUE))
 #| results: asis
 
 BRIDGE21::format_quarto(

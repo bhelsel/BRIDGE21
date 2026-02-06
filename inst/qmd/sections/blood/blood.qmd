@@ -33,17 +33,6 @@ if (nrow(karyotype) == 0) {
 
 ```
 
-
-```{r bold header blood}
-#| echo: false
-#| eval: !expr params$bold_blood
-#| results: asis
-
-BRIDGE21::format_quarto(
-  "BLOOD TESTS",
-  type = "section"
-)
-```
 {{< include sections/blood/components/ptau217.qmd >}}
 
 {{< include sections/blood/components/karyotype.qmd >}}
