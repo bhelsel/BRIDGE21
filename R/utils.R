@@ -110,9 +110,11 @@ get_database_values <- function(..., date = NULL, data, event_name = NULL) {
     renamed <- c(renamed, preferred)
   }
 
+  na_vals <- c(888, -999)
+
   # Filter out rows where all renamed variables are missing
   indx <- which(apply(data[, renamed], 1, function(x) {
-    !all(is.na(x))
+    !all(is.na(x) | x %in% na_vals)
   }))
 
   if (!is.null(date)) {
@@ -167,9 +169,11 @@ add_string <- function(x) {
 #'     \item `"section"` — Print as a LaTeX `\section{}`.
 #'     \item `"subsection"` — Print as a LaTeX `\subsection{}`.
 #'     \item `"newpage"` — Insert a LaTeX `\newpage` command.
-#'     \item `"strwrap"` — Print wrapped text with a specified width.
+#'     \item `"text"` — Print wrapped text with a specified width.
 #'   }
 #' @param width The maximum line width for text wrapping (default = 100).
+#' @param color Change the color of the section, subsection, or text
+#' @param bold An optional parameter to bold text
 #'
 #' @return
 #' No return value. Called for its side effects of printing to the console or Quarto document.
@@ -177,22 +181,41 @@ add_string <- function(x) {
 #' @examples
 #' format_quarto("Participant Characteristics", type = "section")
 #' format_quarto("Next Section", type = "newpage")
-#' format_quarto("This is some long text that should be wrapped.", type = "strwrap", width = 60)
+#' format_quarto("This is some long text that should be wrapped.", type = "text", width = 60)
 #'
 #' @export
 #' @importFrom glue glue
 
-format_quarto <- function(x = NULL, type, width = 100) {
+format_quarto <- function(
+  x = NULL,
+  type,
+  width = 100,
+  color = NULL,
+  bold = FALSE
+) {
+  color_wrap <- function(text, color) {
+    if (!is.null(color)) {
+      glue::glue("\\textcolor{{{color}}}{{{text}}}")
+    } else {
+      text
+    }
+  }
+
+  bold_wrap <- function(text, bold) {
+    if (bold) glue::glue("\\textbf{{{text}}}") else text
+  }
+
   if (type == "section") {
-    cat(glue::glue("\\section{{{x}}}"), sep = "\n")
+    cat(glue::glue("\\section{{{color_wrap(x, color)}}}"), sep = "\n")
   } else if (type == "subsection") {
-    cat(glue::glue("\\subsection{{{x}}}"), sep = "\n")
+    cat(glue::glue("\\subsection{{{color_wrap(x, color)}}}"), sep = "\n")
   } else if (type == "newpage") {
     cat("\\newpage")
   } else if (type == "input") {
     cat(glue::glue("\\input{{{x}}}"), sep = "\n")
-  } else if (type == "strwrap") {
-    cat(strwrap(x, width = width), fill = TRUE)
+  } else if (type == "text") {
+    wrapped <- paste(strwrap(x, width = width), collapse = " ")
+    cat(color_wrap(bold_wrap(wrapped, bold), color), sep = "\n")
     cat("\n\n")
   }
 }
@@ -464,7 +487,7 @@ format_date <- function(data, date, desc = FALSE, display = "%m/%d/%Y") {
 #'
 #' @export
 
-check_missing_values <- function(data, date, missing_values = c(0, -999)) {
+check_missing_values <- function(data, date, missing_values = c(0, 888, -999)) {
   data_cols <- setdiff(colnames(data), date)
 
   if (length(data_cols) == 0 || nrow(data) == 0) {

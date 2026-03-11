@@ -4,7 +4,7 @@
 \alias{check_missing_values}
 \title{Check if data contains only missing or placeholder values}
 \usage{
-check_missing_values(data, date, missing_values = c(0, -999))
+check_missing_values(data, date, missing_values = c(0, 888, -999))
 }
 \arguments{
 \item{data}{A data frame to check for missing values}

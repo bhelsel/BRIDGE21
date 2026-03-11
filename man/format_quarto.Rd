@@ -4,7 +4,7 @@
 \alias{format_quarto}
 \title{Format Output for Quarto Documents}
 \usage{
-format_quarto(x = NULL, type, width = 100)
+format_quarto(x = NULL, type, width = 100, color = NULL, bold = FALSE)
 }
 \arguments{
 \item{x}{A character string to format or print.}
@@ -14,10 +14,14 @@ format_quarto(x = NULL, type, width = 100)
 \item \code{"section"} — Print as a LaTeX \verb{\\section\{\}}.
 \item \code{"subsection"} — Print as a LaTeX \verb{\\subsection\{\}}.
 \item \code{"newpage"} — Insert a LaTeX \verb{\\newpage} command.
-\item \code{"strwrap"} — Print wrapped text with a specified width.
+\item \code{"text"} — Print wrapped text with a specified width.
 }}
 
 \item{width}{The maximum line width for text wrapping (default = 100).}
+
+\item{color}{Change the color of the section, subsection, or text}
+
+\item{bold}{An optional parameter to bold text}
 }
 \value{
 No return value. Called for its side effects of printing to the console or Quarto document.
@@ -28,6 +32,6 @@ Outputs formatted LaTeX-compatible elements or wrapped text for use in Quarto do
 \examples{
 format_quarto("Participant Characteristics", type = "section")
 format_quarto("Next Section", type = "newpage")
-format_quarto("This is some long text that should be wrapped.", type = "strwrap", width = 60)
+format_quarto("This is some long text that should be wrapped.", type = "text", width = 60)
 
 }

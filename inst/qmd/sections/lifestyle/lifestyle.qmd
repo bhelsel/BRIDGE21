@@ -15,7 +15,7 @@ BRIDGE21::format_quarto(
     "We assessed various measures that can affect your overall brain health. " +
       "Recent research suggests that a healthy lifestyle is a key components of brain health."
   ),
-  type = "strwrap"
+  type = "text"
 )
 
 # Blood Pressure
