@@ -1,6 +1,8 @@
 # BRIDGE 0.9.3
 
 - Update Quarto sections to be able to handle example report for any study
+- Rename test_jayhawk to TestJayhawk for the example report
+- Add color and bold options to format_quarto
 
 # BRIDGE 0.9.2
 
