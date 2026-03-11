@@ -6,6 +6,42 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r load data and variable yaml file}
+#| echo: false
+#| message: false
+
+`%>%` <- magrittr::`%>%`
+params <- yaml::read_yaml("_variables.yaml")
+data <- readr::read_csv("data.csv", show_col_types = FALSE)
+
+find_max_date <- function(data) {
+  data$Date = as.Date(data$Date, "%m/%d/%Y")
+  MaxIndex <- which(data[["Date"]] == max(data[["Date"]]))
+  return(MaxIndex)
+}
+
+# params <- yaml::read_yaml("TestJayhawk/_variables.yaml")
+# data <- readr::read_csv("TestJayhawk/data.csv", show_col_types = FALSE)
+
+```
+
+```{r}
+#| echo: false
+#| eval: !expr (any(params[grepl("trcds", names(params))] == TRUE))
+#| results: asis
+
+BRIDGE21::format_quarto(
+  sprintf(
+    "%s: This report is not meant to be handed to participants",
+    params$id
+  ),
+  type = "text",
+  color = "red",
+  bold = TRUE
+)
+
+```
+
 Thank you for participating in the **{{< meta study >}}**. You are helping to advance our understanding and treatment of Alzheimer's disease and related dementias in people with Down syndrome, offering hope to so many.
 
 As part of our study, you get feedback from experts on the research tests and measures we perform. This brain health report, created for you, puts this information back in your hands.
