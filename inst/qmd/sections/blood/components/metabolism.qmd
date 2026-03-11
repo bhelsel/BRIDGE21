@@ -2,7 +2,7 @@
 #| echo: false
 #| results: asis
 #| fig-align: center
-#| eval: !expr (params$bold_metabolism) & (params$id != "test_jayhawk")
+#| eval: !expr (params$bold_metabolism) & (params$id != "TestJayhawk")
 
 BRIDGE21::format_quarto(
   "BLOOD TESTS",

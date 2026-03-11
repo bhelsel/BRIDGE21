@@ -6,7 +6,7 @@
 #| eval: !expr (params$kuadrc_bmi) | (params$bold_bmi) | (params$abcds_bmi) | (params$trcds_bmi)
 
 anthro_units <- ifelse(
-  params$kuadrc_bmi | params$id == "test_jayhawk",
+  params$kuadrc_bmi | params$id == "TestJayhawk",
   "imperial",
   "metric"
 )

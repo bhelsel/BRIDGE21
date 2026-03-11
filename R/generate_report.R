@@ -42,7 +42,7 @@ generate_report <- function(
 
   if (example_report) {
     # reports <- reports[grepl("kuadrc", reports)]
-    id = "test_jayhawk"
+    id = "TestJayhawk"
     datafile = system.file("extdata/example.csv", package = "BRIDGE21")
   }
 
