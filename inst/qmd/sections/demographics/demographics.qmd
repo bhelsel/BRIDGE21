@@ -113,7 +113,7 @@ BRIDGE21::format_quarto(type = "newpage")
 
 intake <- BRIDGE21::get_database_values(
   "subject_fname|firstname",
-  "subject_lname|lastname,",
+  "subject_lname|lastname",
   "subject_birthdate|scrn_dob",
   sex,
   data = data,
@@ -127,19 +127,20 @@ dob <- as.Date(
 
 dob <- dob[!is.na(dob)]
 
-date <- date_expr <- "visitdt"
+date <- date_expr <- "anthro_date"
 
 visit <- BRIDGE21::get_database_values(
-  "redcap_event_name",
+  "average_weight",
+  date = date,
   data = data,
-  date = date
+  event_name = "redcap_event_name"
 )
 
-
-visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, visitdt)[["Date"]]
+# fmt: skip
+visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, anthro_date)[["Date"]]
 
 visit$age_at_visit <- floor(
-  as.numeric(visit$visitdt - dob) / 365.25
+  as.numeric(visit$anthro_date - dob) / 365.25
 )
 
 ```
