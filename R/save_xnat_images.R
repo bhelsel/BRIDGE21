@@ -88,7 +88,8 @@ save_xnat_images <- function(imagedir, data, id) {
 
     if (!is.null(experiments)) {
       experiments <- experiments[grep("mr", experiments$xsiType), ]
-      scans <- kuadrc.xnat::get_scans(experiment = experiments$ID)
+      # fmt: skip
+      scans <- kuadrc.xnat::get_scans(experiment = utils::tail(experiments$ID, 1))
       if (!any(grepl("Sagittal & Accelerated & MPRAGE", checkdicm))) {
         scan_no <- which(
           scans$type == "Sagittal 3D Accelerated MPRAGE" |
@@ -100,7 +101,7 @@ save_xnat_images <- function(imagedir, data, id) {
           outdir = imagedir,
           project = project_no,
           subject = subject_no,
-          experiment = experiments$ID,
+          experiment = tail(experiments$ID, 1),
           scan = scan_no
         )
       }
