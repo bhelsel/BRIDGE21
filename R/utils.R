@@ -586,3 +586,16 @@ interpret_percent_change <- function(x, type, thresholds = c(-5, 5)) {
     "same" ~ base_message$same
   )
 }
+
+
+to_proper <- function(x) {
+  x <- strsplit(x, " ")[[1]]
+  x <- purrr::map_chr(
+    x,
+    ~ paste0(toupper(substr(.x, 1, 1)), substr(.x, 2, nchar(.x)))
+  )
+  if (length(x) > 1) {
+    x <- purrr::reduce(x, ~ paste(.x, .y))
+  }
+  return(x)
+}
