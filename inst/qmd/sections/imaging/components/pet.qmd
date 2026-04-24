@@ -11,6 +11,14 @@ abeta_df <- BRIDGE21::format_date(abeta_df, !!date_expr)
 centiloid <- abeta_df[find_max_date(abeta_df), "centiloid", drop = TRUE]
 centiloid_date <- abeta_df[find_max_date(abeta_df), "Date", drop = TRUE]
 
+# TRC-DS only wants high / not high - will change later if cohort wants to disclose value
+centiloid_level <- ifelse(centiloid >= 18, "high", "not high")
+centiloid_report <- if (params$trcds_pet) {
+  BRIDGE21:::to_proper(centiloid_level)
+} else {
+  round(centiloid, 1)
+}
+
 petScanDescription <- BRIDGE21:::pet_amyloid_description(
   centiloid = centiloid,
   cognitive_decline = cognitiveDecline,
@@ -26,8 +34,8 @@ ltex <- paste(
 ltex <- glue::glue(
   ltex,
   petScanImage = "{sections/imaging/latex/images/pet_amyloid.jpeg}",
-  centiloid = round(centiloid, 1),
-  amyloidHigh = ifelse(centiloid >= 19, "high", "not high"),
+  centiloid = centiloid_report,
+  amyloidHigh = centiloid_level,
   petScanDescription = petScanDescription,
   .open = "{{",
   .close = "}}"
