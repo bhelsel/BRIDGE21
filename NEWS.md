@@ -1,3 +1,10 @@
+# BRIDGE 0.9.4
+
+- Update save_xnat_images to retrieve most recent MRI scan from XNAT for use in imaging section
+- Add an internal to_proper function for use on Quarto formatting
+- Remove centiloid value for TRC-DS study and instead use a high or not high classification
+- Adjust date variables to improve consistency for the BOLD study
+
 # BRIDGE 0.9.3
 
 - Update Quarto sections to be able to handle example report for any study
