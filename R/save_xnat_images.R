@@ -16,6 +16,7 @@
 #' @rdname save_xnat_images
 #' @export
 #' @importFrom kuadrc.xnat get_projects get_subjects get_experiments get_scans xnat_download convert_to_nifti save_nifti_image
+#' @importFrom utils tail
 
 save_xnat_images <- function(imagedir, data, id) {
   # Retrieve and download scans from the XNAT API
@@ -101,7 +102,7 @@ save_xnat_images <- function(imagedir, data, id) {
           outdir = imagedir,
           project = project_no,
           subject = subject_no,
-          experiment = tail(experiments$ID, 1),
+          experiment = utils::tail(experiments$ID, 1),
           scan = scan_no
         )
       }
