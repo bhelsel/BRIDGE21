@@ -26,6 +26,9 @@ if (
 ) {
   params$kuadrc_mri <- FALSE
 } else {
+  if (nrow(imaging) > 1) {
+    imaging <- tail(imaging, 1)
+  }
   axialImage <- paste0("{", imageFiles[grep("axial", imageFiles)], "}")
   sagittalImage <- paste0("{", imageFiles[grep("sagittal", imageFiles)], "}")
 }
