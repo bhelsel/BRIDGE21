@@ -6,11 +6,6 @@
 #| eval: !expr params$kuadrc_ptau217
 #| results: asis
 
-ptau$ptau217_date <- format(
-  as.Date(ptau$ptau217_date, tryFormats = c("%m/%d/%y", "%m/%d/%Y")),
-  "%m/%d/%Y"
-)
-
 # < 0.4 “Negative --  AD pathology not indicated” Not elevated
 # ≥ 0.4 to ≤ 0.62  “Intermediate --  AD pathology possible” Intermediate
 # ≥ 0.63 “Positive --  AD pathology likely” Elevated
