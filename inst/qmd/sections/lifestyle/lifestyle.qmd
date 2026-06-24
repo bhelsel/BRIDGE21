@@ -7,7 +7,6 @@ editor_options:
 #| echo: false
 #| results: asis
 #| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle) | (params$abcds_lifestyle) | (params$trcds_lifestyle)
-
 BRIDGE21::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
 
 BRIDGE21::format_quarto(
@@ -69,10 +68,12 @@ anthro <- BRIDGE21::get_database_values(
   data = data
 )
 
-check_missing_wt_ht <- function(wt, ht) {
+check_missing_wt_ht <- function(wt, ht, missing_vals = 88.8) {
+  ht <- ifelse(ht %in% missing_vals, NA, ht)
+  anthro[["height"]] <<- ht
   len <- c(wt = sum(!is.na(wt)), ht = sum(!is.na(ht)))
   if (len[["wt"]] > len[["ht"]] & len[["ht"]] == 1) {
-    anthro[["height"]] <<- anthro[!is.na(anthro$height), "height", drop = TRUE]
+    anthro[["height"]] <<- ht[!is.na(ht)]
     len[["ht"]] <- len["wt"]
   }
   noWtHt <- (len[["wt"]] == 0 | len[["ht"]] == 0) | len[["wt"]] != len[["ht"]]
@@ -107,7 +108,6 @@ if (params$kuadrc_dxa | params$bold_dxa) {
     params$kuadrc_dxa <- params$bold_dxa <- FALSE
   }
 }
-
 ```
 
 
