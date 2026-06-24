@@ -1,7 +1,7 @@
 #' @title generate_body_fat_plot
 #' @description Generates a bar plot of the participant's body fat percent compared to norms by age and sex.
 #' @param total_fat Participant's body fat percent
-#' @param subject_sex Participant's sex (1 = male, 0 = female)
+#' @param subject_sex Participant's sex (1 = male, 2 = female)
 #' @param subject_birthdate Date of birth (YYYY-MM-DD)
 #' @param fittest_date The date of a DXA scan in a %m/%d/%Y format
 #' @return A ggplot object
