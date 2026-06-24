@@ -1,3 +1,8 @@
+# BRIDGE 0.9.5
+
+- Improve ability to handle missing height data by carrying observation forward if 88.8 or missing
+- Adjust MRI image detection to handle accidental duplication of scans
+
 # BRIDGE 0.9.4
 
 - Update save_xnat_images to retrieve most recent MRI scan from XNAT for use in imaging section
