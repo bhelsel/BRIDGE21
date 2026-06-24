@@ -74,7 +74,7 @@ save_xnat_images <- function(imagedir, data, id) {
         experiments <- tryCatch(
           {
             project_no <- project_no_abcds
-            subject_no <- coenrol_studyid
+            subject_no <- subject_no_abcds
             kuadrc.xnat::get_experiments(
               project = project_no_abcds,
               subject = subject_no_abcds
@@ -89,21 +89,22 @@ save_xnat_images <- function(imagedir, data, id) {
 
     if (!is.null(experiments)) {
       experiments <- experiments[grep("mr", experiments$xsiType), ]
-      # fmt: skip
-      scans <- kuadrc.xnat::get_scans(experiment = utils::tail(experiments$ID, 1))
-      if (!any(grepl("Sagittal & Accelerated & MPRAGE", checkdicm))) {
-        scan_no <- which(
-          scans$type == "Sagittal 3D Accelerated MPRAGE" |
-            scans$type == "Accelerated Sagittal MPRAGE (MSV21)"
-        )
-      }
-      if (length(scan_no) == 1) {
+      if (nrow(experiments) > 0) {
+        # fmt: skip
+        scans <- kuadrc.xnat::get_scans(experiment = utils::tail(experiments$ID, 1))
+        if (!any(grepl("Sagittal & Accelerated & MPRAGE", checkdicm))) {
+          scan_no <- which(
+            scans$type == "Sagittal 3D Accelerated MPRAGE" |
+              scans$type == "Accelerated Sagittal MPRAGE (MSV21)"
+          )
+        }
+
         kuadrc.xnat::xnat_download(
           outdir = imagedir,
           project = project_no,
           subject = subject_no,
           experiment = utils::tail(experiments$ID, 1),
-          scan = scan_no
+          scan = utils::tail(scan_no, 1)
         )
       }
     }
