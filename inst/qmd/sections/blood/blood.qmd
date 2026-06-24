@@ -3,7 +3,6 @@
 #| echo: false
 #| eval: !expr params$kuadrc_blood
 #| results: asis
-
 BRIDGE21::format_quarto(
   "UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK",
   type = "section"
@@ -30,7 +29,6 @@ karyotype <- karyotype[karyotype$dschrom != 9, ]
 if (nrow(karyotype) == 0) {
   params$kuadrc_karyotype <- FALSE
 }
-
 ```
 
 {{< include sections/blood/components/ptau217.qmd >}}

@@ -2,7 +2,6 @@
 #| echo: false
 #| results: asis
 #| eval: !expr (params$kuadrc_dxa) | (params$bold_dxa)
-
 dxa <- BRIDGE21::format_date(dxa, !!date_expr)
 
 dxa[dxa == -999] <- NA
@@ -81,5 +80,4 @@ BRIDGE21::format_quarto(
 )
 
 BRIDGE21::format_quarto(type = "newpage")
-
 ```

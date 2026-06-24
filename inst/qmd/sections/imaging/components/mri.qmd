@@ -2,7 +2,6 @@
 #| echo: false
 #| results: asis
 #| eval: !expr params$kuadrc_mri
-
 scanDate <- format(
   as.Date(imaging$scan_date, tryFormats = c("%m/%d/%Y", "%m/%d/%y")),
   "%B %d, %Y"
@@ -29,6 +28,5 @@ if (length(imageFiles) >= 1) {
 }
 
 BRIDGE21::format_quarto(type = "newpage")
-
 ```
 
