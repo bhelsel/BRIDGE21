@@ -37,15 +37,11 @@ BRIDGE21::format_quarto(type = "newpage")
 
 # Accelerometer Plot for Most Recent Observation
 
-IMPFiles <- list.files(
-  file.path(accelMetaDir, "ms2.out"),
-  recursive = TRUE,
-  full.names = TRUE,
-  pattern = "\\.RData$"
-)
+# Accelerometer Plot for Most Recent Observation
 
-baseIMP <- gsub(".RData$", "", basename(IMPFiles[length(IMPFiles)]))
-accel_df_subset <- accel_df[accel_df$filename == baseIMP, ]
+lastFileName <- tail(unique(accel_df$filename))
+accel_df_subset <- accel_df[accel_df$filename == lastFileName, ]
+
 accelDates <- as.Date(accel_df_subset$date, format = "%m/%d/%Y")
 minDate <- format(min(accelDates), "%B %d, %Y")
 maxDate <- format(max(accelDates), "%B %d, %Y")
@@ -69,12 +65,13 @@ BRIDGE21::format_quarto(
   type = "text"
 )
 
+
 accel_plot <- BRIDGE21::plot_time_series_by_date(
-  IMPFiles[length(IMPFiles)],
+  file.path(accelMetaDir, "ms2.out", sprintf("%s.RData", lastFileName)),
   summary_data = accel_df_subset
 )
 
-accelerometer_file_name <- sprintf("%s.png", baseIMP)
+accelerometer_file_name <- sprintf("%s.png", gsub(".gt3x$", "", lastFileName))
 
 ggplot2::ggsave(
   filename = accelerometer_file_name,
@@ -88,5 +85,4 @@ paste0("", "![](", accelerometer_file_name, ")", "") |>
   cat(sep = "\n")
 
 BRIDGE21::format_quarto(type = "newpage")
-
 ```
