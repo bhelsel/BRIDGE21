@@ -2,6 +2,7 @@
 
 - Improve ability to handle missing height data by carrying observation forward if 88.8 or missing
 - Adjust MRI image detection to handle accidental duplication of scans
+- Adjust activity.qmd to handle cases where the last file contains no activity data
 
 # BRIDGE 0.9.4
 
