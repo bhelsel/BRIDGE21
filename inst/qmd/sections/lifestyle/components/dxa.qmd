@@ -2,7 +2,7 @@
 #| echo: false
 #| results: asis
 #| eval: !expr (params$kuadrc_dxa) | (params$bold_dxa)
-dxa <- BRIDGE21::format_date(dxa, !!date_expr)
+dxa <- BRIDGE21:::format_date(dxa, !!date_expr)
 
 dxa[dxa == -999] <- NA
 
@@ -25,7 +25,7 @@ sex <- ifelse(
   intake[!is.na(intake$sex), "sex", drop = TRUE]
 )
 
-body_fat_percent_plot <- BRIDGE21::generate_body_fat_plot(
+body_fat_percent_plot <- BRIDGE21::plot_body_fat(
   total_fat = tail(na.omit(dxa$total_fat), 1),
   subject_sex = sex,
   subject_birthdate = dob,
@@ -44,12 +44,12 @@ ggplot2::ggsave(
   dpi = 300
 )
 
-BRIDGE21::format_quarto("sections/lifestyle/latex/dxa.tex", type = "input")
+BRIDGE21:::format_quarto("sections/lifestyle/latex/dxa.tex", type = "input")
 
 ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
 
 if ("dxa_bmd_z" %in% colnames(dxa)) {
-  ft_footnote <- BRIDGE21::add_string(
+  ft_footnote <- BRIDGE21:::add_string(
     ft_footnote + "\n" + "BMD: Bone Mineral Density (Z-score)"
   )
 }
@@ -71,13 +71,13 @@ paste("", "![](body_fat_percent_plot.png)", "") %>%
   cat(sep = "\n")
 
 if ("dxa_bmd_z" %in% colnames(dxa)) {
-  BRIDGE21::format_quarto("sections/lifestyle/latex/bmd.tex", type = "input")
+  BRIDGE21:::format_quarto("sections/lifestyle/latex/bmd.tex", type = "input")
 }
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "sections/lifestyle/latex/after-dxa.tex",
   type = "input"
 )
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 ```

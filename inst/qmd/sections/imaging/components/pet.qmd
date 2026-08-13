@@ -6,7 +6,7 @@
 cognitiveDecline <- mcrt_decline || dsmse_decline
 
 
-abeta_df <- BRIDGE21::format_date(abeta_df, !!date_expr)
+abeta_df <- BRIDGE21:::format_date(abeta_df, !!date_expr)
 
 centiloid <- abeta_df[find_max_date(abeta_df), "centiloid", drop = TRUE]
 centiloid_date <- abeta_df[find_max_date(abeta_df), "Date", drop = TRUE]
@@ -42,6 +42,6 @@ ltex <- glue::glue(
 )
 cat(paste0("", ltex, ""), sep = "\n")
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```

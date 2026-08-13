@@ -14,7 +14,6 @@
 #' @import flextable
 #' @import grid
 #' @import gridExtra
-#' @import abcds
 #' @import magrittr
 #' @importFrom patchwork inset_element
 #' @importFrom purrr imap_dfc imap

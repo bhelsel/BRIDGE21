@@ -12,8 +12,8 @@ anthro_units <- ifelse(
 )
 
 anthro <- anthro %>%
-  BRIDGE21::format_date(!!date_expr) %>%
-  BRIDGE21::calculate_bmi(weight, height, units = anthro_units)
+  BRIDGE21:::format_date(!!date_expr) %>%
+  BRIDGE21:::calculate_bmi(weight, height, units = anthro_units)
 
 ltex <- paste(
   readLines("sections/lifestyle/latex/bmi.tex"),
@@ -32,7 +32,7 @@ ltex <- glue::glue(
 cat(paste0("", ltex, ""), sep = "\n")
 
 
-bmi_plot <- BRIDGE21::generate_bmi_arch_plot(
+bmi_plot <- BRIDGE21::plot_body_mass_index(
   anthro[[anthroMaxIndex, "weight"]],
   anthro[[anthroMaxIndex, "height"]]
 )
@@ -49,7 +49,7 @@ ggplot2::ggsave(
   dpi = 300
 )
 
-weight_plot <- BRIDGE21::generate_weight_bar_plot(
+weight_plot <- BRIDGE21::plot_weight(
   anthro[[anthroMaxIndex, "weight"]],
   anthro[[anthroMaxIndex, "height"]]
 )
@@ -84,6 +84,5 @@ anthro %>%
     colwidths = 3
   )
 
-BRIDGE21::format_quarto(type = "newpage")
-
+BRIDGE21:::format_quarto(type = "newpage")
 ```

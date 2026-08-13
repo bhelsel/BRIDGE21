@@ -1,4 +1,4 @@
-#' @title plot_time_series_by_date
+#' @title plot_physical_activity
 #' @description Plot a line graph of the time series acceleration by date
 #' @param IMP The the path to the file containing the IMP object from GGIR Part 2
 #' @param summary_data A data frame with date and min/day of sleep, inactivity, light, and moderate-to-vigorous physical activity
@@ -7,13 +7,13 @@
 #' @seealso
 #'  \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{summarise}}, \code{\link[dplyr]{mutate}}
 #'  \code{\link[ggplot2]{ggplot}}, \code{\link[ggplot2]{geom_path}}, \code{\link[ggplot2]{aes}}, \code{\link[ggplot2]{facet_wrap}}, \code{\link[ggplot2]{vars}}, \code{\link[ggplot2]{ggtheme}}, \code{\link[ggplot2]{theme}}, \code{\link[ggplot2]{element}}
-#' @rdname plot_time_series_by_date
+#' @rdname plot_physical_activity
 #' @export
 #' @importFrom dplyr group_by summarise mutate
 #' @importFrom ggplot2 ggplot geom_line aes facet_wrap vars theme_classic theme element_blank element_text
 #' @importFrom scales date_format
 
-plot_time_series_by_date <- function(IMP, summary_data) {
+plot_physical_activity <- function(IMP, summary_data) {
   load(IMP)
 
   IMPdates <- unique(as.Date(IMP$metashort$timestamp))

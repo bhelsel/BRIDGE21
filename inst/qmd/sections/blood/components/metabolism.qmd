@@ -4,12 +4,12 @@
 #| fig-align: center
 #| eval: !expr (params$bold_metabolism) & (params$id != "TestJayhawk")
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "BLOOD TESTS",
   type = "section"
 )
 
-metabolism <- BRIDGE21::get_database_values(
+metabolism <- BRIDGE21:::get_database_values(
   hdl_mgdl,
   ldl_mgdl,
   totchol_mgdl,
@@ -27,7 +27,7 @@ missing_metabolism <- apply(metabolism, 1, function(x) {
 })
 
 if (!all(missing_metabolism)) {
-  BRIDGE21::format_quarto(
+  BRIDGE21:::format_quarto(
     "sections/blood/latex/metabolism.tex",
     type = "input"
   )
@@ -35,7 +35,7 @@ if (!all(missing_metabolism)) {
   ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
 
   metabolism %>%
-    BRIDGE21::format_date(!!date_expr) %>%
+    BRIDGE21:::format_date(!!date_expr) %>%
     dplyr::mutate(
       dplyr::across(hdl_mgdl:glucose, ~ round(.x, 1))
     ) %>%
@@ -64,6 +64,6 @@ if (!all(missing_metabolism)) {
     )
 }
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```

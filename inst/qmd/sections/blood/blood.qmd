@@ -3,12 +3,12 @@
 #| echo: false
 #| eval: !expr params$kuadrc_blood
 #| results: asis
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK",
   type = "section"
 )
 
-ptau <- BRIDGE21::get_database_values(
+ptau <- BRIDGE21:::get_database_values(
   ptau217_pgml,
   date = "ptau217_date",
   data = data
@@ -18,7 +18,7 @@ if (nrow(ptau) == 0) {
   params$kuadrc_ptau217 <- FALSE
 }
 
-karyotype <- BRIDGE21::get_database_values(
+karyotype <- BRIDGE21:::get_database_values(
   dschrom,
   date = date,
   data = data

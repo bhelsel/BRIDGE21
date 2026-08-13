@@ -1,3 +1,9 @@
+# BRIDGE 1.0.0
+
+- Cleaned up plot functions to improve consistency and reduce code when possible
+- Changed many helper functions to internal functions
+- Updated README to include more details on package installation and use
+
 # BRIDGE 0.9.5
 
 - Improve ability to handle missing height data by carrying observation forward if 88.8 or missing

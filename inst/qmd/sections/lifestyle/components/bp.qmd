@@ -4,7 +4,7 @@
 #| eval: !expr (params$kuadrc_blood_pressure) | (params$bold_blood_pressure) | (params$abcds_blood_pressure) | (params$trcds_blood_pressure)
 
 blood_pressure <- blood_pressure %>%
-  BRIDGE21::format_date(!!date_expr) %>%
+  BRIDGE21:::format_date(!!date_expr) %>%
   dplyr::mutate(
     bpsys_cat = BRIDGE21:::classify_blood_pressure(bpsys, type = "systolic"),
     bpdias_cat = BRIDGE21:::classify_blood_pressure(bpdias, type = "diastolic"),
@@ -17,7 +17,7 @@ blood_pressure <- blood_pressure %>%
     )
   )
 
-BRIDGE21::format_quarto("sections/lifestyle/latex/bp.tex", type = "input")
+BRIDGE21:::format_quarto("sections/lifestyle/latex/bp.tex", type = "input")
 
 bpft <-
   blood_pressure %>%
@@ -34,7 +34,7 @@ bpft <-
   flextable::hrule(rule = "exact")
 
 bp_plot <-
-  BRIDGE21::generate_bp_plot(
+  BRIDGE21::plot_blood_pressure(
     bpsys = blood_pressure$bpsys[length(blood_pressure$bpsys)],
     bpdia = blood_pressure$bpdias[length(blood_pressure$bpdias)]
   ) +
@@ -66,6 +66,6 @@ ggplot2::ggsave(
 
 cat(paste0("", "![](bp_plot.png)", ""), sep = "\n")
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```

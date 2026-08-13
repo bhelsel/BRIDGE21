@@ -10,6 +10,11 @@ Generates participant feedback reports and insights for Down syndrome cohorts to
 \author{
 \strong{Maintainer}: Brian C. Helsel \email{bhelsel@kumc.edu}
 
+Authors:
+\itemize{
+  \item Brian C. Helsel \email{bhelsel@kumc.edu}
+}
+
 Other contributors:
 \itemize{
   \item Julianne G. Clina \email{jclina@kumc.edu} [contributor]

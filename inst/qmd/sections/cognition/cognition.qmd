@@ -7,7 +7,7 @@
 #| eval: !expr (params$kuadrc_cognition) | (params$bold_cognition) | (params$abcds_cognition) | (params$trcds_cognition)
 #| results: asis
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 # Down Syndrome Mental Status Exam
 dsmse_variables <- c(
   "dsmsett|dsmsett2|dsto2",
@@ -17,7 +17,7 @@ dsmse_variables <- c(
   "dslgtot|dslgtot2|dsla2"
 )
 
-dsmse_df <- BRIDGE21::get_database_values(
+dsmse_df <- BRIDGE21:::get_database_values(
   !!!dsmse_variables,
   date = date,
   data = data
@@ -30,7 +30,7 @@ if (all(apply(dsmse_df[setdiff(colnames(dsmse_df), date)], 2, is.na))) {
 
 # Modified Cued Recall Test
 mcrt_variables <- c("dscrttfr|frss", "dscrttcr|dsccttcr|crss")
-mcrt_df <- BRIDGE21::get_database_values(
+mcrt_df <- BRIDGE21:::get_database_values(
   !!!mcrt_variables,
   date = date,
   data = data
@@ -61,7 +61,7 @@ if (params$kuadrc_ntgedsd | params$bold_ntgedsd | params$id == "TestJayhawk") {
   )
 }
 
-ntgedsd_df <- BRIDGE21::get_database_values(
+ntgedsd_df <- BRIDGE21:::get_database_values(
   !!!ntgedsd_names,
   date = date,
   data = data
@@ -85,7 +85,7 @@ vineland_variables <- c(
 )
 
 if (params$bold_cognition & params$id != "TestJayhawk") {
-  vineland_df <- BRIDGE21::get_database_values(
+  vineland_df <- BRIDGE21:::get_database_values(
     !!!vineland_variables,
     date = date,
     data = data
@@ -112,7 +112,7 @@ if (
     any(unlist(params[abcds_cognition])) |
     any(unlist(params[trcds_cognition]))
 ) {
-  BRIDGE21::format_quarto(
+  BRIDGE21:::format_quarto(
     "MEMORY AND THINKING TEST SCORES",
     type = "section"
   )

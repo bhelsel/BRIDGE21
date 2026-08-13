@@ -1,3 +1,6 @@
+#' @keywords internal
+#' @noRd
+
 retrieve_accel_summary <- function(data) {
   accel_df <- cbind(
     filename = data$filename,
@@ -28,6 +31,9 @@ retrieve_accel_summary <- function(data) {
 
   return(accel_df)
 }
+
+#' @keywords internal
+#' @noRd
 
 pet_amyloid_description <- function(
   centiloid,
@@ -87,7 +93,8 @@ pet_amyloid_description <- function(
 #' get_database_values(age, bmi, data = mydata, event_name = redcap_event_name)
 #' }
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom rlang ensym ensyms
 
 get_database_values <- function(..., date = NULL, data, event_name = NULL) {
@@ -144,10 +151,13 @@ get_database_values <- function(..., date = NULL, data, event_name = NULL) {
 #' as `paste0()`. It enables writing cleaner, more readable string concatenations.
 #'
 #' @examples
+#' \dontrun{
 #' add_string("Hello, " + "world" + "!")
 #' # Returns "Hello, world!"
+#' }
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom rlang env caller_env enexpr
 
 add_string <- function(x) {
@@ -179,11 +189,14 @@ add_string <- function(x) {
 #' No return value. Called for its side effects of printing to the console or Quarto document.
 #'
 #' @examples
+#' \dontrun{
 #' format_quarto("Participant Characteristics", type = "section")
 #' format_quarto("Next Section", type = "newpage")
 #' format_quarto("This is some long text that should be wrapped.", type = "text", width = 60)
+#'}
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 #' @importFrom glue glue
 
 format_quarto <- function(
@@ -261,7 +274,8 @@ format_quarto <- function(
 #' #   kuadrc_dxa = FALSE
 #' # )
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 expand_reports <- function(reports, sub_reports = .subReports) {
   # Start with original reports
@@ -318,7 +332,8 @@ expand_reports <- function(reports, sub_reports = .subReports) {
 #' df_imperial <- data.frame(weight_lbs = c(154, 176), height_in = c(67, 71))
 #' calculate_bmi(df_imperial, weight_lbs, height_in, units = "imperial")
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 calculate_bmi <- function(
   data,
@@ -390,7 +405,8 @@ calculate_bmi <- function(
 #' # Composite date using paste()
 #' format_date(df2, paste(visitmo, visitday, visityr, sep = "/"))
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 format_date <- function(data, date, desc = FALSE, display = "%m/%d/%Y") {
   # Capture the date expression without evaluating it
@@ -485,7 +501,8 @@ format_date <- function(data, date, desc = FALSE, display = "%m/%d/%Y") {
 #' )
 #' check_missing_values(df3, c("visitmo", "visitday", "visityr"))  # TRUE
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 check_missing_values <- function(data, date, missing_values = c(0, 888, -999)) {
   data_cols <- setdiff(colnames(data), date)
@@ -551,7 +568,8 @@ check_missing_values <- function(data, date, missing_values = c(0, 888, -999)) {
 #'
 #' @seealso [cut()], [dplyr::case_match()]
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 interpret_percent_change <- function(x, type, thresholds = c(-5, 5)) {
   if (length(x) == 1) {

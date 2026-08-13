@@ -4,7 +4,7 @@
 ```{r extract person information from kuadrc cohort used for other parts of the report}
 #| echo: false
 #| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE))
-intake <- BRIDGE21::get_database_values(
+intake <- BRIDGE21:::get_database_values(
   subject_fname,
   subject_lname,
   subject_birthdate,
@@ -38,7 +38,7 @@ if ("frmdatea1" %in% colnames(data)) {
   }
 }
 
-visit <- BRIDGE21::get_database_values(
+visit <- BRIDGE21:::get_database_values(
   sex,
   final_impression,
   date = date,
@@ -46,7 +46,7 @@ visit <- BRIDGE21::get_database_values(
   event_name = redcap_event_name
 )
 
-visit <- BRIDGE21::format_date(visit, !!date_expr)
+visit <- BRIDGE21:::format_date(visit, !!date_expr)
 
 visit$age_at_visit <-
   visit$Date %>%
@@ -62,12 +62,12 @@ visit$age_at_visit <-
 #| echo: false
 #| eval: !expr params$kuadrc_demographics
 #| results: asis
-BRIDGE21::format_quarto("SUMMARY OF YOUR STUDY VISIT", type = "section")
+BRIDGE21:::format_quarto("SUMMARY OF YOUR STUDY VISIT", type = "section")
 
-BRIDGE21::format_quarto("Physician Assessment and Note", type = "subsection")
+BRIDGE21:::format_quarto("Physician Assessment and Note", type = "subsection")
 
-BRIDGE21::format_quarto(
-  BRIDGE21::add_string(
+BRIDGE21:::format_quarto(
+  BRIDGE21:::add_string(
     "Each time you are seen, we have a team of clinicians review " +
       "your cognitive assessments, questionnaires your study partner answered, and clinical information. " +
       "Below is the clinician’s feedback from your last visit. "
@@ -75,14 +75,14 @@ BRIDGE21::format_quarto(
   type = "text"
 )
 
-name <- BRIDGE21::add_string(
+name <- BRIDGE21:::add_string(
   "Name: " + intake$subject_fname + " " + intake$subject_lname
 )
-lastvisit <- BRIDGE21::add_string(
+lastvisit <- BRIDGE21:::add_string(
   "Last Visit: " + tail(visit$Date, 1)
 )
 
-age <- BRIDGE21::add_string("Age: " + max(visit$age_at_visit) + " Years")
+age <- BRIDGE21:::add_string("Age: " + max(visit$age_at_visit) + " Years")
 
 subjinfo_df <- data.frame(col1 = c(name, lastvisit), col2 = c(age, ""))
 
@@ -97,7 +97,7 @@ flextable::flextable(subjinfo_df) %>%
     colwidths = 2
   )
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 ```
 
 
@@ -106,7 +106,7 @@ BRIDGE21::format_quarto(type = "newpage")
 ```{r extract person information from bold study used for other parts of the report}
 #| echo: false
 #| eval: !expr (any(params[grepl("bold", names(params))] == TRUE))
-intake <- BRIDGE21::get_database_values(
+intake <- BRIDGE21:::get_database_values(
   "subject_fname|firstname",
   "subject_lname|lastname",
   "subject_birthdate|scrn_dob",
@@ -124,7 +124,7 @@ dob <- dob[!is.na(dob)]
 
 date <- date_expr <- "anthro_date"
 
-visit <- BRIDGE21::get_database_values(
+visit <- BRIDGE21:::get_database_values(
   "average_weight",
   date = date,
   data = data,
@@ -132,7 +132,7 @@ visit <- BRIDGE21::get_database_values(
 )
 
 # fmt: skip
-visit$formatted_date_of_visit <- BRIDGE21::format_date(visit, anthro_date)[["Date"]]
+visit$formatted_date_of_visit <- BRIDGE21:::format_date(visit, anthro_date)[["Date"]]
 
 visit$age_at_visit <- floor(
   as.numeric(visit$anthro_date - dob) / 365.25
@@ -146,14 +146,14 @@ visit$age_at_visit <- floor(
 #| eval: !expr (any(params[grepl("abcds", names(params))] == TRUE))
 date <- date_expr <- "de_eval_date"
 
-visit <- BRIDGE21::get_database_values(
+visit <- BRIDGE21:::get_database_values(
   data = data,
   date = date,
   event_name = event_code
 )
 
 visit$formatted_date_of_visit <-
-  BRIDGE21::format_date(visit, de_eval_date)[[
+  BRIDGE21:::format_date(visit, de_eval_date)[[
     "Date"
   ]]
 ```
@@ -166,7 +166,7 @@ visit$formatted_date_of_visit <-
 #| eval: !expr (any(params[grepl("trcds", names(params))] == TRUE))
 date <- date_expr <- "examdate"
 
-visit <- BRIDGE21::get_database_values(
+visit <- BRIDGE21:::get_database_values(
   event_label,
   data = data,
   date = date,
@@ -174,7 +174,7 @@ visit <- BRIDGE21::get_database_values(
 )
 
 visit$formatted_date_of_visit <-
-  BRIDGE21::format_date(visit, examdate)[[
+  BRIDGE21:::format_date(visit, examdate)[[
     "Date"
   ]]
 ```
