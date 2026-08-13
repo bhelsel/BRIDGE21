@@ -4,7 +4,10 @@
 #| ft.align: left
 #| eval: !expr (params$kuadrc_activity) | (params$bold_activity)
 
-BRIDGE21:::format_quarto("sections/lifestyle/latex/activity.tex", type = "input")
+BRIDGE21:::format_quarto(
+  "sections/lifestyle/latex/activity.tex",
+  type = "input"
+)
 
 # Accelerometer Summary Table for All Observations
 
@@ -39,7 +42,7 @@ BRIDGE21:::format_quarto(type = "newpage")
 
 # Accelerometer Plot for Most Recent Observation
 
-lastFileName <- tail(unique(accel_df$filename))
+lastFileName <- tail(unique(accel_df$filename), 1)
 accel_df_subset <- accel_df[accel_df$filename == lastFileName, ]
 
 accelDates <- as.Date(accel_df_subset$date, format = "%m/%d/%Y")
