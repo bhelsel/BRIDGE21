@@ -30,7 +30,7 @@ ptau$interpretation <-
     )
   )
 
-BRIDGE21::format_quarto("sections/blood/latex/proteins.tex", type = "input")
+BRIDGE21:::format_quarto("sections/blood/latex/proteins.tex", type = "input")
 
 flextable::flextable(ptau) %>%
   flextable::set_header_labels(
@@ -61,8 +61,8 @@ flextable::flextable(ptau) %>%
   )
 
 
-BRIDGE21::format_quarto("sections/blood/latex/after-tau.tex", type = "input")
+BRIDGE21:::format_quarto("sections/blood/latex/after-tau.tex", type = "input")
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```

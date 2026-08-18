@@ -30,7 +30,7 @@ find_max_date <- function(data) {
 #| eval: !expr (any(params[grepl("trcds", names(params))] == TRUE))
 #| results: asis
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   sprintf(
     "%s: This report is not meant to be handed to participants",
     params$id
@@ -77,7 +77,7 @@ These results come from tests that may still be in the research stage and may no
 #| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE)) | (any(params[grepl("bold", names(params))] == TRUE))
 #| results: asis
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "sections/resources/latex/resources.tex",
   type = "input"
 )

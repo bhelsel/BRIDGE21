@@ -6,7 +6,7 @@
 # stop("Stop for Veggie Meter Scoring")
 
 vmdf <-
-  BRIDGE21::get_database_values(
+  BRIDGE21:::get_database_values(
     veggiemeter,
     date = date,
     data = data
@@ -15,15 +15,15 @@ vmdf <-
 colnames(vmdf)[which(colnames(vmdf) == "veggiemeter")] <- "Score"
 
 if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
-  BRIDGE21::format_quarto(
+  BRIDGE21:::format_quarto(
     "sections/lifestyle/latex/veggiemeter.tex",
     type = "input"
   )
 
   vmdf %>%
-    BRIDGE21::format_date(!!date) %>%
+    BRIDGE21:::format_date(!!date) %>%
     dplyr::mutate(
-      Interpretation = BRIDGE21::interpret_percent_change(
+      Interpretation = BRIDGE21:::interpret_percent_change(
         Score,
         type = "fruit and vegetable"
       )
@@ -40,6 +40,6 @@ if (nrow(vmdf) > 0 & all(!is.na(vmdf$Score))) {
     flextable::align(i = 1, part = "footer", align = "left")
 }
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```

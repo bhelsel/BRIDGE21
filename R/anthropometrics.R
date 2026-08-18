@@ -1,4 +1,4 @@
-#' @title generate_bmi_arch_plot
+#' @title plot_body_mass_index
 #' @description Generates an arch plot of the participant's body mass index and
 #'     its associated risk level for cardiometabolic conditions.
 #' @param wt Research participant's weight in kilograms or pounds
@@ -9,25 +9,23 @@
 #'     its associated risk level for cardiometabolic conditions.
 #' @seealso
 #'  \code{\link[ggplot2]{geom_polygon}}, \code{\link[ggplot2]{aes}}, \code{\link[ggplot2]{geom_label}}, \code{\link[ggplot2]{ggplot}}, \code{\link[ggplot2]{geom_raster}}, \code{\link[ggplot2]{annotate}}, \code{\link[ggplot2]{scale_continuous}}, \code{\link[ggplot2]{coord_polar}}, \code{\link[ggplot2]{ggtheme}}
-#' @rdname generate_bmi_arch_plot
+#' @rdname plot_body_mass_index
 #' @export
 #' @importFrom ggplot2 geom_polygon aes geom_text ggplot geom_rect annotate scale_x_continuous scale_y_continuous coord_radial theme_void
+#' @importFrom purrr map2 pmap
 
-generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
+plot_body_mass_index <- function(wt, ht, metric = TRUE) {
   # Define internal BMI functions ----
 
   add_bmi_arrow <- function(bmi, curve = 0.75) {
-    yvals <- c(-200, -200, -75, -200)
-    list(
-      ggplot2::geom_polygon(
-        ggplot2::aes(x = c((bmi - curve), bmi, bmi, (bmi - curve)), y = yvals),
-        fill = "grey80",
-        alpha = 0.5,
-        color = "black",
-        linewidth = 0.75
+    purrr::map2(
+      list(
+        c((bmi - curve), bmi, bmi, (bmi - curve)),
+        c(bmi, (bmi + curve), bmi, bmi)
       ),
-      ggplot2::geom_polygon(
-        ggplot2::aes(x = c(bmi, (bmi + curve), bmi, bmi), y = yvals),
+      rep(list(c(-200, -200, -75, -200)), 2),
+      ~ ggplot2::geom_polygon(
+        ggplot2::aes(x = .x, y = .y),
         fill = "grey80",
         alpha = 0.5,
         color = "black",
@@ -37,23 +35,19 @@ generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
   }
 
   add_bmi_text <- function(categories, units) {
-    list(
-      ggplot2::geom_text(
-        ggplot2::aes(
-          x = c(15, 21.7, 27.5, 33),
-          y = c(100, 100, 100, 100),
-          label = categories
-        ),
-        fontface = "bold",
-        size = 4.5
-      ),
-      ggplot2::geom_text(
-        ggplot2::aes(
-          x = c(15, 21.7, 27.5, 33),
-          y = c(-30, -35, -30, -30),
-          label = units
+    label <- list(categories, units)
+    y <- list(rep(100, 4), c(-30, -35, -30, -30))
+    fontface <- list("bold", "plain")
+    size <- list(4.5, 3.87)
+    purrr::pmap(
+      list(label, y, fontface, size),
+      \(label, y, fontface, size) {
+        ggplot2::geom_text(
+          ggplot2::aes(x = c(15, 21.7, 27.5, 33), y = y, label = label),
+          fontface = fontface,
+          size = size
         )
-      )
+      }
     )
   }
 
@@ -63,9 +57,10 @@ generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
   ht_m <- ifelse(!metric, (ht * 2.54) / 100, ht / 100)
   bmi <- wt_kg / ht_m^2
 
+  # Set max bmi for radial plot
   if (bmi > 34) {
     bmi <- 34
-  } # Set max bmi for radial plot
+  }
 
   ggplot2::ggplot() +
     ggplot2::geom_rect(
@@ -119,7 +114,7 @@ generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
     ggplot2::theme_void()
 }
 
-#' @title generate_weight_bar_plot
+#' @title plot_weight
 #' @description Generates a bar plot of the participant's weight and its
 #'     comparison to the weight at a healthy body mass index.
 #' @param wt Research participant's weight in kilograms or pounds
@@ -130,94 +125,34 @@ generate_bmi_arch_plot <- function(wt, ht, metric = TRUE) {
 #'     comparison to the weight at a healthy body mass index.
 #' @seealso
 #'  \code{\link[ggplot2]{geom_segment}}, \code{\link[ggplot2]{aes}}, \code{\link[ggplot2]{geom_point}}, \code{\link[ggplot2]{annotate}}, \code{\link[ggplot2]{ggplot}}, \code{\link[ggplot2]{geom_raster}}, \code{\link[ggplot2]{geom_abline}}, \code{\link[ggplot2]{scale_continuous}}, \code{\link[ggplot2]{labs}}, \code{\link[ggplot2]{coord_fixed}}, \code{\link[ggplot2]{theme}}, \code{\link[ggplot2]{element}}, \code{\link[ggplot2]{reexports}}
-#' @rdname generate_weight_bar_plot
+#' @rdname plot_weight
 #' @export
 #' @importFrom ggplot2 geom_segment aes geom_point annotate ggplot geom_rect geom_hline geom_vline scale_x_continuous scale_y_continuous labs coord_fixed theme element_text margin element_blank element_line unit element_rect
 
-generate_weight_bar_plot <- function(wt, ht, metric = TRUE) {
-  # Define internal weight functions ----
-
-  calculate_bmi_weight_ranges <- function(wt, ht, metric) {
-    if (metric) {
-      ht_m <- ht / 100
-      wt = round(wt * 2.205, 1)
-    } else {
-      ht_m <- (ht * 2.54) / 100
-    }
-
-    bmi_cutoffs <- c(10, 18.5, 24.9, 29.9, 60)
-    weight_cutoffs <- bmi_cutoffs * (ht_m^2) * 2.205
-    plot_max_weight <- weight_cutoffs[5] + 70
-
-    wtrange <- seq(
-      floor(weight_cutoffs[2] - 30),
-      ceiling(plot_max_weight)
-    )
-    return(list(
-      wt = wt,
-      ht_m = ht_m,
-      bmi_cutoffs = bmi_cutoffs,
-      weight_cutoffs = weight_cutoffs,
-      wtrange = wtrange,
-      plot_max_weight = plot_max_weight
-    ))
+plot_weight <- function(wt, ht, metric = TRUE) {
+  if (!metric) {
+    ht <- ht * 2.54
   }
 
-  add_wt_line <- function(info, y.adjust.text = 0.4) {
-    list(
-      ggplot2::geom_segment(
-        ggplot2::aes(
-          x = min(info$wtrange),
-          xend = info$wt,
-          y = y.adjust.text,
-          yend = y.adjust.text
-        ),
-        color = "black",
-        linewidth = 1.5
-      ),
-      ggplot2::geom_point(
-        ggplot2::aes(x = info$wt, y = y.adjust.text),
-        fill = "black",
-        size = 4
-      )
-    )
-  }
+  bmi_cutoffs <- c(10, 18.5, 24.9, 29.9, 60)
+  wt_cutoffs <- bmi_cutoffs * (ht / 100)^2 * 2.205
+  wt <- if (metric) round(wt * 2.205, 1) else wt
+  wtrange <- seq(floor(wt_cutoffs[2] - 30), ceiling(wt_cutoffs[5] + 70))
+  cuts <- wt_cutoffs[2:4]
+  fills <- c("#ADD8E6", "#90EE90", "#FDEE8C", "#F08080")
 
-  add_wt_text <- function(info, y.adjust.line = 0.4) {
-    xvals <- sapply(1:4, function(i) {
-      mean(c(
-        c(min(info$wtrange), info$weight_cutoffs[2:4])[i],
-        info$weight_cutoffs[2:5][i]
-      ))
-    })
-    list(
-      ggplot2::annotate(
-        "text",
-        x = xvals,
-        y = rep(0.95, 4),
-        label = c("Under", "Normal", "Over", "Obesity"),
-        fontface = "bold",
-        size = 4
-      ),
-      ggplot2::geom_label(
-        ggplot2::aes(x = info$wt + 5, y = y.adjust.line),
-        label = paste(info$wt, "lbs"),
-        fill = "white",
-        fontface = "bold",
-        size = 4,
-        hjust = 0
-      )
-    )
-  }
+  seg_df <- data.frame(
+    x = rep(cuts, 2),
+    y = rep(c(0, 0.75), each = 3),
+    yend = rep(c(0.75, 1.1), each = 3),
+    lt = rep(c("solid", "dashed"), each = 3)
+  )
 
-  # Create weight plot ----
-  info <- calculate_bmi_weight_ranges(wt, ht, metric)
-  category_fills <- c("#ADD8E6", "#90EE90", "#FDEE8C", "#F08080")
   ggplot2::ggplot() +
     ggplot2::geom_rect(
       ggplot2::aes(
-        xmin = min(info$wtrange),
-        xmax = max(info$wtrange),
+        xmin = min(wtrange),
+        xmax = max(wtrange),
         ymin = 0,
         ymax = 1.1
       ),
@@ -225,64 +160,67 @@ generate_weight_bar_plot <- function(wt, ht, metric = TRUE) {
     ) +
     ggplot2::geom_rect(
       ggplot2::aes(
-        xmin = c(min(info$wtrange), info$weight_cutoffs[2:4]),
-        xmax = c(info$weight_cutoffs[2:4], max(info$wtrange)),
+        xmin = c(min(wtrange), cuts),
+        xmax = c(cuts, max(wtrange)),
         ymin = c(.75, 0, .75, .75),
-        ymax = c(1.1, 1.1, 1.1, 1.1),
-        fill = category_fills
+        ymax = 1.1,
+        fill = fills
       ),
-      alpha = .6,
+      alpha = 0.6,
       inherit.aes = FALSE
     ) +
     ggplot2::scale_fill_identity() +
-
     ggplot2::geom_hline(yintercept = 0.75, linewidth = 0.75) +
     ggplot2::geom_segment(
+      data = seg_df,
       ggplot2::aes(
-        x = info$weight_cutoffs[2:4],
-        xend = info$weight_cutoffs[2:4],
-        y = 0,
-        yend = 0.75
+        x = .data$x,
+        xend = .data$x,
+        y = .data$y,
+        yend = .data$yend,
+        linetype = .data$lt
       ),
-      linetype = "dashed",
-      linewidth = 0.75
+      linewidth = 0.75,
+      show.legend = FALSE
     ) +
     ggplot2::geom_segment(
-      ggplot2::aes(
-        x = info$weight_cutoffs[2:4],
-        xend = info$weight_cutoffs[2:4],
-        y = 0.75,
-        yend = 1.1
-      ),
-      linetype = "solid",
-      linewidth = 0.75
+      ggplot2::aes(x = min(wtrange), xend = wt, y = 0.4, yend = 0.4),
+      linewidth = 1.5
     ) +
-    add_wt_line(info) +
-    add_wt_text(info) +
+    ggplot2::geom_point(ggplot2::aes(x = wt, y = 0.4), size = 4) +
+    ggplot2::annotate(
+      "text",
+      x = (c(min(wtrange), cuts) + c(cuts, max(wtrange))) / 2,
+      y = 0.95,
+      label = c("Under", "Normal", "Over", "Obesity"),
+      fontface = "bold",
+      size = 4
+    ) +
+    ggplot2::geom_label(
+      ggplot2::aes(x = wt + 5, y = 0.4),
+      label = paste(wt, "lbs"),
+      fill = "white",
+      fontface = "bold",
+      size = 4,
+      hjust = 0
+    ) +
     ggplot2::scale_x_continuous(
-      breaks = round(info$weight_cutoffs[2:4], 0),
-      labels = paste0(round(info$weight_cutoffs[2:4]), " lbs"),
+      breaks = round(cuts),
+      labels = paste0(round(cuts), " lbs"),
       expand = c(0.003, 0.003)
     ) +
     ggplot2::scale_y_continuous(expand = c(0.015, 0.015)) +
     ggplot2::labs(x = "Weight (lbs)") +
     ggplot2::coord_fixed(ratio = 40) +
     ggplot2::theme(
-      axis.title.x = ggplot2::element_text(
-        size = 12,
-        color = "black",
-        margin = ggplot2::margin(t = 10)
-      ),
+      # fmt: skip
+      axis.title.x = ggplot2::element_text(size = 12, color = "black", margin = ggplot2::margin(t = 10)),
       axis.title.y = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(size = 10, color = "black"),
       axis.text.y = ggplot2::element_blank(),
-      axis.ticks.x = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
       panel.grid = ggplot2::element_blank(),
-      panel.background = ggplot2::element_rect(
-        fill = "white",
-        color = "black",
-        linewidth = 2
-      )
+      # fmt: skip
+      panel.background = ggplot2::element_rect(fill = "white", color = "black", linewidth = 2)
     )
 }

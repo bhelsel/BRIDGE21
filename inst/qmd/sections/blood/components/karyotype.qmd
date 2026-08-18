@@ -17,9 +17,9 @@ karyotype <- karyotype %>%
 karyotype <- karyotype[!duplicated(karyotype)]
 
 if (!is.na(karyotype)) {
-  BRIDGE21::format_quarto("sections/blood/latex/karyotype.tex", type = "input")
+  BRIDGE21:::format_quarto("sections/blood/latex/karyotype.tex", type = "input")
   cat("\\textbf{Karyotype Result}: ", as.character(karyotype))
-  BRIDGE21::format_quarto(type = "newpage")
+  BRIDGE21:::format_quarto(type = "newpage")
 }
 
 ```

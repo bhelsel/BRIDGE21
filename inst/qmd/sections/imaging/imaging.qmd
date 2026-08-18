@@ -12,7 +12,7 @@ imageFiles <- list.files(
   full.names = TRUE
 )
 
-imaging <- BRIDGE21::get_database_values(
+imaging <- BRIDGE21:::get_database_values(
   redcap_repeat_instrument,
   radiology_read,
   data = data,
@@ -22,7 +22,7 @@ imaging <- BRIDGE21::get_database_values(
 
 if (
   rlang::is_empty(imageFiles) |
-    BRIDGE21::check_missing_values(imaging, "scan_date")
+    BRIDGE21:::check_missing_values(imaging, "scan_date")
 ) {
   params$kuadrc_mri <- FALSE
 } else {
@@ -34,7 +34,7 @@ if (
 }
 
 if (params$kuadrc_mri | params$kuadrc_pet) {
-  BRIDGE21::format_quarto("IMAGING SCANS", type = "section")
+  BRIDGE21:::format_quarto("IMAGING SCANS", type = "section")
 }
 
 ```
@@ -44,7 +44,7 @@ if (params$kuadrc_mri | params$kuadrc_pet) {
 #| eval: !expr (params$kuadrc_pet) | (params$trcds_pet)
 #| results: asis
 
-abeta_df <- BRIDGE21::get_database_values(
+abeta_df <- BRIDGE21:::get_database_values(
   "centiloid|centiloid_apet",
   date = date,
   data = data

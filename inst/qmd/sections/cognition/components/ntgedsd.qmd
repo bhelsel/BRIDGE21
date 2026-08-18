@@ -32,13 +32,13 @@ ntgedsd_scores <-
 
 ntgedsd_scores[date] <- ntgedsd_df[date]
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "sections/cognition/latex/ntgedsd.tex",
   type = "input"
 )
 
 ntgedsd_scores %>%
-  BRIDGE21::format_date(!!date_expr) %>%
+  BRIDGE21:::format_date(!!date_expr) %>%
   tidyr::pivot_longer(
     cols = dplyr::all_of(unname(unlist(ntgedsd_domains))),
     names_to = "Category"
@@ -57,7 +57,7 @@ ntgedsd_scores %>%
     align = "center"
   )
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```
 

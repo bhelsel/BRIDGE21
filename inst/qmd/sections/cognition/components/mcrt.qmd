@@ -8,13 +8,13 @@ editor_options:
 #| results: asis
 #| eval: !expr (params$kuadrc_mcrt) | (params$bold_mcrt) | (params$abcds_mcrt) | (params$trcds_mcrt)
 
-BRIDGE21::format_quarto(
+BRIDGE21:::format_quarto(
   "sections/cognition/latex/cued-recall.tex",
   type = "input"
 )
 
 mcrt_df <- mcrt_df %>%
-  BRIDGE21::format_date(!!date_expr) %>%
+  BRIDGE21:::format_date(!!date_expr) %>%
   dplyr::mutate(dscrttr = dscrttfr + dscrttcr, .after = 1)
 
 
@@ -40,7 +40,7 @@ mcrt_df %>%
 
 
 if (!after_memory_section) {
-  BRIDGE21::format_quarto(
+  BRIDGE21:::format_quarto(
     "sections/cognition/latex/after-memory.tex",
     type = "input"
   )

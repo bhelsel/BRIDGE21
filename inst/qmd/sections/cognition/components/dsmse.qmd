@@ -8,9 +8,9 @@ editor_options:
 #| results: asis
 #| eval: !expr (params$kuadrc_dsmse) | (params$bold_dsmse) | (params$abcds_dsmse) | (params$trcds_dsmse)
 
-BRIDGE21::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
+BRIDGE21:::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
 
-dsmse_df <- BRIDGE21::format_date(dsmse_df, !!date_expr)
+dsmse_df <- BRIDGE21:::format_date(dsmse_df, !!date_expr)
 
 if (nrow(dsmse_df) == 1) {
   dsmse_decline <- FALSE
@@ -41,12 +41,12 @@ if (
     all(unlist(params[c("abcds_dsmse", "abcds_mcrt")])) |
     all(unlist(params[c("trcds_dsmse", "trcds_mcrt")]))
 ) {
-  BRIDGE21::format_quarto(type = "newpage")
+  BRIDGE21:::format_quarto(type = "newpage")
 }
 
 
 if (after_memory_section) {
-  BRIDGE21::format_quarto(
+  BRIDGE21:::format_quarto(
     "sections/cognition/latex/after-memory.tex",
     type = "input"
   )

@@ -7,7 +7,7 @@ editor_options:
 #| results: asis
 #| eval: !expr (params$bold_vineland) & (params$id != "TestJayhawk")
 
-BRIDGE21::format_quarto("sections/cognition/latex/vineland.tex", type = "input")
+BRIDGE21:::format_quarto("sections/cognition/latex/vineland.tex", type = "input")
 
 vineland_labels <- c(
   "Total Score",
@@ -17,7 +17,7 @@ vineland_labels <- c(
 )
 
 vineland_df %>%
-  BRIDGE21::format_date(!!date_expr) %>%
+  BRIDGE21:::format_date(!!date_expr) %>%
   flextable::flextable() %>%
   flextable::set_header_labels(values = c("Date", vineland_labels)) %>%
   flextable::width(j = 1:5, width = 1.3) %>%
@@ -25,7 +25,7 @@ vineland_df %>%
   flextable::bold(j = 1:5, part = "header") %>%
   flextable::add_footer_row(values = "Mean Score: 100", colwidths = 5)
 
-BRIDGE21::format_quarto(type = "newpage")
+BRIDGE21:::format_quarto(type = "newpage")
 
 ```
 
