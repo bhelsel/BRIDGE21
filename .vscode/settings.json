@@ -8,10 +8,6 @@
   "[quarto]": {
     "editor.defaultFormatter": "quarto.quarto"
   },
-  "[latex]": {
-    "editor.defaultFormatter": "James-Yu.latex-workshop"
-  },
-  "latex-workshop.formatting.latex": "latexindent",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true
 }
