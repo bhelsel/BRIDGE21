@@ -7,9 +7,9 @@ editor_options:
 #| echo: false
 #| results: asis
 #| eval: !expr (params$kuadrc_lifestyle) | (params$bold_lifestyle) | (params$abcds_lifestyle) | (params$trcds_lifestyle)
-BRIDGE21:::format_quarto("LIFESTYLE AND DISEASE RISK", type = "section")
+fq("LIFESTYLE AND DISEASE RISK", type = "section")
 
-BRIDGE21:::format_quarto(
+fq(
   BRIDGE21:::add_string(
     "We assessed various measures that can affect your overall brain health. " +
       "Recent research suggests that a healthy lifestyle is a key components of brain health."
@@ -18,14 +18,9 @@ BRIDGE21:::format_quarto(
 )
 
 # Blood Pressure
+bp_vars <- c("bpsys|bpsysl1|vsbpsys", "bpdias|bpdiasl1|bpdia|vsbpdia")
 
-blood_pressure <-
-  BRIDGE21:::get_database_values(
-    "bpsys|bpsysl1|vsbpsys",
-    "bpdias|bpdiasl1|bpdia|vsbpdia",
-    date = date,
-    data = data
-  )
+blood_pressure <- db(!!!bp_vars, date = date, data = data)
 
 if (BRIDGE21:::check_missing_values(blood_pressure, date)) {
   params$kuadrc_blood_pressure <- params$bold_blood_pressure <- params$abcds_blood_pressure <- params$trcds_blood_pressure <- FALSE
@@ -62,11 +57,7 @@ anthrovars <- c(
   "height|average_height|ht|vsheight"
 )
 
-anthro <- BRIDGE21:::get_database_values(
-  !!!anthrovars,
-  date = date,
-  data = data
-)
+anthro <- db(!!!anthrovars, date = date, data = data)
 
 check_missing_wt_ht <- function(wt, ht, missing_vals = 88.8) {
   ht <- ifelse(ht %in% missing_vals, NA, ht)
@@ -100,7 +91,7 @@ if (params$kuadrc_dxa | params$bold_dxa) {
     "dxa_bmd_z"
   )
 
-  dxa <- BRIDGE21:::get_database_values(!!!dxaVars, date = date, data = data)
+  dxa <- db(!!!dxaVars, date = date, data = data)
 
   dxa <- dxa[complete.cases(dxa[setdiff(names(dxa), date)]), ]
 

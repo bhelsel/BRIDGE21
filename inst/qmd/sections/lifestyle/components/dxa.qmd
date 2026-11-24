@@ -19,11 +19,7 @@ dxa <- dxa %>%
     dplyr::across(mass:fat, ~ round(as.numeric(.x) * 2.205, 1))
   )
 
-sex <- ifelse(
-  params$kuadrc_dxa,
-  visit$sex,
-  intake[!is.na(intake$sex), "sex", drop = TRUE]
-)
+sex <- unique(intake[!is.na(intake$sex), "sex", drop = TRUE])
 
 body_fat_percent_plot <- BRIDGE21::plot_body_fat(
   total_fat = tail(na.omit(dxa$total_fat), 1),
@@ -44,7 +40,7 @@ ggplot2::ggsave(
   dpi = 300
 )
 
-BRIDGE21:::format_quarto("sections/lifestyle/latex/dxa.tex", type = "input")
+fq("sections/lifestyle/latex/dxa.tex", type = "input")
 
 ft_footnote <- "Weight, Lean Tissue, and Fat Tissue Measured in Pounds"
 
@@ -54,30 +50,21 @@ if ("dxa_bmd_z" %in% colnames(dxa)) {
   )
 }
 
-dxa %>%
-  flextable::flextable() %>%
-  flextable::set_header_labels(
-    values = dxa_labels
-  ) %>%
-  flextable::width(j = 1:ncol(dxa), width = 1) %>%
-  flextable::align(part = "all", align = "center") %>%
-  flextable::bold(part = "header") %>%
-  flextable::add_footer_row(
-    values = ft_footnote,
-    colwidths = ncol(dxa)
-  )
+BRIDGE21::flex_table(
+  dxa,
+  col_labels = dxa_labels,
+  widths = 1,
+  footers = ft_footnote
+)
 
 paste("", "![](body_fat_percent_plot.png)", "") %>%
   cat(sep = "\n")
 
 if ("dxa_bmd_z" %in% colnames(dxa)) {
-  BRIDGE21:::format_quarto("sections/lifestyle/latex/bmd.tex", type = "input")
+  fq("sections/lifestyle/latex/bmd.tex", type = "input")
 }
 
-BRIDGE21:::format_quarto(
-  "sections/lifestyle/latex/after-dxa.tex",
-  type = "input"
-)
+fq("sections/lifestyle/latex/after-dxa.tex", type = "input")
 
-BRIDGE21:::format_quarto(type = "newpage")
+fq(type = "newpage")
 ```

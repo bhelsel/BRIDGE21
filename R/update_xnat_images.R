@@ -51,7 +51,7 @@ update_xnat_images <- function(id, outputdir, ...) {
 
     nifti_file <- list.files(
       imagedir,
-      pattern = ".nii.gz$",
+      pattern = ".nii|.nii.gz$",
       full.names = TRUE,
       recursive = TRUE
     )

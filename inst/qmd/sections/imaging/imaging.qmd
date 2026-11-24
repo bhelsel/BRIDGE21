@@ -12,13 +12,10 @@ imageFiles <- list.files(
   full.names = TRUE
 )
 
-imaging <- BRIDGE21:::get_database_values(
-  redcap_repeat_instrument,
-  radiology_read,
-  data = data,
-  date = "scan_date",
-  event_name = redcap_event_name
-)
+mri_vars <- c("redcap_repeat_instrument", "radiology_read")
+
+# fmt: skip
+imaging <- db(!!!mri_vars, data = data, date = "scan_date", event_name = redcap_event_name)
 
 if (
   rlang::is_empty(imageFiles) |
@@ -34,9 +31,8 @@ if (
 }
 
 if (params$kuadrc_mri | params$kuadrc_pet) {
-  BRIDGE21:::format_quarto("IMAGING SCANS", type = "section")
+  fq("IMAGING SCANS", type = "section")
 }
-
 ```
 
 ```{r controller to decide whether to display the pet imaging sections}
@@ -44,11 +40,7 @@ if (params$kuadrc_mri | params$kuadrc_pet) {
 #| eval: !expr (params$kuadrc_pet) | (params$trcds_pet)
 #| results: asis
 
-abeta_df <- BRIDGE21:::get_database_values(
-  "centiloid|centiloid_apet",
-  date = date,
-  data = data
-)
+abeta_df <- db("centiloid|centiloid_apet", date = date, data = data)
 
 if (
   all(apply(abeta_df[setdiff(colnames(abeta_df), date)], 2, is.na)) |
@@ -62,7 +54,6 @@ if (
 #   as.Date(abeta_df$img_scan_date_apet, tryFormats = c("%m/%d/%y", "%m/%d/%Y")),
 #   "%B %d, %Y"
 # )
-
 ```
 
 <!--- MRI Imaging --->

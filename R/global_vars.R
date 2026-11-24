@@ -22,7 +22,8 @@ if (getRversion() >= "2.15.1") {
 )
 
 .subReports <- list(
-  kuadrc_blood = c("karyotype", "ptau217"),
+  # fmt: skip
+  kuadrc_blood = c("karyotype", "ptau217", "analyte", "assay_used", "analyte_value", "fluid_collection_date"),
   bold_blood = c("karyotype", "ptau217", "metabolism"),
   kuadrc_lifestyle = c("activity", "blood_pressure", "bmi", "dxa"),
   bold_lifestyle = c("activity", "blood_pressure", "bmi", "dxa", "veggiemeter"),

@@ -8,7 +8,7 @@ editor_options:
 #| results: asis
 #| eval: !expr (params$kuadrc_dsmse) | (params$bold_dsmse) | (params$abcds_dsmse) | (params$trcds_dsmse)
 
-BRIDGE21:::format_quarto("sections/cognition/latex/dsmse.tex", type = "input")
+fq("sections/cognition/latex/dsmse.tex", type = "input")
 
 dsmse_df <- BRIDGE21:::format_date(dsmse_df, !!date_expr)
 
@@ -27,13 +27,11 @@ dsmse_labels <- c("Total Score", "Visual Spatial", "Memory", "Language")
 dsmse_df %>%
   dplyr::mutate(dsmemtot = dssmtot + dsmmtot) %>%
   dplyr::select(Date, dsmsett, dsvistt, dsmemtot, dslgtot) %>%
-  flextable::flextable() %>%
-  flextable::set_header_labels(values = c("Date", dsmse_labels)) %>%
-  flextable::width(j = 1:5, width = 1.3) %>%
-  flextable::align(j = 1:5, align = "center", part = "all") %>%
-  flextable::bold(j = 1:5, part = "header") %>%
-  flextable::add_footer_row(values = "Max Score: 103", colwidths = 5)
-
+  BRIDGE21::flex_table(
+    widths = 1.3,
+    col_labels = c("Date", dsmse_labels),
+    footers = "Max Score: 103"
+  )
 
 if (
   all(unlist(params[c("kuadrc_dsmse", "kuadrc_mcrt")])) |
@@ -41,15 +39,11 @@ if (
     all(unlist(params[c("abcds_dsmse", "abcds_mcrt")])) |
     all(unlist(params[c("trcds_dsmse", "trcds_mcrt")]))
 ) {
-  BRIDGE21:::format_quarto(type = "newpage")
+  fq(type = "newpage")
 }
 
 
 if (after_memory_section) {
-  BRIDGE21:::format_quarto(
-    "sections/cognition/latex/after-memory.tex",
-    type = "input"
-  )
+  fq("sections/cognition/latex/after-memory.tex", type = "input")
 }
-
 ```
