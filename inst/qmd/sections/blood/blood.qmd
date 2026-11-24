@@ -3,26 +3,43 @@
 #| echo: false
 #| eval: !expr params$kuadrc_blood
 #| results: asis
-BRIDGE21:::format_quarto(
-  "UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK",
-  type = "section"
-)
+fq("UNDERSTANDING YOUR ALZHEIMER'S DISEASE RISK", type = "section")
 
-ptau <- BRIDGE21:::get_database_values(
-  ptau217_pgml,
-  date = "ptau217_date",
-  data = data
-)
+analytevars <- c("analyte", "assay_used", "analyte_value")
+
+
+analytes <- db(!!!analytevars, date = "fluid_collection_date", data = data)
+
+ptau <-
+  db(ptau217_pgml, date = "ptau217_date", data = data) |>
+  # fmt: skip
+  dplyr::rename(fluid_collection_date = ptau217_date, analyte_value = ptau217_pgml) |>
+  dplyr::mutate(
+    analyte = "ptau217_pgml",
+    assay_used = dplyr::case_when(
+      analyte_value >= 0.1 ~ "pTau217_simoa",
+      analyte_value < 0.1 ~ "pTau217_lumipulse"
+    )
+  )
+
+ptau <- dplyr::left_join(
+  ptau,
+  dplyr::filter(analytes, analyte == "ptau217_pgml"),
+  by = c("fluid_collection_date", "analyte", "assay_used", "analyte_value")
+) |>
+  dplyr::mutate(
+    assay_used = factor(
+      assay_used,
+      levels = c("pTau217_simoa", "pTau217_lumipulse"),
+      labels = c("pTau217", "pTau217/A\u03B242")
+    )
+  )
 
 if (nrow(ptau) == 0) {
   params$kuadrc_ptau217 <- FALSE
 }
 
-karyotype <- BRIDGE21:::get_database_values(
-  dschrom,
-  date = date,
-  data = data
-)
+karyotype <- db(dschrom, date = date, data = data)
 
 karyotype <- karyotype[karyotype$dschrom != 9, ]
 
