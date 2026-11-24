@@ -3,6 +3,8 @@
 - Cleaned up plot functions to improve consistency and reduce code when possible
 - Changed many helper functions to internal functions
 - Updated README to include more details on package installation and use
+- Updated pTau217 to handle pTau217/AB42 measures from the Lumipulse
+- Add shortcuts in Quarto for retrieving data values, formatting, and creating flextables
 
 # BRIDGE 0.9.5
 
