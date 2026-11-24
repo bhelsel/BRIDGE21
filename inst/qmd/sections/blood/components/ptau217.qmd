@@ -6,63 +6,73 @@
 #| eval: !expr params$kuadrc_ptau217
 #| results: asis
 
-# < 0.4 “Negative --  AD pathology not indicated” Not elevated
-# ≥ 0.4 to ≤ 0.62  “Intermediate --  AD pathology possible” Intermediate
-# ≥ 0.63 “Positive --  AD pathology likely” Elevated
+# pTau217 on the Simoa
+# < 0.4 Not Elevated --  AD pathology not indicated”
+# ≥ 0.4 to < 0.63  Indeterminant --  AD pathology possible”
+# ≥ 0.63 Elevated --  AD pathology likely”
 
-ptau$category <- cut(
-  ptau$ptau217_pgml,
-  breaks = c(-Inf, 0.4, 0.63, Inf),
-  labels = c("Not Elevated", "Intermediate", "Elevated"),
-  right = FALSE
+# pTau217/AB42 on the Lumipulse
+# < 0.00371 Not Elevated --  AD pathology not indicated”
+# ≥ 0.00371 to < 0.00738  Indeterminant --  AD pathology possible”
+# ≥ 0.00738 Elevated --  AD pathology likely”
+
+cutoffs <- tibble::tribble(
+  ~assay_used         , ~low    , ~high   ,
+  "pTau217"           , 0.4     , 0.63    ,
+  "pTau217/A\u03B242" , 0.00371 , 0.00738
 )
 
-ptau$ptau217_pgml <- round(ptau$ptau217_pgml, 2)
+fq("sections/blood/latex/proteins.tex", type = "input")
 
-ptau$interpretation <-
-  factor(
-    ptau$category,
-    levels = c("Not Elevated", "Intermediate", "Elevated"),
-    labels = c(
-      "Negative: Alzheimer's disease pathology not indicated",
-      "Intermediate: Alzheimer's disease pathology possible",
-      "Positive: Alzheimer's disease pathology likely"
-    )
+assays <- unique(ptau$assay_used)
+
+ptau_footer <- paste(
+  "All",
+  paste0(assays, collapse = " and "),
+  "measures are in pg/ml."
+)
+
+if (length(assays) == 2) {
+  ptau_footer <- paste(
+    ptau_footer,
+    "A new blood pTau217/A\u03B24242 assay was added in May 2026",
+    "and is not comparable with previous pTau217 results."
   )
+}
 
-BRIDGE21:::format_quarto("sections/blood/latex/proteins.tex", type = "input")
-
-flextable::flextable(ptau) %>%
-  flextable::set_header_labels(
-    values = c(
-      "Date",
-      "pTau 217",
-      "Category",
-      "Interpretation"
+ptau_df <- ptau |>
+  dplyr::arrange(
+    dplyr::desc(as.Date(fluid_collection_date, format = "%m/%d/%Y"))
+  ) %>%
+  dplyr::left_join(cutoffs, by = "assay_used") %>%
+  dplyr::mutate(
+    category = dplyr::case_when(
+      analyte_value < low ~ "Not Elevated",
+      analyte_value >= low & analyte_value < high ~ "Indeterminant",
+      analyte_value >= high ~ "Elevated"
+    ),
+    analyte_value = round(analyte_value, 4),
+    interpretation = factor(
+      category,
+      levels = c("Not Elevated", "Indeterminant", "Elevated"),
+      labels = c(
+        "Not Elevated: Alzheimer's disease pathology not indicated",
+        "Indeterminant: Alzheimer's disease pathology possible",
+        "Elevated: Alzheimer's disease pathology likely"
+      )
     )
   ) %>%
-  flextable::width(j = 1:2, width = 0.75) %>%
-  flextable::width(j = 3, width = 1) %>%
-  flextable::width(j = 4, width = 4) %>%
-  flextable::align(j = 1:4, part = "all", align = "center") %>%
-  flextable::add_footer_row(
-    values = "pTau 217 is measured in pg/ml",
-    colwidths = 4
-  ) %>%
-  flextable::add_header_row(
-    values = "Plasma 217 Results and Interpretation",
-    colwidths = 4
-  ) %>%
-  flextable::align(i = 1, part = "head", align = "left") %>%
-  flextable::border(
-    i = 1,
-    part = "head",
-    border = list("width" = 0, color = "black", style = "solid")
-  )
+  # fmt: skip
+  dplyr::select(fluid_collection_date, assay_used, analyte_value, interpretation)
 
+BRIDGE21::flex_table(
+  ptau_df,
+  col_labels = c("Date", "Method", "Value", "Interpretation"),
+  widths = c(0.75, 1, 0.75, 4.1),
+  footers = ptau_footer
+)
 
-BRIDGE21:::format_quarto("sections/blood/latex/after-tau.tex", type = "input")
+fq("sections/blood/latex/after-tau.tex", type = "input")
 
-BRIDGE21:::format_quarto(type = "newpage")
-
+fq(type = "newpage")
 ```
