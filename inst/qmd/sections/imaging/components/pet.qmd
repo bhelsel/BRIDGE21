@@ -42,6 +42,6 @@ ltex <- glue::glue(
 )
 cat(paste0("", ltex, ""), sep = "\n")
 
-BRIDGE21:::format_quarto(type = "newpage")
+fq(type = "newpage")
 
 ```

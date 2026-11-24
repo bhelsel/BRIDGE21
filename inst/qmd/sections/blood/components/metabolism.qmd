@@ -4,21 +4,15 @@
 #| fig-align: center
 #| eval: !expr (params$bold_metabolism) & (params$id != "TestJayhawk")
 
-BRIDGE21:::format_quarto(
-  "BLOOD TESTS",
-  type = "section"
-)
+fq("BLOOD TESTS", type = "section")
 
-metabolism <- BRIDGE21:::get_database_values(
-  hdl_mgdl,
-  ldl_mgdl,
-  totchol_mgdl,
-  triglyc_mgdl,
-  hba1c,
-  glucose,
-  date = date,
-  data = data
-)
+# fmt: skip
+metabolism_vars <- c("hdl_mgdl", "ldl_mgdl", "totchol_mgdl", "triglyc_mgdl", "hba1c", "glucose")
+
+# fmt: skip
+metabolism_labels <- c("HDL", "LDL", "Total Cholesterol", "Triglycerides", "HbA1c (%)", "Glucose")
+
+metabolism <- db(!!!metabolism_vars, date = date, data = data)
 
 metabolism <- purrr::modify(metabolism, ~ ifelse(.x == -999, NA, .x))
 
@@ -26,11 +20,9 @@ missing_metabolism <- apply(metabolism, 1, function(x) {
   all(is.na(x))
 })
 
+
 if (!all(missing_metabolism)) {
-  BRIDGE21:::format_quarto(
-    "sections/blood/latex/metabolism.tex",
-    type = "input"
-  )
+  fq("sections/blood/latex/metabolism.tex", type = "input")
 
   ft_footnote <- "HDL, LDL, Total Cholesterol, Triglycerides, and Glucose measured in mg/dL"
 
@@ -39,31 +31,13 @@ if (!all(missing_metabolism)) {
     dplyr::mutate(
       dplyr::across(hdl_mgdl:glucose, ~ round(.x, 1))
     ) %>%
-    dplyr::select(
-      Date,
-      HDL = hdl_mgdl,
-      LDL = ldl_mgdl,
-      `Total Cholesterol` = totchol_mgdl,
-      Triglycerides = triglyc_mgdl,
-      `HbA1c (%)` = hba1c,
-      Glucose = glucose
-    ) %>%
-    tidyr::pivot_longer(cols = HDL:Glucose, names_to = "Variable") %>%
+    tidyr::pivot_longer(cols = hdl_mgdl:glucose, names_to = "Variable") %>%
     tidyr::pivot_wider(names_from = Date, values_from = value) %>%
-    flextable::flextable() %>%
-    flextable::width(width = 1.5) %>%
-    flextable::align(
-      j = 2:(nrow(metabolism) + 1),
-      part = "all",
-      align = "center"
-    ) %>%
-    flextable::bold(part = "header") %>%
-    flextable::add_footer_row(
-      values = ft_footnote,
-      colwidths = nrow(metabolism) + 1
-    )
+    dplyr::mutate(
+      Variable = setNames(metabolism_labels, metabolism_vars)[Variable]
+    ) |>
+    BRIDGE21::flex_table(widths = 1.6, footers = ft_footnote)
 }
 
-BRIDGE21:::format_quarto(type = "newpage")
-
+fq(type = "newpage")
 ```

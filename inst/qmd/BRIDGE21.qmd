@@ -9,13 +9,14 @@ editor_options:
 ```{r load data and variable yaml file}
 #| echo: false
 #| message: false
-
 `%>%` <- magrittr::`%>%`
+fq <- BRIDGE21:::format_quarto
+db <- BRIDGE21::get_database_values
 params <- yaml::read_yaml("_variables.yaml")
 data <- readr::read_csv("data.csv", show_col_types = FALSE)
 
 find_max_date <- function(data) {
-  data$Date = as.Date(data$Date, "%m/%d/%Y")
+  data$Date <- as.Date(data$Date, "%m/%d/%Y")
   MaxIndex <- which(data[["Date"]] == max(data[["Date"]]))
   return(MaxIndex)
 }
@@ -30,7 +31,7 @@ find_max_date <- function(data) {
 #| eval: !expr (any(params[grepl("trcds", names(params))] == TRUE))
 #| results: asis
 
-BRIDGE21:::format_quarto(
+fq(
   sprintf(
     "%s: This report is not meant to be handed to participants",
     params$id
@@ -77,9 +78,5 @@ These results come from tests that may still be in the research stage and may no
 #| eval: !expr (any(params[grepl("kuadrc", names(params))] == TRUE)) | (any(params[grepl("bold", names(params))] == TRUE))
 #| results: asis
 
-BRIDGE21:::format_quarto(
-  "sections/resources/latex/resources.tex",
-  type = "input"
-)
-
+fq("sections/resources/latex/resources.tex", type = "input")
 ```
